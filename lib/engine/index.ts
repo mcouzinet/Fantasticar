@@ -1,0 +1,13 @@
+// Point d'entrée public du moteur (module pur, sans dépendance framework).
+export * from './types'
+export * from './spellTable'
+export * from './referenceDeck'
+export * from './deckBuffer'
+export * from './deckStats'
+export * from './prng'
+export * from './mana'
+export * from './hand'
+export * from './combo'
+export * from './develop'
+export * from './game'
+export * from './simulate'

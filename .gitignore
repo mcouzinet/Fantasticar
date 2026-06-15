@@ -1,0 +1,18 @@
+# dépendances
+node_modules
+
+# artefacts Nuxt / build
+.nuxt
+.output
+.data
+dist
+.nitro
+.cache
+
+# divers
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+.vite
