@@ -15,4 +15,19 @@ describe('Catalogue de cartes (reconnaissance à l’import)', () => {
     expect(CARD_CATALOG['Solar Transformer']).toBe('rock2t') // {2} engagé, pas un caillou à 3
     expect(CARD_CATALOG['Null Elemental Blast']).toBe('one') // coût {C} = 1, pas 2
   })
+
+  it('annotations Moxfield de fin de ligne (tags #!… et foil *F*) n’empêchent pas la reconnaissance', () => {
+    const text = [
+      '1 Command Beacon (CMR) 349 #!Land',
+      '1 Disruptor Flute (MH3) 461 *F*',
+      '1 Mind Stone (KHC) 102 #!Draw #!Ramp',
+    ].join('\n')
+    const parsed = parseMoxfield(text)
+    expect(parsed.unresolved).toEqual([])
+    expect(parsed.cards.map((c) => c.name)).toEqual([
+      'Command Beacon',
+      'Disruptor Flute',
+      'Mind Stone',
+    ])
+  })
 })

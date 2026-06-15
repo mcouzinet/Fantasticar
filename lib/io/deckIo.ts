@@ -27,13 +27,15 @@ export interface ParsedImport {
   unresolved: { name: string; qty: number }[]
 }
 
+const TAG_TAIL = /\s+#.*$/ // tags Moxfield en fin de ligne (" #!Land", " #!Draw #!Ramp")
+const FOIL_MARK = /\s*\*[a-z]+\*/gi // marqueurs Moxfield "*F*" (foil), "*E*" (etched)…
 const SET_TAIL = /\s*\([^)]*\)\s*\S*\s*$/ // " (SET) 123" en fin de ligne
-const FOIL_TAIL = /\s*\*[a-z]\*\s*$/i // marqueur foil "*F*"
 
 /**
- * Parse une liste au format Moxfield : lignes `1 Nom (SET) NUM`. Les lignes vides,
- * commentaires (`#`) et tags (`#!`) sont ignorés. Les noms inconnus tombent dans
- * `unresolved`.
+ * Parse une liste au format Moxfield : lignes `1 Nom (SET) NUM [*F*] [#!tag]`. Les lignes
+ * vides, commentaires (`#`) sont ignorés. Les annotations de fin de ligne (tags `#!…`,
+ * marqueurs foil) sont retirées AVANT le suffixe de set, sinon ce dernier ne matche plus
+ * et le nom reste pollué. Les noms inconnus tombent dans `unresolved`.
  */
 export function parseMoxfield(text: string, extra?: Deck): ParsedImport {
   const idx = buildIndex(extra)
@@ -45,7 +47,11 @@ export function parseMoxfield(text: string, extra?: Deck): ParsedImport {
     if (!line || line.startsWith('#') || line.startsWith('//')) continue
     const m = /^(\d+)\s*[xX]?\s+(.+)$/.exec(line)
     const qty = m ? Math.max(1, parseInt(m[1]!, 10)) : 1
-    let name = (m ? m[2]! : line).replace(SET_TAIL, '').replace(FOIL_TAIL, '').trim()
+    let name = (m ? m[2]! : line)
+      .replace(TAG_TAIL, '') // " #!Land", " #!Draw #!Ramp"
+      .replace(FOIL_MARK, '') // " *F*"
+      .replace(SET_TAIL, '') // " (SET) 123"
+      .trim()
     if (!name) continue
     const kind = idx[norm(name)]
     if (kind) {
