@@ -117,7 +117,7 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
     </main>
 
     <footer class="foot faint">
-      Calcul 100 % client (Web Worker). Aucune donnée envoyée. — moteur vérifié par tests automatisés.
+      Calcul 100 % client (Web Worker). Aucune donnée de deck envoyée ; mesure d'audience anonyme (sans cookie). — moteur vérifié par tests automatisés.
     </footer>
 
     <HelpModal :open="helpOpen" @close="closeHelp" />

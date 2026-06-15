@@ -22,6 +22,14 @@ export default defineNuxtConfig({
           href: 'https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap',
         },
       ],
+      // Mesure d'audience anonyme, sans cookie (GoatCounter).
+      script: [
+        {
+          src: 'https://gc.zgo.at/count.js',
+          async: true,
+          'data-goatcounter': 'https://fantasticar.goatcounter.com/count',
+        },
+      ],
     },
   },
 })
