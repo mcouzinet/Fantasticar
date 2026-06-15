@@ -3,9 +3,11 @@ import type { Card, Deck, Kind } from '~/lib/engine/types'
 import { deckStats, GROUPS, type GroupId } from '~/lib/engine/deckStats'
 import { KIND_META } from '~/lib/ui/kinds'
 import { fromJson, parseMoxfield, toJson, toMoxfieldText } from '~/lib/io/deckIo'
+import { decodeDeck, encodeDeck } from '~/lib/io/deckShare'
 
 // v2 : nouvelle decklist de référence (invalide le cache v1 des sessions précédentes).
 const STORAGE_KEY = 'fantasticar.deck.v2'
+const SHARE_KEY = 'fantasticar.share.consumed' // garde le lien partagé "à usage unique" par session
 
 function clone(d: Deck): Deck {
   return { cards: d.cards.map((c) => ({ ...c })) }
@@ -159,6 +161,42 @@ export function useDeck() {
   const exportText = () => toMoxfieldText(draft.value)
   const exportJson = () => toJson(draft.value)
 
+  // — Partage par URL (opt-in) —
+  function shareUrl(): string {
+    const code = encodeDeck(draft.value)
+    const { origin, pathname, search } = window.location
+    return `${origin}${pathname}${search}#d=${code}`
+  }
+
+  /**
+   * Charge un deck depuis le hash #d=… s'il est présent ; renvoie true si chargé.
+   * Le lien partagé n'est consommé qu'une fois par session : après un refresh on
+   * reprend le deck local (avec les éditions), même si le hash reste dans l'URL.
+   */
+  function loadFromShareUrl(): boolean {
+    if (!import.meta.client) return false
+    const m = window.location.hash.match(/[#&]d=([^&]+)/)
+    if (!m) return false
+    const code = m[1]!
+    try {
+      if (sessionStorage.getItem(SHARE_KEY) === code) return false // déjà chargé cette session
+    } catch {
+      /* ignore */
+    }
+    const shared = decodeDeck(code)
+    if (!shared) return false
+    baseline.value = clone(shared)
+    draft.value = clone(shared)
+    unresolved.value = []
+    persist()
+    try {
+      sessionStorage.setItem(SHARE_KEY, code)
+    } catch {
+      /* ignore */
+    }
+    return true
+  }
+
   return {
     baseline,
     draft,
@@ -180,5 +218,7 @@ export function useDeck() {
     dismissUnresolved,
     exportText,
     exportJson,
+    shareUrl,
+    loadFromShareUrl,
   }
 }

@@ -7,7 +7,18 @@ const methodoOpen = useState('methodo:open', () => false)
 const HELP_KEY = 'fantasticar.help.v1'
 
 onMounted(() => {
-  deck.restore()
+  // un deck partagé par URL (#d=…) a priorité sur le deck local sauvegardé
+  const shared = deck.loadFromShareUrl()
+  if (!shared) deck.restore()
+  // nettoie le hash après le montage (sinon un refresh ré-appliquerait le deck partagé
+  // et écraserait les éditions). Différé pour passer après la stabilisation de l'URL par Nuxt.
+  if (shared) {
+    nextTick(() => {
+      if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search)
+      }
+    })
+  }
   // popin d'aide au premier lancement
   try {
     if (!localStorage.getItem(HELP_KEY)) helpOpen.value = true
@@ -17,6 +28,17 @@ onMounted(() => {
   // lance une première simulation automatiquement à l'arrivée sur la page
   runSim()
 })
+
+const shareLabel = ref('🔗 Partager')
+async function share() {
+  try {
+    await navigator.clipboard.writeText(deck.shareUrl())
+    shareLabel.value = '✓ Lien copié'
+  } catch {
+    shareLabel.value = 'Copie impossible'
+  }
+  setTimeout(() => (shareLabel.value = '🔗 Partager'), 2200)
+}
 
 function closeHelp() {
   helpOpen.value = false
@@ -55,6 +77,7 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
       <div class="topbar-actions">
         <button class="ghost sm" title="Aide" @click="helpOpen = true">Aide</button>
         <button class="ghost sm" title="Méthodologie & hypothèses" @click="methodoOpen = true">Méthodologie</button>
+        <button class="ghost sm" title="Copier un lien de partage de ta liste" @click="share">{{ shareLabel }}</button>
         <button class="ghost sm" title="Recharger la liste de référence" @click="deck.resetToReference()">
           ↺ Liste de référence
         </button>
