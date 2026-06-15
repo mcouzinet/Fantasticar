@@ -52,6 +52,15 @@ export interface SpellProfile {
   isComboSpell: boolean
   producesMana: boolean
   tappedRock: boolean
+  /** Mana produit par tour par le caillou une fois en jeu (défaut 1 si producesMana). */
+  tapsFor?: number
+  /**
+   * Suspend N : si défini, la carte n'est pas lançable normalement. On paie `cost`
+   * (coût de suspend) pour l'exiler avec N marqueurs temps ; elle est lancée
+   * gratuitement N tours plus tard (entre alors comme permanent et, si combo, compte
+   * comme un sort non-créature lancé ce tour-là). Cf. §"suspend" du moteur.
+   */
+  suspend?: number
 }
 
 export type SpellTable = Record<Kind, SpellProfile>

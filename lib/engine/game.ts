@@ -24,8 +24,10 @@ function resetBattlefield(bf: Battlefield): void {
   bf.tapped = 0
   bf.city = false
   bf.veins = 0
-  bf.rocks = 0
-  bf.pendingRocks = 0
+  bf.rockMana = 0
+  bf.pendingRockMana = 0
+  bf.suspend.length = 0
+  bf.freeCasts = 0
 }
 
 /**

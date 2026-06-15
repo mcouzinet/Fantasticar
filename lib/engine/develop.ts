@@ -5,25 +5,44 @@ import type { Hand } from './hand'
 import { zerosInHand } from './hand'
 import { applyDrop, computeMana, type Battlefield, type LandDrop } from './mana'
 
-/** Cailloux précalculés (code, coût, coût net = cost-refund), triés net puis coût croissants. */
+/** Cailloux et cartes suspend précalculés depuis la SpellTable. */
 export interface DevelopContext {
+  // cailloux normaux (produisent du mana en jeu), triés net puis coût croissants
   rockKinds: number[]
   rockCost: number[]
   rockNet: number[]
+  rockTaps: number[] // mana produit par tour
+  // cartes déployées via suspend
+  suspendKinds: number[]
+  suspendCost: number[]
+  suspendN: number[]
+  suspendTaps: number[]
+  suspendCombo: boolean[]
 }
 
 export function buildDevelopContext(table: SpellTable): DevelopContext {
-  const rocks: { code: number; cost: number; net: number }[] = []
+  const rocks: { code: number; cost: number; net: number; taps: number }[] = []
+  const susp: { code: number; cost: number; n: number; taps: number; combo: boolean }[] = []
   for (const kind of KINDS as readonly Kind[]) {
     const p = table[kind]
+    if (p.suspend) {
+      susp.push({ code: kindCode[kind], cost: p.cost, n: p.suspend, taps: p.tapsFor ?? 0, combo: p.isComboSpell })
+      continue
+    }
     if (!p.producesMana) continue
-    rocks.push({ code: kindCode[kind], cost: p.cost, net: p.cost - p.refund })
+    rocks.push({ code: kindCode[kind], cost: p.cost, net: p.cost - p.refund, taps: p.tapsFor ?? 1 })
   }
-  rocks.sort((a, b) => a.net - b.net || a.cost - b.cost) // rock2u, rock2t, rock3
+  rocks.sort((a, b) => a.net - b.net || a.cost - b.cost) // rock2u, rock2t, rock3, mightstone
   return {
     rockKinds: rocks.map((r) => r.code),
     rockCost: rocks.map((r) => r.cost),
     rockNet: rocks.map((r) => r.net),
+    rockTaps: rocks.map((r) => r.taps),
+    suspendKinds: susp.map((s) => s.code),
+    suspendCost: susp.map((s) => s.cost),
+    suspendN: susp.map((s) => s.n),
+    suspendTaps: susp.map((s) => s.taps),
+    suspendCombo: susp.map((s) => s.combo),
   }
 }
 
@@ -36,7 +55,6 @@ const CITY = kindCode.city
 function chooseDrop(hand: Hand, remaining: number): LandDrop {
   const hasLandT = hand[LANDT]! > 0
   const immediate = hand[LAND]! + hand[VEIN]! // terrains "intacts" gardés en réserve
-  // Poser un landT maintenant si on garde assez de terrains intacts pour les tours restants.
   if (hasLandT && immediate >= remaining) return 'landT'
   if (hand[LAND]! > 0) return 'land'
   if (hand[VEIN]! > 0) return 'vein'
@@ -85,10 +103,25 @@ export function develop(
     const code = ctx.rockKinds[i]!
     const cost = ctx.rockCost[i]!
     const net = ctx.rockNet[i]!
+    const taps = ctx.rockTaps[i]!
     while (hand[code]! > 0 && pool >= cost) {
       hand[code]!--
       pool -= net
-      bf.pendingRocks += 1 // produit à partir du tour suivant
+      bf.pendingRockMana += taps // produit à partir du tour suivant
+    }
+  }
+
+  // 3b. Suspend : exiler les cartes qui se résoudront avant la fin (N ≤ tours restants).
+  for (let i = 0; i < ctx.suspendKinds.length; i++) {
+    const code = ctx.suspendKinds[i]!
+    const cost = ctx.suspendCost[i]!
+    const n = ctx.suspendN[i]!
+    const taps = ctx.suspendTaps[i]!
+    const combo = ctx.suspendCombo[i]!
+    while (hand[code]! > 0 && pool >= cost && n <= remaining) {
+      hand[code]!--
+      pool -= cost
+      bf.suspend.push({ turnsLeft: n, tapsFor: taps, combo })
     }
   }
 

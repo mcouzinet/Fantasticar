@@ -14,8 +14,20 @@ catégorisation « de mémoire » :
 - **Fractured Powerstone = {2}** → `rock2u` (corrigé précédemment).
 - Cailloux à profil mana particulier modélisés finement (cf. `spellTable.ts`) :
   Basalt Monolith ({3}, tape 3, net 0), Mightstone & Weakstone ({5}, tape 2).
-- **Sol Talisman** (Suspend 3—{1}, en ligne ~T4) : pas de délai multi-tours dans le moteur
-  → modélisé **inerte** pour le combo (conservateur), faute de pouvoir représenter les 3 tours.
+
+### Mécanique Suspend (impacte T4)
+
+Le moteur gère le **suspend** de façon générale (`SpellProfile.suspend = N`, coût = coût de
+suspend) : une carte suspendue au tour T se résout à T+N — elle entre alors comme permanent
+(rampe `tapsFor`) **et** compte comme un sort non-créature lancé gratuitement ce tour
+(`bf.freeCasts`, qui réduit le `need` du combo). C'est un levier **T4, pas T3**.
+
+- **Sol Talisman** : Suspend 3—{1}, tape pour {C}{C} → suspendu ~T1, en ligne ~T4. Effet
+  mesuré sur la nouvelle liste : **T3 inchangé**, **T4 +1,3 à +2,4 pt**.
+- Le mécanisme est réutilisable : tout `kind` avec `suspend: N` dans la SpellTable est
+  géré pareil (pour tester d'autres artefacts à suspend).
+- La production des cailloux est désormais **par carte** (`tapsFor`, somme dans
+  `bf.rockMana`) : Mightstone & Weakstone produit bien 2 (et non 1).
 
 La validation §7 est conservée : elle tourne désormais sur la **decklist d'origine** gardée
 en fixture (`test/fixtures/specDeck.ts`).

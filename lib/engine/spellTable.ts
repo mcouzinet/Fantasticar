@@ -21,22 +21,19 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
 
   // — Sorts non-créature : sorts de combo —
   zero: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
-  rock2u: { cost: 2, refund: 1, isComboSpell: true, producesMana: true, tappedRock: false },
-  rock2t: { cost: 2, refund: 0, isComboSpell: true, producesMana: true, tappedRock: true },
-  rock3: { cost: 3, refund: 1, isComboSpell: true, producesMana: true, tappedRock: false },
+  rock2u: { cost: 2, refund: 1, isComboSpell: true, producesMana: true, tappedRock: false, tapsFor: 1 },
+  rock2t: { cost: 2, refund: 0, isComboSpell: true, producesMana: true, tappedRock: true, tapsFor: 1 },
+  rock3: { cost: 3, refund: 1, isComboSpell: true, producesMana: true, tappedRock: false, tapsFor: 1 },
   // Cailloux à profil mana particulier (vérifiés sur Scryfall) :
   // Basalt Monolith : {3}, tape pour {C}{C}{C} mais ne se dégage pas → net 0 le tour lancé
   //   (refund 3), AUCUNE rampe pérenne (producesMana=false). Excellent activateur de combo.
   basalt: { cost: 3, refund: 3, isComboSpell: true, producesMana: false, tappedRock: false },
-  // The Mightstone and Weakstone : {5}, tape pour {C}{C} (refund 2). Rampe modélisée +1
-  //   (le modèle compte 1 mana/caillou ; sous-estime de 1 un sort à coût 5, marginal).
-  mightstone: { cost: 5, refund: 2, isComboSpell: true, producesMana: true, tappedRock: false },
-  // Sol Talisman : Suspend 3—{1} (paie {1}, 3 marqueurs temps → lancé ~T4), tape pour {C}{C}.
-  //   Le moteur n'a pas de délai multi-tours et la carte n'est pas lançable à la demande :
-  //   en ligne au plus tôt à T4, on la modélise donc en INERTE pour le combo (ni rampe
-  //   précoce, ni sort de combo) — conservateur, plutôt que de la sur-évaluer en suspend-1.
-  //   (cost cosmétique, non utilisé tant que isComboSpell/producesMana sont false.)
-  sol: { cost: 1, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  // The Mightstone and Weakstone : {5}, tape pour {C}{C} → tapsFor 2, refund 2.
+  mightstone: { cost: 5, refund: 2, isComboSpell: true, producesMana: true, tappedRock: false, tapsFor: 2 },
+  // Sol Talisman : Suspend 3—{1} (paie {1}, 3 marqueurs temps → lancé à T+3, ~T4), tape pour
+  //   {C}{C}. Déployé via le mécanisme suspend : à la résolution il entre (rampe +2) ET compte
+  //   comme un sort non-créature lancé ce tour (impacte donc le combo T4, pas T3).
+  sol: { cost: 1, refund: 0, isComboSpell: true, producesMana: true, tappedRock: false, tapsFor: 2, suspend: 3 },
   one: { cost: 1, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
   chrom: { cost: 1, refund: 1, isComboSpell: true, producesMana: false, tappedRock: false },
   two: { cost: 2, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },

@@ -6,12 +6,14 @@ import { newHand } from '../lib/engine/hand'
 import { mulberry32 } from '../lib/engine/prng'
 
 const ctx = buildComboContext(DEFAULT_SPELL_TABLE)
-const comboKinds = KINDS.filter((k) => DEFAULT_SPELL_TABLE[k].isComboSpell)
+// Sorts de combo lançables depuis la main (les suspend sont exclus, comme dans le moteur).
+const comboKinds = KINDS.filter((k) => DEFAULT_SPELL_TABLE[k].isComboSpell && !DEFAULT_SPELL_TABLE[k].suspend)
 
 /** Référence brute-force : explore tous les ordres de lancement (≤ need sorts + Fantasticar). */
-function brute(spells: { cost: number; refund: number }[], mana: number, fCast: boolean): boolean {
-  const need = fCast ? 4 : 3
+function brute(spells: { cost: number; refund: number }[], mana: number, fCast: boolean, free: number): boolean {
+  const need = (fCast ? 4 : 3) - free // `free` sorts déjà lancés gratuitement (suspend)
   const fCost = FANTASTICAR_COST
+  if (need <= 0) return mana >= (fCast ? 0 : fCost)
   const n = spells.length
   const used = new Array<boolean>(n).fill(false)
   function rec(bal: number, fpaid: boolean, count: number): boolean {
@@ -55,12 +57,13 @@ describe('combo : fuzz vs brute-force', () => {
       if (refunderCount > 6) continue // hors périmètre du cap §3.4
       const mana = Math.floor(rng() * 9) // 0..8
       const fCast = rng() < 0.5
-      const mine = comboFeasibleForMana(ctx, hand, mana, fCast)
-      const ref = brute(spells, mana, fCast)
+      const free = Math.floor(rng() * 4) // 0..3 sorts gratuits (suspend résolu ce tour)
+      const mine = comboFeasibleForMana(ctx, hand, mana, fCast, free)
+      const ref = brute(spells, mana, fCast, free)
       if (mine !== ref) {
         mismatches++
         if (!firstMismatch) {
-          firstMismatch = `mana=${mana} fCast=${fCast} mine=${mine} ref=${ref} spells=${JSON.stringify(spells)}`
+          firstMismatch = `mana=${mana} fCast=${fCast} free=${free} mine=${mine} ref=${ref} spells=${JSON.stringify(spells)}`
         }
       }
     }

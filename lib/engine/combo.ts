@@ -23,7 +23,9 @@ export function buildComboContext(table: SpellTable): ComboContext {
   const others: { code: number; cost: number }[] = []
   for (const kind of KINDS as readonly Kind[]) {
     const p = table[kind]
-    if (!p.isComboSpell) continue
+    // On exclut les sorts suspend : ils ne sont pas lançables depuis la main ; leur
+    // contribution au combo passe par la résolution de suspend (bf.freeCasts).
+    if (!p.isComboSpell || p.suspend) continue
     if (p.refund > 0) refunders.push({ code: kindCode[kind], cost: p.cost, refund: p.refund })
     else others.push({ code: kindCode[kind], cost: p.cost })
   }
@@ -58,6 +60,7 @@ export function comboFeasibleForMana(
   hand: Hand,
   mana: number,
   fCast: boolean,
+  free = 0,
 ): boolean {
   let k = 0
   for (let i = 0; i < ctx.refunderKinds.length && k < MAX_REFUNDERS; i++) {
@@ -76,7 +79,7 @@ export function comboFeasibleForMana(
     const cost = ctx.otherCost[i]!
     while (n-- > 0 && m < othCost.length) othCost[m++] = cost
   }
-  return feasible(k, m, mana, fCast, ctx.fantasticarCost)
+  return feasible(k, m, mana, fCast, ctx.fantasticarCost, free)
 }
 
 const MAX_REFUNDERS = 6 // cap §3.4 : borne l'énumération de sous-ensembles à 2^6
@@ -121,12 +124,14 @@ export function bestCombo(
     }
   }
 
-  // 3. Tester chaque pose de terrain candidate.
-  if (feasible(k, m, computeMana(bf, 'none'), fCast, ctx.fantasticarCost)) return true
-  if (hand[kindCode.land]! > 0 && feasible(k, m, computeMana(bf, 'land'), fCast, ctx.fantasticarCost)) return true
-  if (hand[kindCode.landT]! > 0 && feasible(k, m, computeMana(bf, 'landT'), fCast, ctx.fantasticarCost)) return true
-  if (hand[kindCode.vein]! > 0 && feasible(k, m, computeMana(bf, 'vein'), fCast, ctx.fantasticarCost)) return true
-  if (hand[kindCode.city]! > 0 && feasible(k, m, computeMana(bf, 'city'), fCast, ctx.fantasticarCost)) return true
+  // 3. Tester chaque pose de terrain candidate (free = sorts gratuits sortis de suspend ce tour).
+  const free = bf.freeCasts
+  const f = ctx.fantasticarCost
+  if (feasible(k, m, computeMana(bf, 'none'), fCast, f, free)) return true
+  if (hand[kindCode.land]! > 0 && feasible(k, m, computeMana(bf, 'land'), fCast, f, free)) return true
+  if (hand[kindCode.landT]! > 0 && feasible(k, m, computeMana(bf, 'landT'), fCast, f, free)) return true
+  if (hand[kindCode.vein]! > 0 && feasible(k, m, computeMana(bf, 'vein'), fCast, f, free)) return true
+  if (hand[kindCode.city]! > 0 && feasible(k, m, computeMana(bf, 'city'), fCast, f, free)) return true
   return false
 }
 
@@ -138,9 +143,11 @@ export function bestCombo(
  * @param k nb de rembourseurs disponibles (refCost/refRefund remplis)
  * @param m nb d'autres sorts (othCost rempli, trié croissant)
  */
-function feasible(k: number, m: number, mana: number, fCast: boolean, fanCost: number): boolean {
-  const need = fCast ? 4 : 3 // sorts à lancer EN PLUS du Fantasticar déjà compté
+function feasible(k: number, m: number, mana: number, fCast: boolean, fanCost: number, free: number): boolean {
   const fCost = fCast ? 0 : fanCost
+  // `free` sorts non-créature ont déjà été lancés gratuitement ce tour (sorties de suspend).
+  const need = (fCast ? 4 : 3) - free // sorts restants à lancer depuis la main
+  if (need <= 0) return mana >= fCost // les sorts gratuits (+ Fantasticar) suffisent
 
   const subsets = 1 << k
   for (let mask = 0; mask < subsets; mask++) {
