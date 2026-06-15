@@ -137,7 +137,7 @@ const previewStyle = computed(() => {
 .groups {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   max-height: 72vh;
   overflow-y: auto;
   padding-right: 6px;
@@ -151,8 +151,8 @@ const previewStyle = computed(() => {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
-  padding: 2px 0 4px;
-  margin-bottom: 4px;
+  padding: 2px 0 3px;
+  margin-bottom: 2px;
   background: var(--bg-2);
 }
 .group h3 {
@@ -173,13 +173,13 @@ const previewStyle = computed(() => {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
 }
 .group li {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 2px 0;
+  padding: 1px 0;
 }
 .badge {
   width: 58px;
@@ -196,7 +196,7 @@ const previewStyle = computed(() => {
 }
 .cut {
   padding: 0 8px;
-  line-height: 20px;
+  line-height: 18px;
   color: var(--text-faint);
   border-color: transparent;
   background: transparent;
