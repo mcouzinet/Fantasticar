@@ -60,8 +60,8 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
     </header>
 
     <main class="dash">
-      <!-- RAIL GAUCHE : le deck -->
-      <section class="rail">
+      <!-- ZONE DECK -->
+      <section class="area-deck">
         <div class="card pad"><DeckAggregates /></div>
         <div class="card pad">
           <h2 class="ph">Decklist</h2>
@@ -73,8 +73,16 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
         </details>
       </section>
 
-      <!-- CŒUR : simulation + résultats -->
-      <section class="core">
+      <!-- ZONE WHAT-IF (à côté de la decklist quand la largeur le permet) -->
+      <section class="area-whatif">
+        <div class="card pad">
+          <h2 class="ph">What-if — changement de carte</h2>
+          <WhatIfPanel :running="sim.isRunning.value" @run="runSim" />
+        </div>
+      </section>
+
+      <!-- ZONE RÉSULTATS : simulation + résultats (graphe sous le tableau) -->
+      <section class="area-results">
         <div class="card pad">
           <SimControls :running="sim.isRunning.value" :progress="sim.progress.value" @run="runSim" />
           <p v-if="sim.error.value" class="err">⚠ {{ sim.error.value }}</p>
@@ -87,10 +95,12 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
           </h2>
           <template v-if="primary">
             <ResultHero :primary="primary" :compare="compare" />
+            <div class="result-table">
+              <ResultsTable :primary="primary" :compare="compare" />
+            </div>
             <div class="chart">
               <ProbBars :on-play="primary.onPlay" :on-draw="primary.onDraw" />
             </div>
-            <ResultsTable :primary="primary" :compare="compare" />
             <p class="combo-flavor faint">
               🛸 Au 4ᵉ sort non-créature du tour, on sacrifie The Fantasticar → <b>4 jetons 4/4</b>
               volants et hâtifs. Décollage visé&nbsp;: <b class="accent">T3</b>.
@@ -100,14 +110,6 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
             <FantasticarMark class="empty-mark" />
             <p>Configure le deck, choisis le mulligan, puis <b>lance la simulation</b> — le résultat s'affiche ici (T2→T5, cible&nbsp;T3).</p>
           </div>
-        </div>
-      </section>
-
-      <!-- RAIL DROITE : what-if -->
-      <section class="rail">
-        <div class="card pad">
-          <h2 class="ph">What-if — changement de carte</h2>
-          <WhatIfPanel :running="sim.isRunning.value" @run="runSim" />
         </div>
       </section>
     </main>
@@ -123,8 +125,8 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
 
 <style scoped>
 .shell {
-  max-width: 1760px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: 20px 24px 36px;
 }
 .topbar {
@@ -162,15 +164,27 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   font-size: 12.5px;
 }
 
-/* Dashboard pleine largeur : 2 rails encadrant le cœur (simulation + résultats). */
+/* Dashboard pleine largeur : 3 zones (decklist · what-if · résultats).
+   What-if à côté de la decklist quand la largeur le permet, sinon dessous. */
 .dash {
   display: grid;
-  grid-template-columns: 336px minmax(0, 1fr) 336px;
+  grid-template-columns: 320px 320px minmax(0, 1fr);
+  grid-template-areas: 'deck whatif results';
   gap: 16px;
   align-items: start;
 }
-.rail,
-.core {
+.area-deck {
+  grid-area: deck;
+}
+.area-whatif {
+  grid-area: whatif;
+}
+.area-results {
+  grid-area: results;
+}
+.area-deck,
+.area-whatif,
+.area-results {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -203,11 +217,14 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   text-transform: none;
   letter-spacing: 0;
 }
-.chart {
-  margin-top: 20px;
-}
-.results-card :deep(.results) {
+/* Résultats en colonne : graphe sous le tableau ; contenu lisible (non étiré). */
+.result-table {
   margin-top: 18px;
+  max-width: 880px;
+}
+.chart {
+  margin-top: 22px;
+  max-width: 880px;
 }
 .combo-flavor {
   font-size: 12px;
@@ -255,12 +272,23 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   font-size: 11px;
 }
 
-@media (max-width: 1200px) {
+/* Pas la place pour 3 colonnes : what-if repasse SOUS la decklist. */
+@media (max-width: 1300px) {
+  .dash {
+    grid-template-columns: 320px minmax(0, 1fr);
+    grid-template-areas:
+      'deck   results'
+      'whatif results';
+  }
+}
+/* Étroit : tout empilé, résultats en premier. */
+@media (max-width: 920px) {
   .dash {
     grid-template-columns: 1fr;
-  }
-  .core {
-    order: -1;
+    grid-template-areas:
+      'results'
+      'deck'
+      'whatif';
   }
 }
 </style>

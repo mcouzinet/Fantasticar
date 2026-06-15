@@ -34,8 +34,8 @@ const curve = computed(() => {
 <template>
   <div class="agg">
     <div class="total" :class="{ warn: !ok }">
-      <span class="num">{{ draftStats.total }}</span><span class="den">/ 99</span>
-      <span v-if="!ok" class="warn-tag">⚠ total ≠ 99 (calcul valide, vérifie la liste)</span>
+      <span class="num">{{ draftStats.total + 1 }}</span><span class="den">/ 100</span>
+      <span v-if="!ok" class="warn-tag">⚠ total ≠ 100 (calcul valide, vérifie la liste)</span>
     </div>
 
     <div class="chips">
@@ -47,6 +47,10 @@ const curve = computed(() => {
       >
         <i class="dot" />{{ g.label }}
         <b>{{ draftStats.byGroup[g.id] }}</b>
+      </span>
+      <span class="chip" :style="{ '--c': 'var(--accent)' }" title="The Fantasticar (commander)">
+        <i class="dot" />Commander
+        <b>1</b>
       </span>
     </div>
 

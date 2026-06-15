@@ -55,7 +55,7 @@ const counterpart = ref<GroupId>('others')
         </div>
       </div>
       <p class="hint faint">
-        Les +/− gardent le total à 99 en échangeant avec la contrepartie. Lance « Comparer »
+        Les +/− gardent le total à 100 en échangeant avec la contrepartie. Lance « Comparer »
         pour voir le delta.
       </p>
     </div>

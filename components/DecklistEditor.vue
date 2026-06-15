@@ -119,12 +119,20 @@ const previewStyle = computed(() => {
 <style scoped>
 .add-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
 }
 .add-row input {
-  flex: 1;
+  flex: 1 1 100%;
   min-width: 0;
+}
+.add-row select {
+  flex: 1 1 0;
+  min-width: 0; /* sans ça, le <select> s'élargit au texte de l'option et déborde */
+}
+.add-row button {
+  flex: 0 0 auto;
 }
 .groups {
   display: flex;

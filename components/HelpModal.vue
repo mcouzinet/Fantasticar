@@ -5,7 +5,7 @@ const emit = defineEmits<{ close: [] }>()
 const steps = [
   {
     title: 'La decklist',
-    body: 'Édite la liste à gauche : ajoute une carte (nom + catégorie) ou coupe-en une avec le bouton −. Tu peux aussi charger une liste Moxfield ou un JSON via « Import / Export ». Le compteur 99/99 t’avertit si le total dérive.',
+    body: 'Édite la liste à gauche : ajoute une carte (nom + catégorie) ou coupe-en une avec le bouton −. Tu peux aussi charger une liste Moxfield ou un JSON via « Import / Export ». Le compteur 100/100 t’avertit si le total dérive.',
   },
   {
     title: 'La simulation',
@@ -13,7 +13,7 @@ const steps = [
   },
   {
     title: 'Tester un changement',
-    body: 'Ajuste la variante avec les steppers de catégorie (ils gardent le total à 99), puis « Comparer ». Chaque résultat affiche alors son écart vs la liste de référence. « Définir comme référence » fige la variante courante.',
+    body: 'Ajuste la variante avec les steppers de catégorie (ils gardent le total à 100), puis « Comparer ». Chaque résultat affiche alors son écart vs la liste de référence. « Définir comme référence » fige la variante courante.',
   },
 ]
 </script>

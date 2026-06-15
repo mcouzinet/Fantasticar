@@ -107,6 +107,7 @@ const gauges = computed(() => [
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  max-width: 560px;
 }
 .gauge {
   display: flex;
@@ -134,7 +135,6 @@ const gauges = computed(() => [
   stroke-width: 11;
   stroke-linecap: round;
   transition: stroke-dasharray 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-  filter: drop-shadow(0 0 6px currentColor);
 }
 .big {
   font-family: var(--font-display);
