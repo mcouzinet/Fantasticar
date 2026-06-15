@@ -22,6 +22,46 @@ function addCard() {
   add(newName.value, newKind.value)
   newName.value = ''
 }
+
+// — Aperçu de carte au survol (image Scryfall, à la demande) —
+const hoverName = ref<string | null>(null)
+const px = ref(0)
+const py = ref(0)
+const imgError = ref(false)
+let hoverTimer: ReturnType<typeof setTimeout> | null = null
+
+function imgUrl(name: string): string {
+  return `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}&format=image&version=normal`
+}
+function onEnter(name: string, e: MouseEvent) {
+  if (hoverTimer) clearTimeout(hoverTimer)
+  px.value = e.clientX
+  py.value = e.clientY
+  // petit délai : évite de spammer Scryfall quand on balaie la liste
+  hoverTimer = setTimeout(() => {
+    imgError.value = false
+    hoverName.value = name
+  }, 140)
+}
+function onMove(e: MouseEvent) {
+  px.value = e.clientX
+  py.value = e.clientY
+}
+function onLeave() {
+  if (hoverTimer) clearTimeout(hoverTimer)
+  hoverName.value = null
+}
+
+const PREVIEW_W = 240
+const PREVIEW_H = 335
+const previewStyle = computed(() => {
+  const pad = 12
+  let left = px.value + 18
+  if (left + PREVIEW_W > window.innerWidth - pad) left = px.value - PREVIEW_W - 18
+  let top = py.value - PREVIEW_H / 2
+  top = Math.max(pad, Math.min(top, window.innerHeight - PREVIEW_H - pad))
+  return { left: `${left}px`, top: `${top}px`, width: `${PREVIEW_W}px` }
+})
 </script>
 
 <template>
@@ -46,7 +86,13 @@ function addCard() {
           <span class="sub">{{ draftStats.byGroup[g.id] }}</span>
         </header>
         <ul>
-          <li v-for="ci in g.cards" :key="ci.i + ci.c.name">
+          <li
+            v-for="ci in g.cards"
+            :key="ci.i + ci.c.name"
+            @mouseenter="onEnter(ci.c.name, $event)"
+            @mousemove="onMove"
+            @mouseleave="onLeave"
+          >
             <span class="badge" :style="{ background: KIND_META[ci.c.kind].color }">
               {{ KIND_META[ci.c.kind].label }}
             </span>
@@ -57,6 +103,16 @@ function addCard() {
         </ul>
       </section>
     </div>
+
+    <Teleport to="body">
+      <div v-if="hoverName" class="card-preview" :style="previewStyle">
+        <img v-show="!imgError" :src="imgUrl(hoverName)" :alt="hoverName" @error="imgError = true" />
+        <div v-if="imgError" class="noimg">
+          <strong>{{ hoverName }}</strong>
+          <span>aperçu indisponible</span>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -135,5 +191,42 @@ function addCard() {
 }
 .empty {
   font-size: 12px;
+}
+.group li:hover {
+  background: var(--bg-3);
+  border-radius: 6px;
+}
+
+/* Aperçu de carte au survol (téléporté dans body) */
+.card-preview {
+  position: fixed;
+  z-index: 1500;
+  pointer-events: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  background: var(--bg-3);
+}
+.card-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+.noimg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.noimg strong {
+  font-size: 13px;
+}
+.noimg span {
+  font-size: 11px;
+  color: var(--text-faint);
 }
 </style>

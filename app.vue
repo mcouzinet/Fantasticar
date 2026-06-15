@@ -2,7 +2,27 @@
 const deck = useDeck()
 const sim = useSim()
 
-onMounted(() => deck.restore())
+const helpOpen = useState('help:open', () => false)
+const HELP_KEY = 'fantasticar.help.v1'
+
+onMounted(() => {
+  deck.restore()
+  // popin d'aide au premier lancement
+  try {
+    if (!localStorage.getItem(HELP_KEY)) helpOpen.value = true
+  } catch {
+    /* mode privé : on ignore */
+  }
+})
+
+function closeHelp() {
+  helpOpen.value = false
+  try {
+    localStorage.setItem(HELP_KEY, '1')
+  } catch {
+    /* ignore */
+  }
+}
 
 function runSim() {
   if (deck.isDirty.value) {
@@ -26,9 +46,12 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
           Probabilité de déclencher le combo (4 sorts non-créature / tour) — Duel Commander, goldfish.
         </p>
       </div>
-      <button class="ghost sm" title="Recharger la liste de référence" @click="deck.resetToReference()">
-        ↺ Liste de référence
-      </button>
+      <div class="topbar-actions">
+        <button class="ghost sm" title="Aide" @click="helpOpen = true">？ Aide</button>
+        <button class="ghost sm" title="Recharger la liste de référence" @click="deck.resetToReference()">
+          ↺ Liste de référence
+        </button>
+      </div>
     </header>
 
     <main class="grid">
@@ -85,6 +108,8 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
     <footer class="foot faint">
       Calcul 100 % client (Web Worker). Aucune donnée envoyée. — moteur testé contre les valeurs §7.
     </footer>
+
+    <HelpModal :open="helpOpen" @close="closeHelp" />
   </div>
 </template>
 
@@ -100,6 +125,11 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
+}
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
 .brand h1 {
   font-size: 22px;
