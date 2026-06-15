@@ -75,18 +75,20 @@ async function copy() {
       <ul>
         <li v-for="u in unresolved" :key="u.name">
           <span class="uname" :title="u.name">{{ u.name }}</span>
-          <select v-model="resolveKind[u.name]" :aria-label="`Catégorie pour ${u.name}`">
-            <option disabled value="">kind…</option>
-            <option v-for="o in KIND_OPTIONS" :key="o.value" :value="o.value">{{ o.label }}</option>
-          </select>
-          <button
-            class="sm"
-            :disabled="!resolveKind[u.name]"
-            @click="resolveUnresolved(u.name, resolveKind[u.name] as Kind)"
-          >
-            OK
-          </button>
-          <button class="sm ghost" @click="dismissUnresolved(u.name)">Ignorer</button>
+          <div class="urow">
+            <select v-model="resolveKind[u.name]" :aria-label="`Catégorie pour ${u.name}`">
+              <option disabled value="">kind…</option>
+              <option v-for="o in KIND_OPTIONS" :key="o.value" :value="o.value">{{ o.label }}</option>
+            </select>
+            <button
+              class="sm"
+              :disabled="!resolveKind[u.name]"
+              @click="resolveUnresolved(u.name, resolveKind[u.name] as Kind)"
+            >
+              OK
+            </button>
+            <button class="sm ghost" @click="dismissUnresolved(u.name)">Ignorer</button>
+          </div>
         </li>
       </ul>
     </div>
@@ -131,14 +133,25 @@ async function copy() {
 }
 .unresolved li {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.uname {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  word-break: break-word;
+}
+.urow {
+  display: flex;
   gap: 6px;
   align-items: center;
 }
-.uname {
-  flex: 1;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.urow select {
+  flex: 1 1 auto;
+  min-width: 0; /* sinon le <select> garde la largeur de l'option la plus longue et déborde */
+}
+.urow button {
+  flex: 0 0 auto;
 }
 </style>
