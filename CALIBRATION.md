@@ -13,8 +13,9 @@ catégorisation « de mémoire » :
 - **Hidden Grotto n'entre pas engagé** → `land` (la spec d'origine l'avait en `landT`).
 - **Fractured Powerstone = {2}** → `rock2u` (corrigé précédemment).
 - Cailloux à profil mana particulier modélisés finement (cf. `spellTable.ts`) :
-  Basalt Monolith ({3}, tape 3, net 0), Mightstone & Weakstone ({5}, tape 2),
-  Sol Talisman (suspend, tape 2, approximé).
+  Basalt Monolith ({3}, tape 3, net 0), Mightstone & Weakstone ({5}, tape 2).
+- **Sol Talisman** (Suspend 3—{1}, en ligne ~T4) : pas de délai multi-tours dans le moteur
+  → modélisé **inerte** pour le combo (conservateur), faute de pouvoir représenter les 3 tours.
 
 La validation §7 est conservée : elle tourne désormais sur la **decklist d'origine** gardée
 en fixture (`test/fixtures/specDeck.ts`).

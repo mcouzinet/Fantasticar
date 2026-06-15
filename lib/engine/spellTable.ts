@@ -31,10 +31,12 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   // The Mightstone and Weakstone : {5}, tape pour {C}{C} (refund 2). Rampe modélisée +1
   //   (le modèle compte 1 mana/caillou ; sous-estime de 1 un sort à coût 5, marginal).
   mightstone: { cost: 5, refund: 2, isComboSpell: true, producesMana: true, tappedRock: false },
-  // Sol Talisman : suspend 3—{1}, tape pour {C}{C}. Pas de coût de lancement normal →
-  //   approximé en caillou déployé pour 1, prêt au tour suivant (le délai suspend-3 et le
-  //   2e mana sont simplifiés ; conservateur sur la production, optimiste sur le timing).
-  sol: { cost: 1, refund: 0, isComboSpell: true, producesMana: true, tappedRock: true },
+  // Sol Talisman : Suspend 3—{1} (paie {1}, 3 marqueurs temps → lancé ~T4), tape pour {C}{C}.
+  //   Le moteur n'a pas de délai multi-tours et la carte n'est pas lançable à la demande :
+  //   en ligne au plus tôt à T4, on la modélise donc en INERTE pour le combo (ni rampe
+  //   précoce, ni sort de combo) — conservateur, plutôt que de la sur-évaluer en suspend-1.
+  //   (cost cosmétique, non utilisé tant que isComboSpell/producesMana sont false.)
+  sol: { cost: 1, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
   one: { cost: 1, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
   chrom: { cost: 1, refund: 1, isComboSpell: true, producesMana: false, tappedRock: false },
   two: { cost: 2, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
