@@ -3,6 +3,7 @@ const deck = useDeck()
 const sim = useSim()
 
 const helpOpen = useState('help:open', () => false)
+const methodoOpen = useState('methodo:open', () => false)
 const HELP_KEY = 'fantasticar.help.v1'
 
 onMounted(() => {
@@ -50,7 +51,8 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
         </div>
       </div>
       <div class="topbar-actions">
-        <button class="ghost sm" title="Aide" @click="helpOpen = true">？ Aide</button>
+        <button class="ghost sm" title="Aide" @click="helpOpen = true">Aide</button>
+        <button class="ghost sm" title="Méthodologie & hypothèses" @click="methodoOpen = true">Méthodologie</button>
         <button class="ghost sm" title="Recharger la liste de référence" @click="deck.resetToReference()">
           ↺ Liste de référence
         </button>
@@ -106,9 +108,6 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
           </p>
         </div>
 
-        <div class="card pad">
-          <MethodoNote />
-        </div>
       </section>
     </main>
 
@@ -117,6 +116,7 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
     </footer>
 
     <HelpModal :open="helpOpen" @close="closeHelp" />
+    <MethodoModal :open="methodoOpen" @close="methodoOpen = false" />
   </div>
 </template>
 
