@@ -27,7 +27,19 @@ onMounted(() => {
   }
   // lance une première simulation automatiquement à l'arrivée sur la page
   runSim()
+
+  // relance auto (debounced) à chaque changement du deck : what-if et édition deviennent "live"
+  watch(
+    () => deck.draft.value,
+    () => {
+      if (autoTimer) clearTimeout(autoTimer)
+      autoTimer = setTimeout(() => runSim(), 300)
+    },
+    { deep: true },
+  )
 })
+
+let autoTimer: ReturnType<typeof setTimeout> | null = null
 
 const shareLabel = ref('🔗 Partager')
 async function share() {
