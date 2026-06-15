@@ -59,55 +59,56 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
       </div>
     </header>
 
-    <main class="grid">
-      <!-- Colonne gauche : éditeur de decklist -->
-      <section class="col left">
-        <div class="card pad">
-          <DeckAggregates />
-        </div>
+    <main class="dash">
+      <!-- RAIL GAUCHE : le deck -->
+      <section class="rail">
+        <div class="card pad"><DeckAggregates /></div>
         <div class="card pad">
           <h2 class="ph">Decklist</h2>
           <DecklistEditor />
         </div>
-        <div class="card pad">
-          <h2 class="ph">Import / Export</h2>
-          <ImportExportPanel />
-        </div>
+        <details class="card pad io">
+          <summary>Import / Export</summary>
+          <div class="io-body"><ImportExportPanel /></div>
+        </details>
       </section>
 
-      <!-- Colonne droite : simulation & stats -->
-      <section class="col right">
+      <!-- CŒUR : simulation + résultats -->
+      <section class="core">
         <div class="card pad">
-          <h2 class="ph">Simulation</h2>
           <SimControls :running="sim.isRunning.value" :progress="sim.progress.value" @run="runSim" />
           <p v-if="sim.error.value" class="err">⚠ {{ sim.error.value }}</p>
         </div>
 
-        <div class="card pad">
-          <h2 class="ph">What-if — changement de carte</h2>
-          <WhatIfPanel :running="sim.isRunning.value" @run="runSim" />
-        </div>
-
-        <div class="card pad">
+        <div class="card pad results-card">
           <h2 class="ph">
-            Résultats
+            Résultats — combo par tour
             <span v-if="compare" class="badge-soft">Δ vs référence</span>
           </h2>
           <template v-if="primary">
-            <ResultsTable :primary="primary" :compare="compare" />
+            <ResultHero :primary="primary" :compare="compare" />
             <div class="chart">
               <ProbBars :on-play="primary.onPlay" :on-draw="primary.onDraw" />
             </div>
+            <ResultsTable :primary="primary" :compare="compare" />
             <p class="combo-flavor faint">
               🛸 Au 4ᵉ sort non-créature du tour, on sacrifie The Fantasticar → <b>4 jetons 4/4</b>
               volants et hâtifs. Décollage visé&nbsp;: <b class="accent">T3</b>.
             </p>
           </template>
-          <p v-else class="empty muted">
-            Lance une simulation pour voir les probabilités T2→T5 (la cible est T3).
-          </p>
+          <div v-else class="empty muted">
+            <FantasticarMark class="empty-mark" />
+            <p>Configure le deck, choisis le mulligan, puis <b>lance la simulation</b> — le résultat s'affiche ici (T2→T5, cible&nbsp;T3).</p>
+          </div>
         </div>
+      </section>
 
+      <!-- RAIL DROITE : what-if -->
+      <section class="rail">
+        <div class="card pad">
+          <h2 class="ph">What-if — changement de carte</h2>
+          <WhatIfPanel :running="sim.isRunning.value" @run="runSim" />
+        </div>
       </section>
     </main>
 
@@ -122,16 +123,18 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
 
 <style scoped>
 .shell {
-  max-width: 1280px;
+  max-width: 1760px;
   margin: 0 auto;
-  padding: 18px;
+  padding: 20px 24px 36px;
 }
 .topbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 .topbar-actions {
   display: flex;
@@ -147,23 +150,27 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   flex-shrink: 0;
 }
 .brand h1 {
-  font-size: 22px;
-  letter-spacing: -0.01em;
+  font-size: 23px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 .brand .accent {
   color: var(--accent);
 }
 .brand p {
-  margin: 2px 0 0;
-  font-size: 13px;
+  margin: 3px 0 0;
+  font-size: 12.5px;
 }
-.grid {
+
+/* Dashboard pleine largeur : 2 rails encadrant le cœur (simulation + résultats). */
+.dash {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-columns: 336px minmax(0, 1fr) 336px;
   gap: 16px;
   align-items: start;
 }
-.col {
+.rail,
+.core {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -172,12 +179,16 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
 .card.pad {
   padding: 16px;
 }
+.results-card {
+  padding: 18px;
+}
 .ph {
-  font-size: 13px;
+  font-family: var(--font-display);
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--text-faint);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -186,25 +197,52 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   font-size: 10px;
   font-weight: 600;
   color: var(--accent);
-  background: rgba(217, 164, 65, 0.12);
+  background: rgba(224, 169, 63, 0.14);
   border-radius: 999px;
   padding: 2px 8px;
   text-transform: none;
   letter-spacing: 0;
 }
 .chart {
-  margin-top: 16px;
+  margin-top: 20px;
+}
+.results-card :deep(.results) {
+  margin-top: 18px;
 }
 .combo-flavor {
   font-size: 12px;
   line-height: 1.55;
-  margin: 14px 0 0;
-  padding-top: 12px;
+  margin: 16px 0 0;
+  padding-top: 14px;
   border-top: 1px dashed var(--border);
 }
 .empty {
-  font-size: 13px;
-  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  padding: 48px 24px;
+  font-size: 14px;
+  max-width: 460px;
+  margin: 0 auto;
+}
+.empty-mark {
+  width: 60px;
+  height: 38px;
+  opacity: 0.85;
+}
+.io > summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  user-select: none;
+}
+.io[open] > summary {
+  margin-bottom: 12px;
 }
 .err {
   color: var(--bad);
@@ -212,14 +250,17 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   margin: 10px 0 0;
 }
 .foot {
-  margin-top: 20px;
+  margin-top: 24px;
   text-align: center;
   font-size: 11px;
 }
 
-@media (max-width: 880px) {
-  .grid {
+@media (max-width: 1200px) {
+  .dash {
     grid-template-columns: 1fr;
+  }
+  .core {
+    order: -1;
   }
 }
 </style>

@@ -129,15 +129,23 @@ const previewStyle = computed(() => {
 .groups {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
+  max-height: 58vh;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-right: -4px;
 }
 .group header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 4px;
-  margin-bottom: 6px;
+  padding: 2px 0 4px;
+  margin-bottom: 4px;
+  background: var(--bg-2);
 }
 .group h3 {
   font-size: 13px;
@@ -166,16 +174,17 @@ const previewStyle = computed(() => {
   padding: 2px 0;
 }
 .badge {
-  width: 64px;
+  width: 58px;
   justify-content: center;
   flex-shrink: 0;
+  font-size: 10px;
 }
 .name {
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 13px;
+  font-size: 12.5px;
 }
 .cut {
   padding: 0 8px;
