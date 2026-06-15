@@ -41,10 +41,13 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   <div class="shell">
     <header class="topbar">
       <div class="brand">
-        <h1>Fantasticar <span class="accent">Combo Lab</span></h1>
-        <p class="muted">
-          Probabilité de déclencher le combo (4 sorts non-créature / tour) — Duel Commander, goldfish.
-        </p>
+        <FantasticarMark class="brand-mark" />
+        <div>
+          <h1>Fantasticar <span class="accent">Combo Lab</span></h1>
+          <p class="muted">
+            Probabilité de déclencher le combo (4 sorts non-créature / tour) — Duel Commander, goldfish.
+          </p>
+        </div>
       </div>
       <div class="topbar-actions">
         <button class="ghost sm" title="Aide" @click="helpOpen = true">？ Aide</button>
@@ -93,6 +96,10 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
             <div class="chart">
               <ProbBars :on-play="primary.onPlay" :on-draw="primary.onDraw" />
             </div>
+            <p class="combo-flavor faint">
+              🛸 Au 4ᵉ sort non-créature du tour, on sacrifie The Fantasticar → <b>4 jetons 4/4</b>
+              volants et hâtifs. Décollage visé&nbsp;: <b class="accent">T3</b>.
+            </p>
           </template>
           <p v-else class="empty muted">
             Lance une simulation pour voir les probabilités T2→T5 (la cible est T3).
@@ -129,6 +136,14 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
 .topbar-actions {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brand-mark {
   flex-shrink: 0;
 }
 .brand h1 {
@@ -179,6 +194,13 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
 }
 .chart {
   margin-top: 16px;
+}
+.combo-flavor {
+  font-size: 12px;
+  line-height: 1.55;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
 }
 .empty {
   font-size: 13px;

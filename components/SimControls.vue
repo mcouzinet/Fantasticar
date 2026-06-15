@@ -28,6 +28,33 @@ const precisionOptions = [
   { value: 15000, label: 'Normal (~15 000)' },
   { value: 40000, label: 'Précis (~40 000)' },
 ]
+
+// Messages thématiques pendant le calcul (clin d'œil au combo).
+const messages = [
+  'Mise à feu des réacteurs…',
+  'On enchaîne les sorts non-créature…',
+  'Décollage visé au T3…',
+  'Sacrifice du véhicule…',
+  'Quatre jetons 4/4 en approche…',
+]
+const msgIdx = ref(0)
+let msgTimer: ReturnType<typeof setInterval> | null = null
+watch(
+  () => props.running,
+  (r) => {
+    if (msgTimer) {
+      clearInterval(msgTimer)
+      msgTimer = null
+    }
+    if (r) {
+      msgIdx.value = 0
+      msgTimer = setInterval(() => (msgIdx.value = (msgIdx.value + 1) % messages.length), 750)
+    }
+  },
+)
+onBeforeUnmount(() => {
+  if (msgTimer) clearInterval(msgTimer)
+})
 </script>
 
 <template>
@@ -48,9 +75,14 @@ const precisionOptions = [
       {{ props.running ? 'Calcul…' : '▶ Lancer la simulation' }}
     </button>
   </div>
-  <div v-if="props.running || props.progress > 0" class="progress">
-    <div class="bar" :style="{ width: `${Math.round(props.progress * 100)}%` }" />
-    <span class="pct">{{ Math.round(props.progress * 100) }} %</span>
+  <div v-if="props.running || props.progress > 0" class="progress-wrap">
+    <div class="sim-line">
+      <span class="sim-msg">{{ props.running ? `🚀 ${messages[msgIdx]}` : '✓ Décollage !' }}</span>
+      <span class="pct">{{ Math.round(props.progress * 100) }} %</span>
+    </div>
+    <div class="progress">
+      <div class="bar" :style="{ width: `${Math.round(props.progress * 100)}%` }" />
+    </div>
   </div>
 </template>
 
@@ -75,25 +107,34 @@ const precisionOptions = [
 .run {
   margin-left: auto;
 }
+.progress-wrap {
+  margin-top: 14px;
+}
+.sim-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+.sim-msg {
+  color: var(--accent);
+  font-weight: 600;
+}
+.pct {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
 .progress {
-  position: relative;
   height: 8px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 999px;
-  margin-top: 12px;
   overflow: hidden;
 }
 .progress .bar {
   height: 100%;
   background: linear-gradient(90deg, var(--accent-2), var(--accent));
   transition: width 0.15s ease;
-}
-.progress .pct {
-  position: absolute;
-  right: 8px;
-  top: -18px;
-  font-size: 11px;
-  color: var(--text-dim);
 }
 </style>
