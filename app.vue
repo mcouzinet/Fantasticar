@@ -62,9 +62,8 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
     </header>
 
     <main class="dash">
-      <!-- ZONE DECK -->
+      <!-- ZONE DECK (decklist seule → plus de hauteur) -->
       <section class="area-deck">
-        <div class="card pad"><DeckAggregates /></div>
         <div class="card pad">
           <h2 class="ph">Decklist</h2>
           <DecklistEditor />
@@ -75,8 +74,9 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
         </details>
       </section>
 
-      <!-- ZONE WHAT-IF (à côté de la decklist quand la largeur le permet) -->
+      <!-- ZONE WHAT-IF : agrégats du deck + changement de carte -->
       <section class="area-whatif">
+        <div class="card pad"><DeckAggregates /></div>
         <div class="card pad">
           <h2 class="ph">What-if — changement de carte</h2>
           <WhatIfPanel :running="sim.isRunning.value" @run="runSim" />
@@ -117,7 +117,7 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
     </main>
 
     <footer class="foot faint">
-      Calcul 100 % client (Web Worker). Aucune donnée envoyée. — moteur testé contre les valeurs §7.
+      Calcul 100 % client (Web Worker). Aucune donnée envoyée. — moteur vérifié par tests automatisés.
     </footer>
 
     <HelpModal :open="helpOpen" @close="closeHelp" />

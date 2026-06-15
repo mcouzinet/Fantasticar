@@ -138,7 +138,7 @@ const previewStyle = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 58vh;
+  max-height: 72vh;
   overflow-y: auto;
   padding-right: 6px;
   margin-right: -4px;
