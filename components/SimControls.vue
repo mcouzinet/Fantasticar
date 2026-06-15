@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { MulliganMode } from '~/lib/engine/types'
-
 const props = defineProps<{
   running: boolean
   progress: number
@@ -8,26 +6,7 @@ const props = defineProps<{
 const emit = defineEmits<{ run: [] }>()
 
 const sim = useSim()
-
-const mulligan = computed({
-  get: () => sim.lastConfig.value.mulligan,
-  set: (v: MulliganMode) => (sim.lastConfig.value = { ...sim.lastConfig.value, mulligan: v }),
-})
-const iterations = computed({
-  get: () => sim.lastConfig.value.iterations,
-  set: (v: number) => (sim.lastConfig.value = { ...sim.lastConfig.value, iterations: Number(v) }),
-})
-
-const mulliganOptions: { value: MulliganMode; label: string }[] = [
-  { value: 'none', label: 'Aucun' },
-  { value: 'london', label: 'London (→5)' },
-  { value: 'moxfield', label: 'Moxfield (free 7)' },
-]
-const precisionOptions = [
-  { value: 5000, label: 'Rapide (~5 000)' },
-  { value: 15000, label: 'Normal (~15 000)' },
-  { value: 40000, label: 'Précis (~40 000)' },
-]
+const iterations = computed(() => sim.lastConfig.value.iterations)
 
 // Messages thématiques pendant le calcul (clin d'œil au combo).
 const messages = [
@@ -59,21 +38,13 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="controls">
-    <div class="field">
-      <label for="mulligan-select">Mulligan</label>
-      <select id="mulligan-select" v-model="mulligan" :disabled="props.running">
-        <option v-for="o in mulliganOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="precision-select">Précision</label>
-      <select id="precision-select" v-model="iterations" :disabled="props.running">
-        <option v-for="o in precisionOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
-      </select>
-    </div>
     <button class="primary run" :disabled="props.running" @click="emit('run')">
       {{ props.running ? 'Calcul…' : '▶ Lancer la simulation' }}
     </button>
+    <dl class="config">
+      <div><dt>Mulligan</dt><dd>London (→5)</dd></div>
+      <div><dt>Précision</dt><dd>{{ iterations.toLocaleString('fr-FR') }} itérations</dd></div>
+    </dl>
   </div>
   <div v-if="props.running || props.progress > 0" class="progress-wrap">
     <div class="sim-line">
@@ -89,23 +60,36 @@ onBeforeUnmount(() => {
 <style scoped>
 .controls {
   display: flex;
-  gap: 12px;
-  align-items: flex-end;
+  align-items: center;
+  gap: 20px;
   flex-wrap: wrap;
 }
-.field {
+.run {
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 24px;
+}
+.config {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+}
+.config div {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px;
 }
-.field label {
-  font-size: 11px;
-  color: var(--text-faint);
+.config dt {
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
 }
-.run {
-  margin-left: auto;
+.config dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
 }
 .progress-wrap {
   margin-top: 14px;

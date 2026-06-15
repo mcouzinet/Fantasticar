@@ -12,8 +12,9 @@ export function useSim() {
   const baselineResult = useState<SimResult | null>('sim:baseline', () => null)
   const draftResult = useState<SimResult | null>('sim:draft', () => null)
   const error = useState<string | null>('sim:error', () => null)
+  // Config fixe : 50 000 itérations (calcul quasi instantané) et mulligan London.
   const lastConfig = useState<SimConfig>('sim:config', () => ({
-    iterations: 15000,
+    iterations: 50000,
     mulligan: 'london',
     maxTurn: 5,
     seed: 0xc0ffee,

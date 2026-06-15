@@ -14,6 +14,8 @@ onMounted(() => {
   } catch {
     /* mode privé : on ignore */
   }
+  // lance une première simulation automatiquement à l'arrivée sur la page
+  runSim()
 })
 
 function closeHelp() {

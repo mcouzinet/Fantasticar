@@ -1,6 +1,7 @@
 import { REFERENCE_DECK } from '../engine/referenceDeck'
 import { KINDS } from '../engine/types'
 import type { Card, Deck, Kind } from '../engine/types'
+import { CARD_CATALOG } from './cardCatalog'
 
 const KIND_SET = new Set<string>(KINDS)
 
@@ -8,9 +9,13 @@ function norm(name: string): string {
   return name.trim().toLowerCase()
 }
 
-/** Index nom → kind construit depuis la liste de référence (source de vérité §3.2). */
+/**
+ * Index nom → kind : catalogue élargi (Scryfall) + liste de référence (§3.2, prioritaire)
+ * + deck courant éventuel. Sert à reconnaître les cartes à l'import.
+ */
 function buildIndex(extra?: Deck): Record<string, Kind> {
   const idx: Record<string, Kind> = {}
+  for (const [name, kind] of Object.entries(CARD_CATALOG)) idx[norm(name)] = kind
   for (const c of REFERENCE_DECK.cards) idx[norm(c.name)] = c.kind
   if (extra) for (const c of extra.cards) idx[norm(c.name)] = c.kind
   return idx
