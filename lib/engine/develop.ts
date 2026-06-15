@@ -19,7 +19,7 @@ export function buildDevelopContext(table: SpellTable): DevelopContext {
     if (!p.producesMana) continue
     rocks.push({ code: kindCode[kind], cost: p.cost, net: p.cost - p.refund })
   }
-  rocks.sort((a, b) => a.net - b.net || a.cost - b.cost) // rock1, rock2u, rock2t, rock3
+  rocks.sort((a, b) => a.net - b.net || a.cost - b.cost) // rock2u, rock2t, rock3
   return {
     rockKinds: rocks.map((r) => r.code),
     rockCost: rocks.map((r) => r.cost),

@@ -27,7 +27,17 @@ export function buildComboContext(table: SpellTable): ComboContext {
     if (p.refund > 0) refunders.push({ code: kindCode[kind], cost: p.cost, refund: p.refund })
     else others.push({ code: kindCode[kind], cost: p.cost })
   }
-  refunders.sort((a, b) => a.cost - b.cost)
+  // Ordre de lancement optimal des rembourseurs (problème du capital minimal) : d'abord
+  // ceux dont le remboursement couvre le coût (net ≤ 0, ex. Basalt Monolith net 0) triés
+  // par coût croissant, puis les autres (net > 0) triés par remboursement décroissant.
+  // (Le tri « par coût croissant » du §3.4 est sous-optimal dès qu'un rembourseur cher est
+  //  net 0 : il doit être lancé tant que le solde est haut. Validé par le fuzz vs brute-force.)
+  refunders.sort((a, b) => {
+    const aCovers = a.refund >= a.cost
+    const bCovers = b.refund >= b.cost
+    if (aCovers !== bCovers) return aCovers ? -1 : 1
+    return aCovers ? a.cost - b.cost : b.refund - a.refund
+  })
   others.sort((a, b) => a.cost - b.cost)
   return {
     refunderKinds: refunders.map((r) => r.code),

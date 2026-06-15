@@ -4,7 +4,8 @@ import { deckStats, GROUPS, type GroupId } from '~/lib/engine/deckStats'
 import { KIND_META } from '~/lib/ui/kinds'
 import { fromJson, parseMoxfield, toJson, toMoxfieldText } from '~/lib/io/deckIo'
 
-const STORAGE_KEY = 'fantasticar.deck.v1'
+// v2 : nouvelle decklist de référence (invalide le cache v1 des sessions précédentes).
+const STORAGE_KEY = 'fantasticar.deck.v2'
 
 function clone(d: Deck): Deck {
   return { cards: d.cards.map((c) => ({ ...c })) }

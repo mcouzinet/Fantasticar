@@ -26,7 +26,7 @@ const HIGH_COST_BURY = [
 ]
 // Dernier recours : pièces de combo bon marché, en gardant les zéros au maximum.
 const LAST_RESORT_BURY = [
-  kindCode.rock3, kindCode.rock2t, kindCode.rock2u, kindCode.rock1,
+  kindCode.rock3, kindCode.rock2t, kindCode.rock2u,
   kindCode.chrom, kindCode.one,
 ]
 

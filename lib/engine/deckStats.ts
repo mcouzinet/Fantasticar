@@ -13,7 +13,7 @@ export interface GroupDef {
 export const GROUPS: GroupDef[] = [
   { id: 'lands', label: 'Terrains', kinds: ['land', 'landT', 'city', 'vein'] },
   { id: 'zeros', label: 'Sorts à 0', kinds: ['zero'] },
-  { id: 'rocks', label: 'Cailloux', kinds: ['rock1', 'rock2u', 'rock2t', 'rock3'] },
+  { id: 'rocks', label: 'Cailloux', kinds: ['rock2u', 'rock2t', 'rock3', 'basalt', 'mightstone', 'sol'] },
   { id: 'ones', label: 'Sorts à 1', kinds: ['one', 'chrom'] },
   { id: 'twos', label: 'Sorts à 2', kinds: ['two'] },
   { id: 'creatures', label: 'Créatures', kinds: ['creature'] },

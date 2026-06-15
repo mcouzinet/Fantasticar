@@ -5,8 +5,6 @@ decklist Duel Commander autour de **The Fantasticar**, estimer par Monte Carlo l
 de déclencher le combo (4 sorts non-créature dans un tour) de T2 à T5, et **mesurer l'impact
 d'un changement de carte** (what-if avec deltas).
 
-Spécification complète : [`Fantasticar-combo.md`](./Fantasticar-combo.md).
-
 ## Démarrage
 
 ```bash
@@ -29,7 +27,7 @@ npm run preview    # prévisualise le build
 lib/engine/        Moteur de simulation — TypeScript pur, sans dépendance framework
   types.ts           Modèle de données (Kind, Deck, SimConfig, SimResult…)
   spellTable.ts      Profils mécaniques par kind (coût / remboursement) — hypothèses §3.8
-  referenceDeck.ts   Decklist de référence (99 cartes, §3.2)
+  referenceDeck.ts   Decklist de référence (99 cartes, catégorisée d'après Scryfall)
   prng.ts            PRNG seedable (mulberry32) + Fisher-Yates
   mana.ts            État de jeu + mana par tour (§3.3)
   combo.ts           Faisabilité du combo (§3.4) — recherche exacte sur les rembourseurs

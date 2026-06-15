@@ -1,7 +1,31 @@
 # Calibration du moteur — note d'ingénierie
 
-> Statut : moteur **fidèle à la spec** (§3.4–§3.7), cœur combo **prouvé optimal**.
-> Reproduction des valeurs §7 à **~3 pt** près sur les extrêmes (cible spec : ±1,5 pt).
+> Statut : cœur combo **prouvé optimal** (fuzz vs brute-force). Reproduction des valeurs §7
+> à **~3 pt** près sur les extrêmes (cible spec : ±1,5 pt).
+
+## Mise à jour — nouvelle decklist de référence
+
+La decklist par défaut a été remplacée par une liste fournie, **catégorisée d'après les
+données Scryfall** (coût/type/production de mana vérifiés). Corrections notables vs une
+catégorisation « de mémoire » :
+
+- **Eldrazi Confluence = {2}{C}{C} → coût 4** (et non 5 comme supposé au §3.8).
+- **Hidden Grotto n'entre pas engagé** → `land` (la spec d'origine l'avait en `landT`).
+- **Fractured Powerstone = {2}** → `rock2u` (corrigé précédemment).
+- Cailloux à profil mana particulier modélisés finement (cf. `spellTable.ts`) :
+  Basalt Monolith ({3}, tape 3, net 0), Mightstone & Weakstone ({5}, tape 2),
+  Sol Talisman (suspend, tape 2, approximé).
+
+La validation §7 est conservée : elle tourne désormais sur la **decklist d'origine** gardée
+en fixture (`test/fixtures/specDeck.ts`).
+
+### Bug trouvé par le fuzz : ordre de lancement des rembourseurs
+
+Le §3.4 lance les rembourseurs « par coût croissant ». Avec un rembourseur **cher mais
+net 0** (Basalt Monolith : coût 3, remboursement 3), cet ordre est **sous-optimal** : il faut
+le lancer tant que le solde est élevé. Le fuzz vs brute-force a détecté l'écart ; l'ordre a
+été corrigé (problème du capital minimal : net ≤ 0 d'abord par coût croissant, puis net > 0
+par remboursement décroissant). Le combo redevient **prouvé optimal**.
 
 ## Résultats (T3 cumulé, N=40 000, seed fixe)
 
