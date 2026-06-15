@@ -177,6 +177,7 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
 }
 .topbar-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   flex-shrink: 0;
 }
@@ -318,14 +319,20 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
       'whatif results';
   }
 }
-/* Étroit : tout empilé, résultats en premier. */
+/* Étroit : tout empilé, résultats en premier, decklist tout en bas. */
 @media (max-width: 920px) {
+  .topbar {
+    flex-wrap: wrap;
+  }
+  .topbar-actions {
+    flex-shrink: 1;
+  }
   .dash {
     grid-template-columns: 1fr;
     grid-template-areas:
       'results'
-      'deck'
-      'whatif';
+      'whatif'
+      'deck';
   }
 }
 </style>
