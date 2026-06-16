@@ -6,14 +6,12 @@ const props = defineProps<{ data: T2RecipesResult | null }>()
 const rows = computed(() => {
   if (!props.data || props.data.t2Count === 0) return []
   const { combos, t2Count } = props.data
-  return combos.map((c) => ({ label: c.label, pct: c.count / t2Count }))
+  return combos
+    .map((c) => ({ label: c.label, pct: c.count / t2Count }))
+    .filter((r) => r.pct >= 0.005) // masque les recettes < 0,5 %
 })
 const maxPct = computed(() => rows.value.reduce((m, r) => Math.max(m, r.pct), 0) || 1)
-const coverage = computed(() => {
-  if (!props.data || props.data.t2Count === 0) return 0
-  const shown = props.data.combos.reduce((s, c) => s + c.count, 0)
-  return shown / props.data.t2Count
-})
+const coverage = computed(() => rows.value.reduce((s, r) => s + r.pct, 0))
 </script>
 
 <template>
