@@ -1,6 +1,5 @@
 import type { Kind, SpellTable } from './types'
 import { KINDS, kindCode } from './types'
-import { FANTASTICAR_COST } from './spellTable'
 import type { Hand } from './hand'
 import { applyDrop, computeMana, scorchedSacPool, type Battlefield, type LandDrop } from './mana'
 
@@ -116,17 +115,6 @@ const ROCKS = [
 const MANA_LANDS = [LAND, LANDT, VEIN, CITY, LANDGRANT, LANDSCRY]
 const CHEAP_SPELLS = [kindCode.zero, kindCode.one, kindCode.chrom, kindCode.two]
 
-// Sorts non-créature réalistement lançables pour compléter le combo (pour le gate de pré-cast).
-const COMBO_SPELLS = [
-  kindCode.zero, kindCode.amulet, kindCode.one, kindCode.chrom, kindCode.two,
-  kindCode.rock2u, kindCode.rock2t, kindCode.rock3, kindCode.basalt, kindCode.o3, kindCode.o4,
-]
-function comboSpellsInHand(hand: Hand): number {
-  let n = 0
-  for (const k of COMBO_SPELLS) n += hand[k]!
-  return n
-}
-
 /**
  * Décision scry/surveil 1 sur la carte du dessus (kind), selon l'état de la main.
  * `true` = on la garde ; `false` = on s'en débarrasse (on piochera la suivante).
@@ -165,15 +153,11 @@ export function develop(
   removeDrop(hand, drop)
   applyDrop(bf, drop)
 
-  // 2. Pré-cast du Fantasticar SEULEMENT si on aura de quoi compléter need=4 (≥ 4 sorts de combo
-  //    en main). Sinon on le garde pour le tour du combo (need=3), où le mana en surplus (Tron…)
-  //    sert à payer des sorts à 1/2 — pré-lancer avec < 4 sorts rendrait le combo inatteignable.
-  if (!fCast && pool >= FANTASTICAR_COST && comboSpellsInHand(hand) >= 4) {
-    pool -= FANTASTICAR_COST
-    fCast = true
-  }
+  // NB : on ne pré-lance JAMAIS le Fantasticar pendant le développement. Il est en zone de
+  // commandement et se lance le tour du combo, en même temps que les 3 autres sorts non-créature
+  // (need = 3). Le poser seul un tour à l'avance (need = 4) serait strictement pire.
 
-  // 3. Pré-cast des cailloux abordables, du moins cher (net) au plus cher.
+  // 2. Pré-cast des cailloux abordables, du moins cher (net) au plus cher.
   for (let i = 0; i < ctx.rockKinds.length; i++) {
     const code = ctx.rockKinds[i]!
     const cost = ctx.rockCost[i]!
@@ -212,12 +196,6 @@ export function develop(
       pool -= cost
       bf.suspend.push({ turnsLeft: n, tapsFor: taps, combo })
     }
-  }
-
-  // 4. Re-tenter le pré-cast du Fantasticar avec le mana restant (même garde : ≥ 4 sorts de combo).
-  if (!fCast && pool >= FANTASTICAR_COST && comboSpellsInHand(hand) >= 4) {
-    pool -= FANTASTICAR_COST
-    fCast = true
   }
 
   return fCast

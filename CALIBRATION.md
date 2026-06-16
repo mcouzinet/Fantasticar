@@ -61,13 +61,17 @@ La validation tourne sur la **decklist d'origine** gardée en fixture
 | none | draw (T3) | 46,5 % | 49 % | −2,5 |
 | london | play (T3) | 46,7 % | 51,5 % | −4,8 |
 | london | draw (T3) | 60,1 % | 65 % | −4,9 |
-| london | play (T4) | 75,1 % | 71 % | +4,1 |
+| london | play (T4) | 73,0 % | 71 % | +2,0 |
 | moxfield | draw (T3) | 74,5 % | 80 % | −5,5 |
 
-Note : le **pré-lancement du Fantasticar** ne se déclenche plus que si l'on dispose d'au moins
-4 sorts de combo en main (sinon on resterait coincé à `need=4` ingagnable). Cette correction
-monte T4/T5 d'environ +5 pt (on passe ainsi au-dessus de la cible §7 à T4) et laisse le mana
-en surplus payer des sorts à 1/2 le tour du combo plutôt que de pré-lancer trop tôt.
+Note : **on ne pré-lance jamais le Fantasticar** pendant le développement. Il est en zone de
+commandement et se lance le **tour du combo**, en même temps que les 3 autres sorts non-créature
+(`need = 3`). Le poser seul un tour à l'avance forcerait `need = 4` (strictement pire) et ne
+correspond pas au jeu réel (on ne télégraphie pas le commander). C'est pourquoi le mana en
+surplus (Tron, etc.) sert à payer des sorts à 1/2 le tour du combo plutôt qu'à anticiper.
+Cette modélisation monte T4/T5 (référence T4 ≈ 81 %) par rapport à l'ancien pré-lancement avide
+qui ratait des `need = 4` ; le séquençage intra-tour (ex. caillou à 2 → Fantasticar → 2 sorts à 0)
+est géré par le solveur de combo (rembourseurs lancés en premier, ils tapent pour leur mana).
 
 L'écart sur london/moxfield (T3) s'est creusé (~1,5 → ~5 pt) **depuis la correction de Chromatic**
 (`chrom` refund 1 → 0). Le §7 de la spec modélisait visiblement Chromatic Sphere/Star comme
