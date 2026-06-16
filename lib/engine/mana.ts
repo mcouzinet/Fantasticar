@@ -48,13 +48,16 @@ export function emptyBattlefield(): Battlefield {
 /**
  * Mana disponible ce tour, selon le terrain posé (`drop`). Spec §3.3 (rockMana = somme
  * de la production des cailloux en jeu) :
- *   mana = plain + rockMana + 2*veins
- *        + (city ? (on pose un terrain ? 0 : 2) : 0)
+ *   mana = plain + rockMana + 2*veins + 2*city + bank
  *        + (drop == land ? 1 : 0) + (drop == vein ? 2 : 0) + (drop == city ? 2 : 0)
+ *
+ * City of Traitors rapporte toujours ses 2 mana le tour où on l'utilise : on la tappe
+ * ({C}{C} dans la pool) AVANT de poser le terrain qui la sacrifie. La pose du terrain la
+ * sacrifie seulement pour les tours SUIVANTS (géré dans applyDrop : bf.city = false).
  */
 export function computeMana(bf: Battlefield, drop: LandDrop): number {
   let mana = bf.plain + bf.rockMana + 2 * bf.veins + bf.bank
-  if (bf.city) mana += drop === 'none' ? 2 : 0
+  if (bf.city) mana += 2
   if (drop === 'land') mana += 1
   else if (drop === 'vein') mana += 2
   else if (drop === 'city') mana += 2

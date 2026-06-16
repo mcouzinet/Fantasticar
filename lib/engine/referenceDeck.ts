@@ -30,8 +30,10 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
     'War Room',
   ],
   landT: ['Arid Archway', 'Echoing Deeps', 'Vesuva'], // entrent engagés
-  city: ['City of Traitors'],
-  vein: ['Crystal Vein'],
+  // Sources de 2 mana à usage unique (tap puis sacrifice/consommation). Crystal Vein
+  // (tape 1 ou sacrifie pour 2) est modélisé comme City : 2 mana one-shot, pas +2 récurrent.
+  city: ['City of Traitors', 'Crystal Vein'],
+  vein: [], // kind conservé mais inutilisé (Crystal Vein → city)
   land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
   landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
   // terrains dégagés qui scry/surveil 1 à l'arrivée (filtrent la prochaine pioche)

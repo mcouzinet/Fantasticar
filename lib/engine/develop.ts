@@ -58,15 +58,15 @@ const AMULET = kindCode.amulet
 /** Choix de la pose de terrain (spec §3.5.1). */
 function chooseDrop(hand: Hand, remaining: number): LandDrop {
   const hasLandT = hand[LANDT]! > 0
-  // terrains dégagés produisant 1, gardés en réserve (incl. landGrant/landScry)
-  const immediate = hand[LAND]! + hand[VEIN]! + hand[LANDGRANT]! + hand[LANDSCRY]!
+  // terrains dégagés produisant du mana, gardés en réserve (land/vein/city/landGrant/landScry)
+  const immediate = hand[LAND]! + hand[VEIN]! + hand[CITY]! + hand[LANDGRANT]! + hand[LANDSCRY]!
   if (hasLandT && immediate >= remaining) return 'landT'
   if (hand[LANDSCRY]! > 0) return 'landScry' // priorité : pose "gratuite" qui filtre la pioche
   if (hand[LANDGRANT]! > 0) return 'landGrant' // tape pour 1 + active les Maze
   if (hand[LAND]! > 0) return 'land'
   if (hand[VEIN]! > 0) return 'vein'
+  if (hand[CITY]! > 0) return 'city' // dégagée, tape pour 2 → avant un terrain engagé (0 mana ce tour)
   if (hand[LANDT]! > 0) return 'landT'
-  if (hand[CITY]! > 0) return 'city'
   if (hand[LAND0]! > 0) return 'land0' // Maze : dernier recours (0 mana sauf donneur)
   return 'none'
 }

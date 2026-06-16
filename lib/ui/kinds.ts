@@ -10,8 +10,8 @@ export interface KindMeta {
 export const KIND_META: Record<Kind, KindMeta> = {
   land: { label: 'Terrain', full: 'Terrain (prêt)', color: 'var(--k-land)' },
   landT: { label: 'Terrain ⟲', full: 'Terrain engagé', color: 'var(--k-land)' },
-  city: { label: 'City', full: 'City of Traitors (+2)', color: 'var(--k-land)' },
-  vein: { label: 'Vein', full: 'Crystal Vein (+2)', color: 'var(--k-land)' },
+  city: { label: '2 mana ⚡', full: 'Source 2 mana à usage unique (City of Traitors / Crystal Vein)', color: 'var(--k-land)' },
+  vein: { label: 'Vein', full: 'Crystal Vein (+2 récurrent — inutilisé)', color: 'var(--k-land)' },
   land0: { label: 'Terrain 0', full: 'Terrain sans mana (Maze of Ith)', color: 'var(--k-land)' },
   landGrant: { label: 'Terrain type', full: 'Donneur de type (Yavimaya/Urborg)', color: 'var(--k-land)' },
   landScry: { label: 'Terrain 👁', full: 'Terrain à scry/surveil (filtre la pioche)', color: 'var(--k-land)' },
