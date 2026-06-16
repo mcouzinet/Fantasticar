@@ -31,15 +31,21 @@
   box-sizing: border-box;
 }
 
+html {
+  background: var(--bg); /* couleur de base opaque (sous la grille) */
+}
 html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.5;
+}
+/* body transparent : sinon son fond opaque recouvre la grille de body::before (z-index -1). */
+body {
+  background: transparent;
 }
 
 /* Atmosphère "cockpit" : halo doré discret + voile de grille technique. */
@@ -52,8 +58,8 @@ body::before {
   background:
     radial-gradient(1100px 520px at 72% -8%, rgba(224, 169, 63, 0.1), transparent 60%),
     radial-gradient(900px 500px at 10% 0%, rgba(86, 168, 255, 0.07), transparent 55%),
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
 }
 
