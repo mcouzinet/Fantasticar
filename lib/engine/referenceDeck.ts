@@ -23,9 +23,9 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
     'Darksteel Citadel', 'Dust Bowl',
     'Fountainport', 'Gemstone Caverns',
     "Inventors' Fair", "Mishra's Factory", "Mishra's Foundry", 'Mutavault',
-    'Petrified Hamlet', 'Planar Nexus', 'Rishadan Port', 'Rumble Arena',
+    'Petrified Hamlet', 'Planar Nexus', 'Rishadan Port',
     'Scorched Ruins', 'Snow-Covered Wastes', 'Talon Gates of Madara',
-    'The Grey Havens', "Thespian's Stage", "Urza's Cave", "Urza's Mine",
+    "Thespian's Stage", "Urza's Cave", "Urza's Mine",
     "Urza's Power Plant", "Urza's Saga", "Urza's Tower", "Urza's Workshop",
     'War Room',
   ],
@@ -35,7 +35,10 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
   landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
   // terrains dégagés qui scry/surveil 1 à l'arrivée (filtrent la prochaine pioche)
-  landScry: ['Conduit Pylons', 'Crystal Grotto', 'Gallifrey Council Chamber', 'Hidden Grotto', 'Surveillance Room', 'Zhalfirin Void'],
+  landScry: [
+    'Conduit Pylons', 'Crystal Grotto', 'Gallifrey Council Chamber', 'Hidden Grotto',
+    'Rumble Arena', 'Surveillance Room', 'The Grey Havens', 'Zhalfirin Void',
+  ],
 
   // — SORTS À 0 (25) —
   zero: [
