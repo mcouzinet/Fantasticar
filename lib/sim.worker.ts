@@ -1,7 +1,8 @@
 /// <reference lib="webworker" />
-import { runSimulation, collectT2Recipes } from './engine'
+import { runSimulation, collectT2Recipes, cardImpacts } from './engine'
 import type { Deck, SimConfig, SimResult } from './engine/types'
 import type { T2RecipesResult } from './engine/trace'
+import type { CardImpact } from './engine/impacts'
 
 export interface CompareRequest {
   kind: 'compare'
@@ -11,16 +12,38 @@ export interface CompareRequest {
   config: SimConfig
 }
 
+export interface ImpactsRequest {
+  kind: 'impacts'
+  reqId: number
+  config: SimConfig
+}
+
+export type WorkerIn = CompareRequest | ImpactsRequest
+
 export type WorkerOut =
   | { kind: 'progress'; reqId: number; done: number; total: number }
   | { kind: 'done'; reqId: number; baseline: SimResult; draft: SimResult | null; t2: T2RecipesResult }
+  | { kind: 'impacts-done'; reqId: number; impacts: CardImpact[] }
   | { kind: 'error'; reqId: number; message: string }
 
 const ctx = self as unknown as DedicatedWorkerGlobalScope
 
-ctx.onmessage = (e: MessageEvent<CompareRequest>) => {
+ctx.onmessage = (e: MessageEvent<WorkerIn>) => {
   const msg = e.data
-  if (!msg || msg.kind !== 'compare') return
+  if (!msg) return
+  if (msg.kind === 'impacts') {
+    const { reqId, config } = msg
+    try {
+      const onProgress = (done: number, total: number) =>
+        ctx.postMessage({ kind: 'progress', reqId, done, total } satisfies WorkerOut)
+      const impacts = cardImpacts(config, onProgress)
+      ctx.postMessage({ kind: 'impacts-done', reqId, impacts } satisfies WorkerOut)
+    } catch (err) {
+      ctx.postMessage({ kind: 'error', reqId, message: err instanceof Error ? err.message : String(err) } satisfies WorkerOut)
+    }
+    return
+  }
+  if (msg.kind !== 'compare') return
   const { reqId, baseline, draft, config } = msg
   try {
     const decks = draft ? 2 : 1
