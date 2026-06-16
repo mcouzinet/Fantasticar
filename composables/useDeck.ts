@@ -5,8 +5,9 @@ import { KIND_META } from '~/lib/ui/kinds'
 import { fromJson, parseMoxfield, toJson, toMoxfieldText } from '~/lib/io/deckIo'
 import { decodeDeck, encodeDeck } from '~/lib/io/deckShare'
 
-// v2 : nouvelle decklist de référence (invalide le cache v1 des sessions précédentes).
-const STORAGE_KEY = 'fantasticar.deck.v2'
+// v3 : nouvelles catégories (amulet, landScry, land0/landGrant, chrom recalibré) → invalide
+// les decks sauvegardés v2 qui gardaient l'ancienne catégorisation (sinon chiffres faux).
+const STORAGE_KEY = 'fantasticar.deck.v3'
 const SHARE_KEY = 'fantasticar.share.consumed' // garde le lien partagé "à usage unique" par session
 
 function clone(d: Deck): Deck {

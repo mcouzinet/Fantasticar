@@ -180,3 +180,66 @@ function feasible(k: number, m: number, mana: number, fCast: boolean, fanCost: n
   }
   return false
 }
+
+// — Variante « traçante » (pour l'affichage des recettes T2) : renvoie la ligne choisie —
+
+export interface ComboLine {
+  drop: LandDrop // terrain posé ce tour pour le combo ('none' si inutile)
+  spellKinds: number[] // kinds des sorts non-créature lancés depuis la main (hors Fantasticar)
+}
+
+const DROP_CANDIDATES: LandDrop[] = ['none', 'land', 'landGrant', 'landScry', 'landT', 'vein', 'city', 'land0']
+const DROP_KIND: Partial<Record<LandDrop, number>> = {
+  land: kindCode.land, landGrant: kindCode.landGrant, landScry: kindCode.landScry,
+  landT: kindCode.landT, vein: kindCode.vein, city: kindCode.city, land0: kindCode.land0,
+}
+
+/**
+ * Comme `bestCombo`, mais renvoie la PREMIÈRE ligne faisable (pose de terrain + sorts lancés),
+ * ou `null`. Sert uniquement à reconstituer les recettes (lent, hors chemin de simulation).
+ */
+export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast: boolean): ComboLine | null {
+  const refKind: number[] = [], refCost2: number[] = [], refRefund2: number[] = []
+  for (let i = 0; i < ctx.refunderKinds.length && refKind.length < MAX_REFUNDERS; i++) {
+    let n = hand[ctx.refunderKinds[i]!]!
+    while (n-- > 0 && refKind.length < MAX_REFUNDERS) {
+      refKind.push(ctx.refunderKinds[i]!); refCost2.push(ctx.refunderCost[i]!); refRefund2.push(ctx.refunderRefund[i]!)
+    }
+  }
+  const othKind: number[] = [], othCost2: number[] = []
+  for (let i = 0; i < ctx.otherKinds.length; i++) {
+    let n = hand[ctx.otherKinds[i]!]!
+    while (n-- > 0) { othKind.push(ctx.otherKinds[i]!); othCost2.push(ctx.otherCost[i]!) }
+  }
+
+  const free = bf.freeCasts
+  const fanCost = ctx.fantasticarCost
+  const need = (fCast ? 4 : 3) - free
+  const fCost = fCast ? 0 : fanCost
+
+  for (const drop of DROP_CANDIDATES) {
+    if (drop !== 'none' && hand[DROP_KIND[drop]!]! <= 0) continue
+    const mana = computeMana(bf, drop)
+    if (need <= 0) {
+      if (mana >= fCost) return { drop, spellKinds: [] }
+      continue
+    }
+    const k = refKind.length
+    for (let mask = 0; mask < (1 << k); mask++) {
+      let bal = mana, cnt = 0, valid = true
+      const used: number[] = []
+      for (let i = 0; i < k; i++) {
+        if ((mask & (1 << i)) === 0) continue
+        if (bal < refCost2[i]!) { valid = false; break }
+        bal -= refCost2[i]! - refRefund2[i]!; cnt++; used.push(refKind[i]!)
+      }
+      if (!valid || bal < fCost) continue
+      bal -= fCost
+      for (let j = 0; j < othKind.length && cnt < need; j++) {
+        if (bal >= othCost2[j]!) { bal -= othCost2[j]!; cnt++; used.push(othKind[j]!) }
+      }
+      if (cnt >= need) return { drop, spellKinds: used }
+    }
+  }
+  return null
+}

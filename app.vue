@@ -148,6 +148,8 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
             <p>Configure le deck, choisis le mulligan, puis <b>lance la simulation</b> — le résultat s'affiche ici (T2→T5, cible&nbsp;T3).</p>
           </div>
         </div>
+
+        <T2Combos v-if="primary" :data="sim.t2.value" />
       </section>
     </main>
 

@@ -53,6 +53,7 @@ const CITY = kindCode.city
 const LAND0 = kindCode.land0
 const LANDGRANT = kindCode.landGrant
 const LANDSCRY = kindCode.landScry
+const AMULET = kindCode.amulet
 
 /** Choix de la pose de terrain (spec §3.5.1). */
 function chooseDrop(hand: Hand, remaining: number): LandDrop {
@@ -151,6 +152,20 @@ export function develop(
       hand[code]!--
       pool -= net
       bf.pendingRockMana += taps // produit à partir du tour suivant
+    }
+  }
+
+  // 3a. Jeweled Amulet : banque le mana en rab (paie {1} maintenant → +1 mana au tour suivant).
+  //     On ne charge QUE si on a déjà ≥ 3 autres sorts bon marché en main : sacrifier l'Amulet
+  //     comme source de mana ne coûte alors aucune pièce de combo (need = 3), c'est tout bénéf.
+  //     Sinon on le garde comme sort à 0 (4e pièce). Évite de plomber le T3.
+  if (hand[AMULET]! > 0 && pool >= 1) {
+    let cheap = 0
+    for (const k of CHEAP_SPELLS) cheap += hand[k]!
+    while (hand[AMULET]! > 0 && pool >= 1 && cheap >= 3) {
+      hand[AMULET]!--
+      pool -= 1
+      bf.pendingBank += 1
     }
   }
 

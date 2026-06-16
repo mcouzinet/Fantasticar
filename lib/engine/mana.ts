@@ -23,6 +23,8 @@ export interface Battlefield {
   maze: number // terrains "land0" en jeu (Maze of Ith) : 0 mana, sauf donneur de type
   granters: number // terrains donneurs de type en jeu (Yavimaya/Urborg) : rendent les Maze productifs
   scry: number // filtres scry/surveil 1 en attente de résolution (déclenchés ce tour, résolus dans game.ts)
+  bank: number // mana banqué disponible CE tour (Jeweled Amulet), one-shot
+  pendingBank: number // mana banqué ce tour, disponible au tour suivant
 }
 
 export function emptyBattlefield(): Battlefield {
@@ -38,6 +40,8 @@ export function emptyBattlefield(): Battlefield {
     maze: 0,
     granters: 0,
     scry: 0,
+    bank: 0,
+    pendingBank: 0,
   }
 }
 
@@ -49,7 +53,7 @@ export function emptyBattlefield(): Battlefield {
  *        + (drop == land ? 1 : 0) + (drop == vein ? 2 : 0) + (drop == city ? 2 : 0)
  */
 export function computeMana(bf: Battlefield, drop: LandDrop): number {
-  let mana = bf.plain + bf.rockMana + 2 * bf.veins
+  let mana = bf.plain + bf.rockMana + 2 * bf.veins + bf.bank
   if (bf.city) mana += drop === 'none' ? 2 : 0
   if (drop === 'land') mana += 1
   else if (drop === 'vein') mana += 2
@@ -113,6 +117,9 @@ export function promote(bf: Battlefield): void {
   bf.tapped = 0
   bf.rockMana += bf.pendingRockMana
   bf.pendingRockMana = 0
+  // mana banqué (Jeweled Amulet) : dispo ce tour-ci, one-shot (perdu s'il n'est pas rechargé).
+  bf.bank = bf.pendingBank
+  bf.pendingBank = 0
 
   bf.freeCasts = 0
   for (const s of bf.suspend) {

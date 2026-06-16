@@ -21,12 +21,18 @@ export function nextInt(rng: Rng, n: number): number {
 
 /**
  * Mélange de Fisher-Yates en place sur un Int8Array réutilisé (évite les allocations).
+ * `ids` optionnel : co-permuté à l'identique (pour tracer l'identité des cartes, cf. trace.ts).
  */
-export function shuffle(arr: Int8Array, rng: Rng): void {
+export function shuffle(arr: Int8Array, rng: Rng, ids?: Int16Array): void {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1))
     const tmp = arr[i]!
     arr[i] = arr[j]!
     arr[j] = tmp
+    if (ids) {
+      const t2 = ids[i]!
+      ids[i] = ids[j]!
+      ids[j] = t2
+    }
   }
 }

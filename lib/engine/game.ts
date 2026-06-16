@@ -31,6 +31,8 @@ function resetBattlefield(bf: Battlefield): void {
   bf.maze = 0
   bf.granters = 0
   bf.scry = 0
+  bf.bank = 0
+  bf.pendingBank = 0
 }
 
 /**

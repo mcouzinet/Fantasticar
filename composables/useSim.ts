@@ -1,4 +1,5 @@
 import type { Deck, SimConfig, SimResult } from '~/lib/engine/types'
+import type { T2RecipesResult } from '~/lib/engine/trace'
 import type { WorkerOut } from '~/lib/sim.worker'
 
 // Singleton worker (hors état réactif : non sérialisable).
@@ -11,6 +12,7 @@ export function useSim() {
   const progress = useState('sim:progress', () => 0) // 0..1
   const baselineResult = useState<SimResult | null>('sim:baseline', () => null)
   const draftResult = useState<SimResult | null>('sim:draft', () => null)
+  const t2 = useState<T2RecipesResult | null>('sim:t2', () => null)
   const error = useState<string | null>('sim:error', () => null)
   // Config fixe : 50 000 itérations (calcul quasi instantané) et mulligan London.
   const lastConfig = useState<SimConfig>('sim:config', () => ({
@@ -41,6 +43,7 @@ export function useSim() {
       } else if (m.kind === 'done') {
         baselineResult.value = m.baseline
         draftResult.value = m.draft
+        t2.value = m.t2
         progress.value = 1
         finish()
       } else if (m.kind === 'error') {
@@ -81,5 +84,5 @@ export function useSim() {
     })
   }
 
-  return { isRunning, progress, baselineResult, draftResult, error, lastConfig, run }
+  return { isRunning, progress, baselineResult, draftResult, t2, error, lastConfig, run }
 }

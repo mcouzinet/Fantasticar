@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
-import { runSimulation } from './engine'
+import { runSimulation, collectT2Recipes } from './engine'
 import type { Deck, SimConfig, SimResult } from './engine/types'
+import type { T2RecipesResult } from './engine/trace'
 
 export interface CompareRequest {
   kind: 'compare'
@@ -12,7 +13,7 @@ export interface CompareRequest {
 
 export type WorkerOut =
   | { kind: 'progress'; reqId: number; done: number; total: number }
-  | { kind: 'done'; reqId: number; baseline: SimResult; draft: SimResult | null }
+  | { kind: 'done'; reqId: number; baseline: SimResult; draft: SimResult | null; t2: T2RecipesResult }
   | { kind: 'error'; reqId: number; message: string }
 
 const ctx = self as unknown as DedicatedWorkerGlobalScope
@@ -34,7 +35,11 @@ ctx.onmessage = (e: MessageEvent<CompareRequest>) => {
     offset = config.iterations * 2
     const draftResult = draft ? runSimulation(draft, config, { onProgress }) : null
 
-    ctx.postMessage({ kind: 'done', reqId, baseline: baselineResult, draft: draftResult } satisfies WorkerOut)
+    // Recettes T2 (par nom) du deck affiché : la variante si présente, sinon la référence.
+    // Itérations plafonnées (la fréquence T2 est stable bien avant 50 000) pour rester fluide.
+    const t2 = collectT2Recipes(draft ?? baseline, { ...config, iterations: Math.min(config.iterations, 30000) })
+
+    ctx.postMessage({ kind: 'done', reqId, baseline: baselineResult, draft: draftResult, t2 } satisfies WorkerOut)
   } catch (err) {
     ctx.postMessage({ kind: 'error', reqId, message: err instanceof Error ? err.message : String(err) } satisfies WorkerOut)
   }

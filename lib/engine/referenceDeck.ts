@@ -21,7 +21,7 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   land: [
     'Abstergo Entertainment', 'Blast Zone', 'Castle Doom', 'Command Beacon',
     'Darksteel Citadel', 'Dust Bowl',
-    'Fountainport', 'Gallifrey Council Chamber', 'Gemstone Caverns',
+    'Fountainport', 'Gemstone Caverns',
     "Inventors' Fair", "Mishra's Factory", "Mishra's Foundry", 'Mutavault',
     'Petrified Hamlet', 'Planar Nexus', 'Rishadan Port', 'Rumble Arena',
     'Scorched Ruins', 'Snow-Covered Wastes', 'Talon Gates of Madara',
@@ -35,17 +35,18 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
   landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
   // terrains dégagés qui scry/surveil 1 à l'arrivée (filtrent la prochaine pioche)
-  landScry: ['Conduit Pylons', 'Crystal Grotto', 'Hidden Grotto', 'Surveillance Room', 'Zhalfirin Void'],
+  landScry: ['Conduit Pylons', 'Crystal Grotto', 'Gallifrey Council Chamber', 'Hidden Grotto', 'Surveillance Room', 'Zhalfirin Void'],
 
   // — SORTS À 0 (25) —
   zero: [
     'Astral Cornucopia', 'Bone Saw', "Briber's Purse", 'Chimeric Mass', 'Claws of Gix',
     'Clown Car', 'Dark Sphere', "Delif's Cone", 'Engineered Explosives',
-    'Everflowing Chalice', 'Fountain of Youth', 'Jeweled Amulet', 'Lodestone Bauble',
+    'Everflowing Chalice', 'Fountain of Youth', 'Lodestone Bauble',
     "Mishra's Bauble", 'Orochi Hatchery', 'Paradise Mantle', 'Sigil of Distinction',
     'Spidersilk Net', "Tormod's Crypt", "Urza's Bauble", 'Welding Jar', 'Zuran Orb',
     "Accorder's Shield", "Cathar's Shield", 'Kite Shield',
   ],
+  amulet: ['Jeweled Amulet'], // sort à 0 qui banque 1 mana (activateur de combo précoce)
 
   // — CAILLOUX (10) —
   rock2u: [

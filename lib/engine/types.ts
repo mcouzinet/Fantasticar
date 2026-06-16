@@ -6,7 +6,7 @@ export type Kind =
   | 'land' | 'landT' | 'city' | 'vein'
   | 'land0' | 'landGrant' // Maze of Ith (0 mana) · donneur de type (Yavimaya/Urborg)
   | 'landScry' // terrain dégagé qui scry/surveil 1 à l'arrivée (filtre la prochaine pioche)
-  | 'zero' | 'rock2u' | 'rock2t' | 'rock3'
+  | 'zero' | 'amulet' | 'rock2u' | 'rock2t' | 'rock3'
   | 'basalt' | 'mightstone' | 'sol' // cailloux à profil mana particulier
   | 'one' | 'chrom' | 'two'
   | 'o3' | 'o4' | 'o5' | 'o6' | 'o7'
@@ -16,7 +16,7 @@ export type Kind =
 export const KINDS: readonly Kind[] = [
   'land', 'landT', 'city', 'vein',
   'land0', 'landGrant', 'landScry',
-  'zero', 'rock2u', 'rock2t', 'rock3',
+  'zero', 'amulet', 'rock2u', 'rock2t', 'rock3',
   'basalt', 'mightstone', 'sol',
   'one', 'chrom', 'two',
   'o3', 'o4', 'o5', 'o6', 'o7',

@@ -77,9 +77,10 @@ export function openingHand(
   rng: Rng,
   mode: MulliganMode,
   outHand: Hand,
+  ids?: Int16Array, // optionnel : co-permuté pour tracer l'identité des cartes (cf. trace.ts)
 ): number {
   if (mode === 'none') {
-    shuffle(deckBuf, rng)
+    shuffle(deckBuf, rng, ids)
     dealInto(deckBuf, 7, outHand)
     return 7
   }
@@ -87,7 +88,7 @@ export function openingHand(
   if (mode === 'moxfield') {
     // « New Hand » gratuit : re-tirage à 7 jusqu'à 2≤lands≤5 et zeros≥2 (cap ~15).
     for (let attempt = 0; attempt < MOXFIELD_CAP; attempt++) {
-      shuffle(deckBuf, rng)
+      shuffle(deckBuf, rng, ids)
       dealInto(deckBuf, 7, outHand)
       const lands = landsInHand(outHand)
       if (lands >= 2 && lands <= 5 && zerosInHand(outHand) >= 2) break
@@ -98,7 +99,7 @@ export function openingHand(
   // London : mulligan jusqu'à 5.
   for (let mull = 0; mull <= 2; mull++) {
     const targetSize = 7 - mull
-    shuffle(deckBuf, rng)
+    shuffle(deckBuf, rng, ids)
     dealInto(deckBuf, 7, outHand)
     if (mull === 2 || keepLondon(outHand, targetSize)) {
       if (mull > 0) bottomCards(outHand, mull)
