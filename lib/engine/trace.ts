@@ -136,6 +136,11 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
               }
               const tronOn = nexus > 0 ? realTron > 0 : mineP && ppP && towerP
 
+              // Jeweled Amulet : « activateur » seulement si chargée (bankée) — elle est alors dans
+              // le battlefield. Si elle est lancée le tour du combo (pas dans le battlefield), c'est
+              // juste un sort à 0 (cheerio). Singleton → un seul rôle possible par partie.
+              const amuletIsMana = battlefield.some((n) => KINDS[nameToKind.get(n) ?? -1] === 'amulet')
+
               // Signature de recette : on nomme les activateurs (City/Vein…) et on COMPTE les
               // terrains et sorts à 0 (« cheerios ») au lieu de les énumérer.
               const tokens = new Map<string, number>()
@@ -145,6 +150,7 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
                 const kind = KINDS[code]!
                 let tok: string
                 if (kind === 'city') tok = n
+                else if (kind === 'amulet') tok = amuletIsMana ? 'Jeweled Amulet' : 'sort à 0'
                 else if (kind === 'urzaMine' || kind === 'urzaPP' || kind === 'urzaTower') tok = tronOn ? 'terrain Tron' : 'terrain'
                 else if (kind === 'planarNexus') tok = tronOn ? 'Planar Nexus' : 'terrain'
                 else tok = TOKEN[kind] ?? n
