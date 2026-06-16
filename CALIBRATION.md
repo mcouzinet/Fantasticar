@@ -57,14 +57,19 @@ La validation tourne sur la **decklist d'origine** gardée en fixture
 
 | Mode | Axe | Moteur | Cible §7 | Écart |
 |------|-----|:------:|:--------:|:-----:|
-| none | play | 33,3 % | 34,5 % | −1,2 |
-| none | draw | 46,4 % | 49 % | −2,6 |
-| london | play | 46,6 % | 51,5 % | −4,9 |
-| london | draw | 60,0 % | 65 % | −5,0 |
-| london | **T4** play | 69,9 % | 71 % | −1,1 |
-| moxfield | draw | 74,5 % | 80 % | −5,5 |
+| none | play (T3) | 33,5 % | 34,5 % | −1,0 |
+| none | draw (T3) | 46,5 % | 49 % | −2,5 |
+| london | play (T3) | 46,7 % | 51,5 % | −4,8 |
+| london | draw (T3) | 60,1 % | 65 % | −4,9 |
+| london | play (T4) | 75,1 % | 71 % | +4,1 |
+| moxfield | draw (T3) | 74,5 % | 80 % | −5,5 |
 
-L'écart sur london/moxfield s'est creusé (~1,5 → ~5 pt) **depuis la correction de Chromatic**
+Note : le **pré-lancement du Fantasticar** ne se déclenche plus que si l'on dispose d'au moins
+4 sorts de combo en main (sinon on resterait coincé à `need=4` ingagnable). Cette correction
+monte T4/T5 d'environ +5 pt (on passe ainsi au-dessus de la cible §7 à T4) et laisse le mana
+en surplus payer des sorts à 1/2 le tour du combo plutôt que de pré-lancer trop tôt.
+
+L'écart sur london/moxfield (T3) s'est creusé (~1,5 → ~5 pt) **depuis la correction de Chromatic**
 (`chrom` refund 1 → 0). Le §7 de la spec modélisait visiblement Chromatic Sphere/Star comme
 des rembourseurs net-0 (« gratuits ») ; or leur activation pour piocher coûte autant qu'elle
 rend → ce sont des sorts à 1 nets. On a privilégié la **justesse mécanique** sur le collage au
