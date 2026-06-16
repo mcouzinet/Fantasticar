@@ -53,10 +53,13 @@ const CITY = kindCode.city
 const LAND0 = kindCode.land0
 const LANDGRANT = kindCode.landGrant
 const LANDSCRY = kindCode.landScry
+const SCORCHED = kindCode.scorched
 const AMULET = kindCode.amulet
 
 /** Choix de la pose de terrain (spec §3.5.1). */
-function chooseDrop(hand: Hand, remaining: number): LandDrop {
+function chooseDrop(hand: Hand, bf: Battlefield, remaining: number): LandDrop {
+  // Scorched Ruins : gros boost (+2 mana net, source à 4) dès qu'on a 2 terrains dégagés à sacrifier.
+  if (hand[SCORCHED]! > 0 && bf.plain >= 2) return 'scorched'
   const hasLandT = hand[LANDT]! > 0
   // terrains dégagés produisant du mana, gardés en réserve (land/vein/city/landGrant/landScry)
   const immediate = hand[LAND]! + hand[VEIN]! + hand[CITY]! + hand[LANDGRANT]! + hand[LANDSCRY]!
@@ -80,6 +83,7 @@ function removeDrop(hand: Hand, drop: LandDrop): void {
     case 'land0': hand[LAND0]!--; break
     case 'landGrant': hand[LANDGRANT]!--; break
     case 'landScry': hand[LANDSCRY]!--; break
+    case 'scorched': hand[SCORCHED]!--; break
     case 'none': break
   }
 }
@@ -131,7 +135,7 @@ export function develop(
   remaining: number,
 ): boolean {
   // 1. Pose de terrain (priorité).
-  const drop = chooseDrop(hand, remaining)
+  const drop = chooseDrop(hand, bf, remaining)
   let pool = computeMana(bf, drop)
   removeDrop(hand, drop)
   applyDrop(bf, drop)

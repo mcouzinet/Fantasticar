@@ -26,6 +26,8 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   landGrant: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
   // Terrain dégagé qui scry/surveil 1 à l'arrivée (filtre la prochaine pioche, cf. game.ts).
   landScry: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  // Scorched Ruins : sacrifie 2 terrains dégagés à l'arrivée, tape pour 4 (cf. mana/develop).
+  scorched: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
 
   // — Sorts non-créature : sorts de combo —
   zero: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },

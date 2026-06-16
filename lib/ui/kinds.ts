@@ -15,6 +15,7 @@ export const KIND_META: Record<Kind, KindMeta> = {
   land0: { label: 'Terrain 0', full: 'Terrain sans mana (Maze of Ith)', color: 'var(--k-land)' },
   landGrant: { label: 'Terrain type', full: 'Donneur de type (Yavimaya/Urborg)', color: 'var(--k-land)' },
   landScry: { label: 'Terrain 👁', full: 'Terrain à scry/surveil (filtre la pioche)', color: 'var(--k-land)' },
+  scorched: { label: 'Terrain ×4', full: 'Scorched Ruins (sacrifie 2 terrains → tape pour 4)', color: 'var(--k-land)' },
   zero: { label: '0', full: 'Sort non-créature — coût 0', color: 'var(--k-zero)' },
   amulet: { label: '0 banque', full: 'Jeweled Amulet (sort à 0, banque 1 mana)', color: 'var(--k-zero)' },
   rock2u: { label: 'Caillou 2', full: 'Caillou — coût 2, prêt', color: 'var(--k-rock)' },

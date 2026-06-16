@@ -8,11 +8,12 @@ import type { Card, Deck, Kind } from './types'
  *   créatures 3 · autres 7  = 99.
  *
  * Hypothèses notables (conservatrices, cf. méthodo §3.8) :
- *  - Lands tapant pour >1 (Scorched Ruins, Arid Archway) modélisés en land/landT simples.
+ *  - Arid Archway modélisé en landT simple.
+ *  - Scorched Ruins modélisé fidèlement (kind `scorched` : sacrifie 2 terrains dégagés, tape pour 4).
  *  - X = 0 (Astral Cornucopia, Everflowing Chalice, Chimeric Mass, Orochi Hatchery,
  *    Engineered Explosives, Sigil, Briber's Purse, Kozilek's Command…).
  *  - Forsaken Monument modélisé en sort à 5 « nu » : son doublement de mana est ignoré.
- *  - Tron non assemblé ; Gemstone Caverns / Scorched Ruins = lands standards.
+ *  - Tron non assemblé ; Gemstone Caverns = land standard.
  *  - Cailloux spéciaux (Basalt Monolith, Mightstone & Weakstone, Sol Talisman) : voir
  *    spellTable.ts pour le détail de leur modélisation.
  */
@@ -24,7 +25,7 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
     'Fountainport', 'Gemstone Caverns',
     "Inventors' Fair", "Mishra's Factory", "Mishra's Foundry", 'Mutavault',
     'Petrified Hamlet', 'Planar Nexus', 'Rishadan Port',
-    'Scorched Ruins', 'Snow-Covered Wastes', 'Talon Gates of Madara',
+    'Snow-Covered Wastes', 'Talon Gates of Madara',
     "Thespian's Stage", "Urza's Cave", "Urza's Mine",
     "Urza's Power Plant", "Urza's Saga", "Urza's Tower", "Urza's Workshop",
     'War Room',
@@ -34,6 +35,7 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   // (tape 1 ou sacrifie pour 2) est modélisé comme City : 2 mana one-shot, pas +2 récurrent.
   city: ['City of Traitors', 'Crystal Vein'],
   vein: [], // kind conservé mais inutilisé (Crystal Vein → city)
+  scorched: ['Scorched Ruins'], // sacrifie 2 terrains dégagés à l'arrivée, tape pour 4
   land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
   landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
   // terrains dégagés qui scry/surveil 1 à l'arrivée (filtrent la prochaine pioche)

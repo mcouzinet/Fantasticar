@@ -2,7 +2,7 @@
  * Modèle de mana et état de jeu minimal (spec §3.3) + production par caillou et Suspend.
  */
 
-export type LandDrop = 'none' | 'land' | 'landT' | 'vein' | 'city' | 'land0' | 'landGrant' | 'landScry'
+export type LandDrop = 'none' | 'land' | 'landT' | 'vein' | 'city' | 'land0' | 'landGrant' | 'landScry' | 'scorched'
 
 /** Une carte en exil suspendu : se résout quand `turnsLeft` atteint 0. */
 export interface SuspendTimer {
@@ -25,6 +25,7 @@ export interface Battlefield {
   scry: number // filtres scry/surveil 1 en attente de résolution (déclenchés ce tour, résolus dans game.ts)
   bank: number // mana banqué disponible CE tour (Jeweled Amulet), one-shot
   pendingBank: number // mana banqué ce tour, disponible au tour suivant
+  scorched: number // Scorched Ruins en jeu (tape pour 4 chacun)
 }
 
 export function emptyBattlefield(): Battlefield {
@@ -42,6 +43,7 @@ export function emptyBattlefield(): Battlefield {
     scry: 0,
     bank: 0,
     pendingBank: 0,
+    scorched: 0,
   }
 }
 
@@ -56,13 +58,14 @@ export function emptyBattlefield(): Battlefield {
  * sacrifie seulement pour les tours SUIVANTS (géré dans applyDrop : bf.city = false).
  */
 export function computeMana(bf: Battlefield, drop: LandDrop): number {
-  let mana = bf.plain + bf.rockMana + 2 * bf.veins + bf.bank
+  let mana = bf.plain + bf.rockMana + 2 * bf.veins + bf.bank + 4 * bf.scorched
   if (bf.city) mana += 2
   if (drop === 'land') mana += 1
   else if (drop === 'vein') mana += 2
   else if (drop === 'city') mana += 2
   else if (drop === 'landGrant') mana += 1 // donneur de type : tape pour 1 comme un terrain normal
   else if (drop === 'landScry') mana += 1 // terrain à scry/surveil : tape pour 1 comme un terrain normal
+  else if (drop === 'scorched') mana += 4 - 2 // Scorched Ruins : tape pour 4, en sacrifiant 2 terrains dégagés (comptés dans bf.plain)
   // Terrains sans mana (Maze of Ith) : produisent 1 chacun SI un donneur de type est en jeu
   // (Yavimaya/Urborg les rend Forêt/Marais), y compris celui qu'on poserait ce tour-ci.
   const granted = bf.granters > 0 || drop === 'landGrant'
@@ -103,6 +106,11 @@ export function applyDrop(bf: Battlefield, drop: LandDrop): void {
     case 'landScry':
       bf.plain += 1 // tape pour 1 comme un terrain normal
       bf.scry += 1 // déclenche un filtre scry/surveil 1 (résolu après le développement)
+      bf.city = false
+      break
+    case 'scorched':
+      bf.plain -= 2 // sacrifie 2 terrains dégagés à l'arrivée (appelant garantit plain ≥ 2)
+      bf.scorched += 1 // tape pour 4, dégagé dès ce tour
       bf.city = false
       break
     case 'none':

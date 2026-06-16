@@ -135,6 +135,7 @@ export function bestCombo(
   if (hand[kindCode.vein]! > 0 && feasible(k, m, computeMana(bf, 'vein'), fCast, f, free)) return true
   if (hand[kindCode.city]! > 0 && feasible(k, m, computeMana(bf, 'city'), fCast, f, free)) return true
   if (hand[kindCode.land0]! > 0 && feasible(k, m, computeMana(bf, 'land0'), fCast, f, free)) return true
+  if (hand[kindCode.scorched]! > 0 && bf.plain >= 2 && feasible(k, m, computeMana(bf, 'scorched'), fCast, f, free)) return true
   return false
 }
 
@@ -188,10 +189,11 @@ export interface ComboLine {
   spellKinds: number[] // kinds des sorts non-créature lancés depuis la main (hors Fantasticar)
 }
 
-const DROP_CANDIDATES: LandDrop[] = ['none', 'land', 'landGrant', 'landScry', 'landT', 'vein', 'city', 'land0']
+const DROP_CANDIDATES: LandDrop[] = ['none', 'land', 'landGrant', 'landScry', 'landT', 'vein', 'city', 'land0', 'scorched']
 const DROP_KIND: Partial<Record<LandDrop, number>> = {
   land: kindCode.land, landGrant: kindCode.landGrant, landScry: kindCode.landScry,
   landT: kindCode.landT, vein: kindCode.vein, city: kindCode.city, land0: kindCode.land0,
+  scorched: kindCode.scorched,
 }
 
 /**
@@ -219,6 +221,7 @@ export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast
 
   for (const drop of DROP_CANDIDATES) {
     if (drop !== 'none' && hand[DROP_KIND[drop]!]! <= 0) continue
+    if (drop === 'scorched' && bf.plain < 2) continue // besoin de 2 terrains dégagés à sacrifier
     const mana = computeMana(bf, drop)
     if (need <= 0) {
       if (mana >= fCost) return { drop, spellKinds: [] }

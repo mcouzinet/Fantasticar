@@ -33,6 +33,7 @@ function resetBattlefield(bf: Battlefield): void {
   bf.scry = 0
   bf.bank = 0
   bf.pendingBank = 0
+  bf.scorched = 0
 }
 
 /**
