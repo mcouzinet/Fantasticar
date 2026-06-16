@@ -1,39 +1,45 @@
 <script setup lang="ts">
 import type { T2RecipesResult } from '~/lib/engine/trace'
-import { KIND_META } from '~/lib/ui/kinds'
 
 const props = defineProps<{ data: T2RecipesResult | null }>()
 
 const rows = computed(() => {
   if (!props.data || props.data.t2Count === 0) return []
-  const { groups, t2Count } = props.data
-  return groups
-    .map((g) => ({ label: KIND_META[g.kind].full, pct: g.count / t2Count }))
-    .filter((r) => r.pct >= 0.005) // masque les catégories quasi absentes (< 0,5 %)
+  const { combos, t2Count } = props.data
+  return combos.map((c) => ({ label: c.label, pct: c.count / t2Count }))
 })
 const maxPct = computed(() => rows.value.reduce((m, r) => Math.max(m, r.pct), 0) || 1)
+const coverage = computed(() => {
+  if (!props.data || props.data.t2Count === 0) return 0
+  const shown = props.data.combos.reduce((s, c) => s + c.count, 0)
+  return shown / props.data.t2Count
+})
 </script>
 
 <template>
   <div class="card pad t2card">
-    <h2 class="ph">Combos T2 — cartes impliquées</h2>
+    <h2 class="ph">Combos T2 — recettes de mana</h2>
 
     <template v-if="data && data.t2Count > 0">
       <p class="intro faint">
-        Sur <b>{{ data.t2Count.toLocaleString('fr-FR') }}</b> combos T2 (échantillon de
-        {{ data.games.toLocaleString('fr-FR') }} parties). Pour chaque <b>catégorie</b>, part des
-        combos T2 qui en utilisent au moins une carte. À T2 il faut quasi toujours une
-        <b>source de 2 mana</b> (City of Traitors / Crystal Vein) + des <b>sorts à 0</b> ;
-        Jeweled Amulet aide une partie du temps.
+        Sur <b>{{ data.t2Count.toLocaleString('fr-FR') }}</b> combos T2, les
+        <b>combinaisons de sources de mana</b> qui les débloquent. Les terrains et les
+        <b>sorts à 0</b> (« cheerios ») sont comptés, pas détaillés (ils sont toujours là). Le
+        Fantasticar et les 3 sorts non-créature se lancent le même tour.
       </p>
 
       <ul class="bars">
         <li v-for="r in rows" :key="r.label">
           <span class="nm" :title="r.label">{{ r.label }}</span>
           <span class="track"><span class="fill" :style="{ width: `${(r.pct / maxPct) * 100}%` }" /></span>
-          <span class="pct">{{ (r.pct * 100).toFixed(0) }}%</span>
+          <span class="pct">{{ (r.pct * 100).toFixed(1) }}%</span>
         </li>
       </ul>
+
+      <p class="foot faint">
+        {{ data.distinct.toLocaleString('fr-FR') }} recettes distinctes ; top {{ rows.length }}
+        affichées (≈ {{ (coverage * 100).toFixed(0) }} % des combos T2).
+      </p>
     </template>
 
     <p v-else class="intro faint">Aucun combo T2 dans l'échantillon (combo trop rare pour ce deck).</p>
@@ -52,14 +58,14 @@ const maxPct = computed(() => rows.value.reduce((m, r) => Math.max(m, r.pct), 0)
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  max-height: 360px;
+  gap: 4px;
+  max-height: 380px;
   overflow-y: auto;
   padding-right: 6px;
 }
 .bars li {
   display: grid;
-  grid-template-columns: 280px 1fr 40px;
+  grid-template-columns: 1fr 110px 48px;
   align-items: center;
   gap: 10px;
 }
@@ -71,7 +77,7 @@ const maxPct = computed(() => rows.value.reduce((m, r) => Math.max(m, r.pct), 0)
   text-overflow: ellipsis;
 }
 .track {
-  height: 10px;
+  height: 9px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -91,13 +97,14 @@ const maxPct = computed(() => rows.value.reduce((m, r) => Math.max(m, r.pct), 0)
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+.foot {
+  font-size: 11px;
+  margin: 12px 0 0;
+}
 @media (max-width: 560px) {
   .bars li {
-    grid-template-columns: 130px 1fr 34px;
+    grid-template-columns: 1fr 70px 42px;
     gap: 6px;
-  }
-  .nm {
-    font-size: 11px;
   }
 }
 </style>

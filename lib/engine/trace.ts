@@ -8,15 +8,45 @@ import { buildComboContext, traceCombo } from './combo'
 import { buildDevelopContext, develop, scryKeep } from './develop'
 import { openingHand } from './mulligan'
 
-export interface T2Group {
-  kind: Kind // catégorie de carte
-  count: number // nb de combos T2 utilisant AU MOINS une carte de cette catégorie
+export interface T2Combo {
+  label: string // recette lisible, ex. « City of Traitors + terrain + 3× sort à 0 »
+  count: number // nb de combos T2 correspondant à cette recette
 }
 
 export interface T2RecipesResult {
-  groups: T2Group[] // catégories présentes dans les combos T2, triées par fréquence décroissante
+  combos: T2Combo[] // recettes (combinaisons de mana) triées par fréquence décroissante
   t2Count: number // nombre total de combos T2 échantillonnés (2 axes)
+  distinct: number // nombre de recettes distinctes
   games: number // parties simulées (2 × itérations)
+}
+
+// Jeton normalisé par carte pour la signature de recette. `city` est traité par NOM
+// (City of Traitors vs Crystal Vein, distincts pour le joueur même si même profil).
+const TOKEN: Partial<Record<Kind, string>> = {
+  zero: 'sort à 0',
+  one: 'sort à 1', chrom: 'sort à 1', two: 'sort à 2',
+  o3: 'sort cher', o4: 'sort cher', o5: 'sort cher', o6: 'sort cher', o7: 'sort cher',
+  land: 'terrain', landT: 'terrain', landScry: 'terrain', landGrant: 'terrain', land0: 'terrain',
+  amulet: 'Jeweled Amulet', planarNexus: 'Planar Nexus',
+  urzaMine: 'terrain Tron', urzaPP: 'terrain Tron', urzaTower: 'terrain Tron',
+  scorched: 'Scorched Ruins',
+  rock2u: 'caillou', rock2t: 'caillou', rock3: 'caillou',
+  basalt: 'Basalt Monolith', mightstone: 'Mightstone', sol: 'Sol Talisman',
+}
+// Ordre d'affichage dans la signature : activateurs nommés d'abord, terrains, puis sorts (à 0 en dernier).
+function prio(tok: string): number {
+  if (tok === 'sort à 0') return 9
+  if (tok === 'sort à 1' || tok === 'sort à 2' || tok === 'sort cher') return 8
+  if (tok === 'caillou') return 6
+  if (tok === 'terrain') return 5
+  if (tok === 'terrain Tron') return 4
+  return 1 // activateurs nommés (City/Vein, Amulet, Nexus, Scorched, Basalt…)
+}
+function signature(tokens: Map<string, number>): string {
+  return [...tokens.entries()]
+    .sort((a, b) => prio(a[0]) - prio(b[0]) || a[0].localeCompare(b[0]))
+    .map(([tok, n]) => (n > 1 ? `${n}× ${tok}` : tok))
+    .join(' + ')
 }
 
 const DROP_KIND: Partial<Record<LandDrop, number>> = {
@@ -46,7 +76,7 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
   const nameToKind = new Map<string, number>() // nom → kindCode (pour regrouper par catégorie)
   for (let i = 0; i < total; i++) nameToKind.set(nameByCard[i]!, kindByCard[i]!)
 
-  const kindCount = new Map<number, number>() // kindCode → nb de combos T2 utilisant ≥1 carte du kind
+  const comboCount = new Map<string, number>() // signature de recette → nb de combos T2
   let t2Count = 0
 
   const hand = newHand()
@@ -93,11 +123,18 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
               const recipe = battlefield.slice()
               if (line.drop !== 'none') recipe.push(popName(handCards, DROP_KIND[line.drop]!))
               for (const sk of line.spellKinds) recipe.push(popName(handCards, sk))
-              recipe.push('The Fantasticar')
-              // regroupe par catégorie : 1 incrément par kind présent dans la recette
-              const kinds = new Set<number>()
-              for (const n of recipe) { const k = nameToKind.get(n); if (k !== undefined) kinds.add(k) }
-              for (const k of kinds) kindCount.set(k, (kindCount.get(k) ?? 0) + 1)
+              // Signature de recette : on nomme les activateurs (City/Vein…) et on COMPTE les
+              // terrains et sorts à 0 (« cheerios ») au lieu de les énumérer.
+              const tokens = new Map<string, number>()
+              for (const n of recipe) {
+                const code = nameToKind.get(n)
+                if (code === undefined) continue // « The Fantasticar » (commander)
+                const kind = KINDS[code]!
+                const tok = kind === 'city' ? n : (TOKEN[kind] ?? n)
+                tokens.set(tok, (tokens.get(tok) ?? 0) + 1)
+              }
+              const sig = signature(tokens)
+              comboCount.set(sig, (comboCount.get(sig) ?? 0) + 1)
             }
             break // la partie s'arrête au combo
           }
@@ -123,9 +160,9 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
   runAxis(true, config.seed)
   runAxis(false, (config.seed ^ 0x9e3779b9) >>> 0)
 
-  const groups: T2Group[] = [...kindCount.entries()]
-    .map(([code, count]) => ({ kind: KINDS[code]!, count }))
+  const all = [...comboCount.entries()]
+    .map(([label, count]) => ({ label, count }))
     .sort((a, b) => b.count - a.count)
 
-  return { groups, t2Count, games: config.iterations * 2 }
+  return { combos: all.slice(0, 20), t2Count, distinct: all.length, games: config.iterations * 2 }
 }
