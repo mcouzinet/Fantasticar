@@ -27,8 +27,8 @@ const TOKEN: Partial<Record<Kind, string>> = {
   one: 'sort à 1', chrom: 'sort à 1', two: 'sort à 2',
   o3: 'sort cher', o4: 'sort cher', o5: 'sort cher', o6: 'sort cher', o7: 'sort cher',
   land: 'terrain', landT: 'terrain', landScry: 'terrain', landGrant: 'terrain', land0: 'terrain',
-  amulet: 'Jeweled Amulet', planarNexus: 'Planar Nexus',
-  urzaMine: 'terrain Tron', urzaPP: 'terrain Tron', urzaTower: 'terrain Tron',
+  amulet: 'Jeweled Amulet',
+  // planarNexus + pièces Tron : jeton dynamique (terrain Tron seulement si le set est productif).
   scorched: 'Scorched Ruins',
   rock2u: 'caillou', rock2t: 'caillou', rock3: 'caillou',
   basalt: 'Basalt Monolith', mightstone: 'Mightstone', sol: 'Sol Talisman',
@@ -123,6 +123,19 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
               const recipe = battlefield.slice()
               if (line.drop !== 'none') recipe.push(popName(handCards, DROP_KIND[line.drop]!))
               for (const sk of line.spellKinds) recipe.push(popName(handCards, sk))
+              // Tron : un terrain Tron isolé (sans Nexus ni set complet) ne tape que pour 1 →
+              // on le considère comme un terrain normal. Productif seulement si Nexus + ≥1 pièce,
+              // ou les 3 vraies pièces présentes.
+              let nexus = 0, mineP = false, ppP = false, towerP = false, realTron = 0
+              for (const n of recipe) {
+                const kind = KINDS[nameToKind.get(n) ?? -1]
+                if (kind === 'planarNexus') nexus++
+                else if (kind === 'urzaMine') { mineP = true; realTron++ }
+                else if (kind === 'urzaPP') { ppP = true; realTron++ }
+                else if (kind === 'urzaTower') { towerP = true; realTron++ }
+              }
+              const tronOn = nexus > 0 ? realTron > 0 : mineP && ppP && towerP
+
               // Signature de recette : on nomme les activateurs (City/Vein…) et on COMPTE les
               // terrains et sorts à 0 (« cheerios ») au lieu de les énumérer.
               const tokens = new Map<string, number>()
@@ -130,7 +143,11 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
                 const code = nameToKind.get(n)
                 if (code === undefined) continue // « The Fantasticar » (commander)
                 const kind = KINDS[code]!
-                const tok = kind === 'city' ? n : (TOKEN[kind] ?? n)
+                let tok: string
+                if (kind === 'city') tok = n
+                else if (kind === 'urzaMine' || kind === 'urzaPP' || kind === 'urzaTower') tok = tronOn ? 'terrain Tron' : 'terrain'
+                else if (kind === 'planarNexus') tok = tronOn ? 'Planar Nexus' : 'terrain'
+                else tok = TOKEN[kind] ?? n
                 tokens.set(tok, (tokens.get(tok) ?? 0) + 1)
               }
               const sig = signature(tokens)
