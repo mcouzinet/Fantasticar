@@ -127,19 +127,21 @@ export function bestCombo(
   // 3. Tester chaque pose de terrain candidate (free = sorts gratuits sortis de suspend ce tour).
   const free = bf.freeCasts
   const f = ctx.fantasticarCost
-  if (feasible(k, m, computeMana(bf, 'none'), fCast, f, free)) return true
-  if (hand[kindCode.land]! > 0 && feasible(k, m, computeMana(bf, 'land'), fCast, f, free)) return true
-  if (hand[kindCode.landGrant]! > 0 && feasible(k, m, computeMana(bf, 'landGrant'), fCast, f, free)) return true
-  if (hand[kindCode.landScry]! > 0 && feasible(k, m, computeMana(bf, 'landScry'), fCast, f, free)) return true
-  if (hand[kindCode.landT]! > 0 && feasible(k, m, computeMana(bf, 'landT'), fCast, f, free)) return true
-  if (hand[kindCode.vein]! > 0 && feasible(k, m, computeMana(bf, 'vein'), fCast, f, free)) return true
-  if (hand[kindCode.city]! > 0 && feasible(k, m, computeMana(bf, 'city'), fCast, f, free)) return true
-  if (hand[kindCode.land0]! > 0 && feasible(k, m, computeMana(bf, 'land0'), fCast, f, free)) return true
-  if (hand[kindCode.scorched]! > 0 && scorchedSacPool(bf) >= 2 && feasible(k, m, computeMana(bf, 'scorched'), fCast, f, free)) return true
-  if (hand[kindCode.urzaMine]! > 0 && feasible(k, m, computeMana(bf, 'urzaMine'), fCast, f, free)) return true
-  if (hand[kindCode.urzaPP]! > 0 && feasible(k, m, computeMana(bf, 'urzaPP'), fCast, f, free)) return true
-  if (hand[kindCode.urzaTower]! > 0 && feasible(k, m, computeMana(bf, 'urzaTower'), fCast, f, free)) return true
-  if (hand[kindCode.planarNexus]! > 0 && feasible(k, m, computeMana(bf, 'planarNexus'), fCast, f, free)) return true
+  // combo = true : c'est le tour du combo → Crystal Vein peut être sacrifiée pour {C}{C} (+1).
+  const cm = (drop: LandDrop): number => computeMana(bf, drop, true)
+  if (feasible(k, m, cm('none'), fCast, f, free)) return true
+  if (hand[kindCode.land]! > 0 && feasible(k, m, cm('land'), fCast, f, free)) return true
+  if (hand[kindCode.landGrant]! > 0 && feasible(k, m, cm('landGrant'), fCast, f, free)) return true
+  if (hand[kindCode.landScry]! > 0 && feasible(k, m, cm('landScry'), fCast, f, free)) return true
+  if (hand[kindCode.landT]! > 0 && feasible(k, m, cm('landT'), fCast, f, free)) return true
+  if (hand[kindCode.vein]! > 0 && feasible(k, m, cm('vein'), fCast, f, free)) return true
+  if (hand[kindCode.city]! > 0 && feasible(k, m, cm('city'), fCast, f, free)) return true
+  if (hand[kindCode.land0]! > 0 && feasible(k, m, cm('land0'), fCast, f, free)) return true
+  if (hand[kindCode.scorched]! > 0 && scorchedSacPool(bf) >= 2 && feasible(k, m, cm('scorched'), fCast, f, free)) return true
+  if (hand[kindCode.urzaMine]! > 0 && feasible(k, m, cm('urzaMine'), fCast, f, free)) return true
+  if (hand[kindCode.urzaPP]! > 0 && feasible(k, m, cm('urzaPP'), fCast, f, free)) return true
+  if (hand[kindCode.urzaTower]! > 0 && feasible(k, m, cm('urzaTower'), fCast, f, free)) return true
+  if (hand[kindCode.planarNexus]! > 0 && feasible(k, m, cm('planarNexus'), fCast, f, free)) return true
   return false
 }
 
@@ -230,7 +232,7 @@ export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast
   for (const drop of DROP_CANDIDATES) {
     if (drop !== 'none' && hand[DROP_KIND[drop]!]! <= 0) continue
     if (drop === 'scorched' && scorchedSacPool(bf) < 2) continue // besoin de 2 terrains dégagés à sacrifier
-    const mana = computeMana(bf, drop)
+    const mana = computeMana(bf, drop, true) // tour du combo : Crystal Vein peut se sacrifier (+1)
     if (need <= 0) {
       if (mana >= fCost) return { drop, spellKinds: [] }
       continue

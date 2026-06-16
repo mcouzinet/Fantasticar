@@ -150,7 +150,7 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
                 const kind = KINDS[code]!
                 if (kind === 'sol') continue // Sol Talisman : suspend 3, ne se résout jamais avant le T2
                 let tok: string
-                if (kind === 'city') tok = n
+                if (kind === 'city' || kind === 'vein') tok = n // activateurs nommés (City of Traitors / Crystal Vein)
                 else if (kind === 'amulet') tok = amuletIsMana ? 'Jeweled Amulet' : 'sort à 0'
                 else if (kind === 'urzaMine' || kind === 'urzaPP' || kind === 'urzaTower') tok = tronOn ? 'terrain Tron' : 'terrain'
                 else if (kind === 'planarNexus') tok = tronOn ? 'Planar Nexus' : 'terrain'

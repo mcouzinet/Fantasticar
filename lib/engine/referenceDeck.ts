@@ -30,10 +30,8 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
     'War Room',
   ],
   landT: ['Arid Archway', 'Echoing Deeps', 'Vesuva'], // entrent engagés
-  // Sources de 2 mana à usage unique (tap puis sacrifice/consommation). Crystal Vein
-  // (tape 1 ou sacrifie pour 2) est modélisé comme City : 2 mana one-shot, pas +2 récurrent.
-  city: ['City of Traitors', 'Crystal Vein'],
-  vein: [], // kind conservé mais inutilisé (Crystal Vein → city)
+  city: ['City of Traitors'], // 2 mana récurrents (sacrifiée si on pose un autre terrain)
+  vein: ['Crystal Vein'], // 1 mana/tour, ou sacrifice pour 2 (burst one-shot, cf. mana.ts)
   scorched: ['Scorched Ruins'], // sacrifie 2 terrains dégagés à l'arrivée, tape pour 4
   // Tron (set complet : Mine/PP tapent 2, Tower 3) ; Planar Nexus = toutes les pièces (tape 1).
   urzaMine: ["Urza's Mine"],

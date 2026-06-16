@@ -19,7 +19,8 @@ des `kind` spéciaux (cf. `spellTable.ts`, `mana.ts`, `develop.ts`) :
 | `sol` | Sol Talisman | **Suspend 3**—{1} → en ligne ~T4, tape pour 2 (impacte T4, pas T3) |
 | `chrom` | Chromatic Sphere/Star, Relic of Progenitus, Vexing Bauble | **sort à 1 net** : l'activation qui pioche coûte ~autant qu'elle rend → pas un rembourseur gratuit |
 | `amulet` | Jeweled Amulet | banque 1 mana d'un tour sur l'autre (activateur T2), chargé seulement si ≥ 3 autres sorts bon marché en main |
-| `city` | City of Traitors, Crystal Vein | source **2 mana à usage unique** (on tappe avant le sacrifice ; City sacrifiée si on pose un autre terrain) |
+| `city` | City of Traitors | **2 mana récurrents** (on tappe avant de poser le terrain qui la sacrifie ; sacrifiée seulement pour les tours suivants) |
+| `vein` | Crystal Vein | **1 mana/tour** (récurrent), ou **sacrifice pour 2** — ce burst (+1) n'est compté que le tour du combo, pas pendant la rampe (où on la garde) |
 | `landScry` | Conduit Pylons, Crystal Grotto, Gallifrey Council Chamber, Hidden Grotto, Rumble Arena, Surveillance Room, The Grey Havens, Zhalfirin Void | terrain dégagé qui scry/surveil 1 à l'arrivée → filtre la prochaine pioche (creuse la pièce manquante, sans anticipation) |
 | `scorched` | Scorched Ruins | sacrifie 2 terrains dégagés à l'arrivée → tape pour 4 (dispo dès le T3, +2 mana net) |
 | `land0` / `landGrant` | Maze of Ith / Yavimaya, Urborg | terrain 0 mana, sauf si un donneur de type est en jeu (qui le rend productif) |

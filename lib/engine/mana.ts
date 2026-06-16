@@ -81,20 +81,21 @@ export function tronMana(mine: number, pp: number, tower: number, nexus: number)
 }
 
 /**
- * Mana disponible ce tour, selon le terrain posé (`drop`). Spec §3.3 (rockMana = somme
- * de la production des cailloux en jeu) :
- *   mana = plain + rockMana + 2*veins + 2*city + bank
- *        + (drop == land ? 1 : 0) + (drop == vein ? 2 : 0) + (drop == city ? 2 : 0)
+ * Mana disponible ce tour, selon le terrain posé (`drop`) et si c'est le tour du combo.
+ *   mana = plain + rockMana + veins(1/tour) + bank + 4*scorched + 2*city + Tron + Maze
+ *        + (drop == land/vein/landGrant/landScry ? 1) + (drop == city ? 2) + …
+ *        + (combo ? +1 par vein (sacrifice de Crystal Vein pour {C}{C}))
  *
- * City of Traitors rapporte toujours ses 2 mana le tour où on l'utilise : on la tappe
- * ({C}{C} dans la pool) AVANT de poser le terrain qui la sacrifie. La pose du terrain la
- * sacrifie seulement pour les tours SUIVANTS (géré dans applyDrop : bf.city = false).
+ * City of Traitors : 2 mana récurrents (tappée AVANT de poser le terrain qui la sacrifie ;
+ * applyDrop met bf.city = false pour les tours suivants).
+ * Crystal Vein : 1 mana/tour (récurrent), ou sacrifice pour 2 — ce burst (+1) n'est compté
+ * que `combo=true` (le tour du combo), pas pendant la rampe où on la garde.
  */
-export function computeMana(bf: Battlefield, drop: LandDrop): number {
-  let mana = bf.plain + bf.rockMana + 2 * bf.veins + bf.bank + 4 * bf.scorched
+export function computeMana(bf: Battlefield, drop: LandDrop, combo = false): number {
+  let mana = bf.plain + bf.rockMana + bf.veins + bf.bank + 4 * bf.scorched // vein : 1/tour (récurrent)
   if (bf.city) mana += 2
   if (drop === 'land') mana += 1
-  else if (drop === 'vein') mana += 2
+  else if (drop === 'vein') mana += 1 // Crystal Vein tape 1 ce tour
   else if (drop === 'city') mana += 2
   else if (drop === 'landGrant') mana += 1 // donneur de type : tape pour 1 comme un terrain normal
   else if (drop === 'landScry') mana += 1 // terrain à scry/surveil : tape pour 1 comme un terrain normal
@@ -114,6 +115,9 @@ export function computeMana(bf: Battlefield, drop: LandDrop): number {
     mana += bf.maze
     if (drop === 'land0') mana += 1 // le Maze posé ce tour tape aussi
   }
+  // Crystal Vein : sacrifice pour {C}{C} (one-shot) → +1 par vein, réservé au tour du combo
+  // (pendant la rampe `combo=false`, on la garde et elle ne tape que pour 1).
+  if (combo) mana += bf.veins + (drop === 'vein' ? 1 : 0)
   return mana
 }
 
