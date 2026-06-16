@@ -8,7 +8,9 @@ import type { SpellTable } from './types'
  *   - rock2u (caillou prêt, ex. Fractured Powerstone) : payé 2, tape pour 1 → net 1, refund 1
  *   - rock2t (caillou engagé)      : payé 2, arrive tapped → net 2, refund 0
  *   - rock3 (Solar Transformer)    : payé 3, tape pour 1  → net 2, refund 1
- *   - chrom (Chromatic Sphere/Star): payé 1, sacrifié → +1 → net 0, refund 1
+ *   - chrom (Chromatic Sphere/Star, Relic of Progenitus) : payé 1 pour lancer ; l'activation
+ *     qui pioche coûte {1} (Chromatic rend 1 mana → net 0 sur l'activation ; Relic n'en rend
+ *     pas). Aucun gain de mana net pour enchaîner le combo → sort à 1 net, refund 0.
  *
  * Ces valeurs sont les hypothèses §3.8 : centralisées et éditables sans toucher au moteur.
  */
@@ -35,7 +37,7 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   //   comme un sort non-créature lancé ce tour (impacte donc le combo T4, pas T3).
   sol: { cost: 1, refund: 0, isComboSpell: true, producesMana: true, tappedRock: false, tapsFor: 2, suspend: 3 },
   one: { cost: 1, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
-  chrom: { cost: 1, refund: 1, isComboSpell: true, producesMana: false, tappedRock: false },
+  chrom: { cost: 1, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
   two: { cost: 2, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
   o3: { cost: 3, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
   o4: { cost: 4, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },

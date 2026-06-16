@@ -58,6 +58,7 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Tooth of Chiss-Goria': 'zero',
 
   // — Sorts à 1 —
+  'Relic of Progenitus': 'chrom', // {1} ; activation pioche = {1},T,sac (sans mana) → sort à 1 net
   'Candy Trail': 'one',
   'Currency Converter': 'one',
   'Eldritch Immunity': 'one',

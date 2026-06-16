@@ -35,9 +35,11 @@ describe('comboFeasible (§3.4)', () => {
     expect(comboAtMana(handOf('zero', 'zero', 'zero'), 3, true)).toBe(false)
   })
 
-  it('les rembourseurs net-0 (chrom) comptent gratuitement', () => {
-    // F(3) + chrom + chrom + zero = 4 sorts, à 3 mana.
-    expect(comboAtMana(handOf('chrom', 'chrom', 'zero'), 3, false)).toBe(true)
+  it('chrom est un sort à 1 net (activation neutre/coûteuse) — pas un rembourseur gratuit', () => {
+    // Fantasticar payé (3) ne laisse rien pour lancer les chrom (coût 1 chacun) → échoue.
+    expect(comboAtMana(handOf('chrom', 'chrom', 'zero'), 3, false)).toBe(false)
+    // Avec le mana pour les payer (3 Fantasticar + 2×1 chrom), le combo passe.
+    expect(comboAtMana(handOf('chrom', 'chrom', 'zero'), 5, false)).toBe(true)
   })
 
   it('les créatures et terrains ne comptent jamais pour le combo', () => {

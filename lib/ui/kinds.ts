@@ -20,7 +20,7 @@ export const KIND_META: Record<Kind, KindMeta> = {
   mightstone: { label: 'Caillou 5', full: 'Mightstone & Weakstone (5 → 2)', color: 'var(--k-rock)' },
   sol: { label: 'Suspend', full: 'Sol Talisman (Suspend 3 → caillou 2)', color: 'var(--k-rock)' },
   one: { label: '1', full: 'Sort non-créature — coût 1', color: 'var(--k-one)' },
-  chrom: { label: 'Chrom', full: 'Chromatic (sac → mana)', color: 'var(--k-one)' },
+  chrom: { label: 'Chrom', full: 'Cantrip à 1 (Chromatic, Relic — 1 pour piocher)', color: 'var(--k-one)' },
   two: { label: '2', full: 'Sort non-créature — coût 2', color: 'var(--k-two)' },
   o3: { label: '3', full: 'Sort non-créature — coût 3', color: 'var(--k-other)' },
   o4: { label: '4', full: 'Sort non-créature — coût 4', color: 'var(--k-other)' },
