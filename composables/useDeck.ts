@@ -18,6 +18,7 @@ const GROUP_PRIMARY: Record<GroupId, Kind> = {
   lands: 'land',
   zeros: 'zero',
   rocks: 'rock2u',
+  rocksTapped: 'rock2t',
   ones: 'one',
   twos: 'two',
   creatures: 'creature',

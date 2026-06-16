@@ -11,6 +11,7 @@ const groupColors: Record<string, string> = {
   lands: 'var(--k-land)',
   zeros: 'var(--k-zero)',
   rocks: 'var(--k-rock)',
+  rocksTapped: 'var(--k-rock)',
   ones: 'var(--k-one)',
   twos: 'var(--k-two)',
   creatures: 'var(--k-creature)',

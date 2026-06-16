@@ -59,7 +59,9 @@ describe('Calibration moteur vs §7 (deck d’origine de la spec — fixture)', 
   it('sous-totaux du deck d’origine (38/24/9/8/6/6/8)', () => {
     const s = deckStats(SPEC_DECK)
     expect(s.total).toBe(99)
-    expect([s.byGroup.lands, s.byGroup.zeros, s.byGroup.rocks, s.byGroup.ones, s.byGroup.twos, s.byGroup.creatures, s.byGroup.others])
+    // « Cailloux » est scindé en dégagés (rocks) + engagés (rocksTapped) ; total cailloux = 9.
+    const rocks = s.byGroup.rocks + s.byGroup.rocksTapped
+    expect([s.byGroup.lands, s.byGroup.zeros, rocks, s.byGroup.ones, s.byGroup.twos, s.byGroup.creatures, s.byGroup.others])
       .toEqual([38, 24, 9, 8, 6, 6, 8])
   })
 

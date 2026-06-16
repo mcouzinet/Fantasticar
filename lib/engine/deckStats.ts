@@ -1,7 +1,15 @@
 import type { Deck, Kind } from './types'
 import { KINDS } from './types'
 
-export type GroupId = 'lands' | 'zeros' | 'rocks' | 'ones' | 'twos' | 'creatures' | 'others'
+export type GroupId =
+  | 'lands'
+  | 'zeros'
+  | 'rocks'
+  | 'rocksTapped'
+  | 'ones'
+  | 'twos'
+  | 'creatures'
+  | 'others'
 
 export interface GroupDef {
   id: GroupId
@@ -13,7 +21,8 @@ export interface GroupDef {
 export const GROUPS: GroupDef[] = [
   { id: 'lands', label: 'Terrains', kinds: ['land', 'landT', 'city', 'vein'] },
   { id: 'zeros', label: 'Sorts à 0', kinds: ['zero'] },
-  { id: 'rocks', label: 'Cailloux', kinds: ['rock2u', 'rock2t', 'rock3', 'basalt', 'mightstone', 'sol'] },
+  { id: 'rocks', label: 'Cailloux', kinds: ['rock2u', 'rock3', 'basalt', 'mightstone', 'sol'] },
+  { id: 'rocksTapped', label: 'Cailloux engagés', kinds: ['rock2t'] },
   { id: 'ones', label: 'Sorts à 1', kinds: ['one', 'chrom'] },
   { id: 'twos', label: 'Sorts à 2', kinds: ['two'] },
   { id: 'creatures', label: 'Créatures', kinds: ['creature'] },
