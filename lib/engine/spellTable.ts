@@ -20,6 +20,10 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   landT: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
   city: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
   vein: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  // Maze of Ith : terrain qui ne tape pour aucun mana (mana géré dans mana.ts, pas ici).
+  land0: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  // Yavimaya/Urborg : terrain donneur de type (tape pour 1 + active les Maze, cf. mana.ts).
+  landGrant: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
 
   // — Sorts non-créature : sorts de combo —
   zero: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },

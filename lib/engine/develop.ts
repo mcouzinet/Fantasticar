@@ -50,16 +50,20 @@ const LAND = kindCode.land
 const LANDT = kindCode.landT
 const VEIN = kindCode.vein
 const CITY = kindCode.city
+const LAND0 = kindCode.land0
+const LANDGRANT = kindCode.landGrant
 
 /** Choix de la pose de terrain (spec §3.5.1). */
 function chooseDrop(hand: Hand, remaining: number): LandDrop {
   const hasLandT = hand[LANDT]! > 0
-  const immediate = hand[LAND]! + hand[VEIN]! // terrains "intacts" gardés en réserve
+  const immediate = hand[LAND]! + hand[VEIN]! + hand[LANDGRANT]! // terrains "intacts" en réserve
   if (hasLandT && immediate >= remaining) return 'landT'
+  if (hand[LANDGRANT]! > 0) return 'landGrant' // tape pour 1 + active les Maze
   if (hand[LAND]! > 0) return 'land'
   if (hand[VEIN]! > 0) return 'vein'
   if (hand[LANDT]! > 0) return 'landT'
   if (hand[CITY]! > 0) return 'city'
+  if (hand[LAND0]! > 0) return 'land0' // Maze : dernier recours (0 mana sauf donneur)
   return 'none'
 }
 
@@ -69,6 +73,8 @@ function removeDrop(hand: Hand, drop: LandDrop): void {
     case 'landT': hand[LANDT]!--; break
     case 'vein': hand[VEIN]!--; break
     case 'city': hand[CITY]!--; break
+    case 'land0': hand[LAND0]!--; break
+    case 'landGrant': hand[LANDGRANT]!--; break
     case 'none': break
   }
 }

@@ -32,6 +32,8 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   landT: ['Arid Archway', 'Echoing Deeps', 'Vesuva'], // entrent engagés
   city: ['City of Traitors'],
   vein: ['Crystal Vein'],
+  land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
+  landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
 
   // — SORTS À 0 (25) —
   zero: [

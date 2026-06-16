@@ -29,6 +29,14 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'The Gold Saucer': 'land',
   'Treasure Vault': 'land',
   Trenchpost: 'land',
+  Wastes: 'land',
+  "Adventurer's Inn": 'land',
+  'Fomori Vault': 'land',
+
+  // — Terrains spéciaux —
+  'Maze of Ith': 'land0', // ne tape pour aucun mana
+  'Yavimaya, Cradle of Growth': 'landGrant', // chaque terrain devient Forêt → active les Maze
+  'Urborg, Tomb of Yawgmoth': 'landGrant', // chaque terrain devient Marais → active les Maze
 
   // — Terrains engagés (enters tapped) —
   Cloudpost: 'landT',
@@ -46,6 +54,7 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Patchwork Banner': 'rock3',
 
   // — Sorts à 0 —
+  'Chalice of the Void': 'zero', // {X}{X}, joué X=0
   "Accorder's Shield": 'zero',
   "Cathar's Shield": 'zero',
   'Darksteel Relic': 'zero',
@@ -59,6 +68,8 @@ export const CARD_CATALOG: Record<string, Kind> = {
 
   // — Sorts à 1 —
   'Relic of Progenitus': 'chrom', // {1} ; activation pioche = {1},T,sac (sans mana) → sort à 1 net
+  'Vexing Bauble': 'chrom', // {1} ; activation pioche = {1},T,sac (sans mana) → sort à 1 net
+  "Conjurer's Bauble": 'one', // {1} ; sac (sans coût) → pioche
   'Candy Trail': 'one',
   'Currency Converter': 'one',
   'Eldritch Immunity': 'one',
@@ -72,6 +83,7 @@ export const CARD_CATALOG: Record<string, Kind> = {
 
   // — Autres (sorts non-créature chers) —
   'Tangle Wire': 'o3',
+  'Krark-Clan Ironworks': 'o4', // {4} ; moteur de mana (sac artefact → CC) sous-modélisé en o4
   'Apple of Eden, Isu Relic': 'o4',
   'Ugin, the Ineffable': 'o6',
 

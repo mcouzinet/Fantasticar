@@ -4,6 +4,7 @@
 /** Catégorie mécanique d'une carte. Une carte = une seule catégorie (spec §3.1). */
 export type Kind =
   | 'land' | 'landT' | 'city' | 'vein'
+  | 'land0' | 'landGrant' // Maze of Ith (0 mana) · donneur de type (Yavimaya/Urborg)
   | 'zero' | 'rock2u' | 'rock2t' | 'rock3'
   | 'basalt' | 'mightstone' | 'sol' // cailloux à profil mana particulier
   | 'one' | 'chrom' | 'two'
@@ -13,6 +14,7 @@ export type Kind =
 /** Ordre canonique des kinds → code entier utilisé dans les buffers de perf. */
 export const KINDS: readonly Kind[] = [
   'land', 'landT', 'city', 'vein',
+  'land0', 'landGrant',
   'zero', 'rock2u', 'rock2t', 'rock3',
   'basalt', 'mightstone', 'sol',
   'one', 'chrom', 'two',

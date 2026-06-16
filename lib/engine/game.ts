@@ -28,6 +28,8 @@ function resetBattlefield(bf: Battlefield): void {
   bf.pendingRockMana = 0
   bf.suspend.length = 0
   bf.freeCasts = 0
+  bf.maze = 0
+  bf.granters = 0
 }
 
 /**

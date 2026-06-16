@@ -12,6 +12,8 @@ export const KIND_META: Record<Kind, KindMeta> = {
   landT: { label: 'Terrain ⟲', full: 'Terrain engagé', color: 'var(--k-land)' },
   city: { label: 'City', full: 'City of Traitors (+2)', color: 'var(--k-land)' },
   vein: { label: 'Vein', full: 'Crystal Vein (+2)', color: 'var(--k-land)' },
+  land0: { label: 'Terrain 0', full: 'Terrain sans mana (Maze of Ith)', color: 'var(--k-land)' },
+  landGrant: { label: 'Terrain type', full: 'Donneur de type (Yavimaya/Urborg)', color: 'var(--k-land)' },
   zero: { label: '0', full: 'Sort non-créature — coût 0', color: 'var(--k-zero)' },
   rock2u: { label: 'Caillou 2', full: 'Caillou — coût 2, prêt', color: 'var(--k-rock)' },
   rock2t: { label: 'Caillou 2⟲', full: 'Caillou — coût 2, engagé', color: 'var(--k-rock)' },
