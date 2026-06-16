@@ -20,20 +20,22 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   // — TERRAINS (39) —
   land: [
     'Abstergo Entertainment', 'Blast Zone', 'Castle Doom', 'Command Beacon',
-    'Conduit Pylons', 'Crystal Grotto', 'Darksteel Citadel', 'Dust Bowl',
-    'Fountainport', 'Gallifrey Council Chamber', 'Gemstone Caverns', 'Hidden Grotto',
+    'Darksteel Citadel', 'Dust Bowl',
+    'Fountainport', 'Gallifrey Council Chamber', 'Gemstone Caverns',
     "Inventors' Fair", "Mishra's Factory", "Mishra's Foundry", 'Mutavault',
     'Petrified Hamlet', 'Planar Nexus', 'Rishadan Port', 'Rumble Arena',
-    'Scorched Ruins', 'Snow-Covered Wastes', 'Surveillance Room', 'Talon Gates of Madara',
+    'Scorched Ruins', 'Snow-Covered Wastes', 'Talon Gates of Madara',
     'The Grey Havens', "Thespian's Stage", "Urza's Cave", "Urza's Mine",
     "Urza's Power Plant", "Urza's Saga", "Urza's Tower", "Urza's Workshop",
-    'War Room', 'Zhalfirin Void',
+    'War Room',
   ],
   landT: ['Arid Archway', 'Echoing Deeps', 'Vesuva'], // entrent engagés
   city: ['City of Traitors'],
   vein: ['Crystal Vein'],
   land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
   landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
+  // terrains dégagés qui scry/surveil 1 à l'arrivée (filtrent la prochaine pioche)
+  landScry: ['Conduit Pylons', 'Crystal Grotto', 'Hidden Grotto', 'Surveillance Room', 'Zhalfirin Void'],
 
   // — SORTS À 0 (25) —
   zero: [

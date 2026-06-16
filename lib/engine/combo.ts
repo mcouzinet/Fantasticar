@@ -130,6 +130,7 @@ export function bestCombo(
   if (feasible(k, m, computeMana(bf, 'none'), fCast, f, free)) return true
   if (hand[kindCode.land]! > 0 && feasible(k, m, computeMana(bf, 'land'), fCast, f, free)) return true
   if (hand[kindCode.landGrant]! > 0 && feasible(k, m, computeMana(bf, 'landGrant'), fCast, f, free)) return true
+  if (hand[kindCode.landScry]! > 0 && feasible(k, m, computeMana(bf, 'landScry'), fCast, f, free)) return true
   if (hand[kindCode.landT]! > 0 && feasible(k, m, computeMana(bf, 'landT'), fCast, f, free)) return true
   if (hand[kindCode.vein]! > 0 && feasible(k, m, computeMana(bf, 'vein'), fCast, f, free)) return true
   if (hand[kindCode.city]! > 0 && feasible(k, m, computeMana(bf, 'city'), fCast, f, free)) return true

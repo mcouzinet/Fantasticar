@@ -2,7 +2,7 @@
  * Modèle de mana et état de jeu minimal (spec §3.3) + production par caillou et Suspend.
  */
 
-export type LandDrop = 'none' | 'land' | 'landT' | 'vein' | 'city' | 'land0' | 'landGrant'
+export type LandDrop = 'none' | 'land' | 'landT' | 'vein' | 'city' | 'land0' | 'landGrant' | 'landScry'
 
 /** Une carte en exil suspendu : se résout quand `turnsLeft` atteint 0. */
 export interface SuspendTimer {
@@ -22,6 +22,7 @@ export interface Battlefield {
   freeCasts: number // sorts non-créature lancés gratuitement ce tour (sorties de suspend)
   maze: number // terrains "land0" en jeu (Maze of Ith) : 0 mana, sauf donneur de type
   granters: number // terrains donneurs de type en jeu (Yavimaya/Urborg) : rendent les Maze productifs
+  scry: number // filtres scry/surveil 1 en attente de résolution (déclenchés ce tour, résolus dans game.ts)
 }
 
 export function emptyBattlefield(): Battlefield {
@@ -36,6 +37,7 @@ export function emptyBattlefield(): Battlefield {
     freeCasts: 0,
     maze: 0,
     granters: 0,
+    scry: 0,
   }
 }
 
@@ -53,6 +55,7 @@ export function computeMana(bf: Battlefield, drop: LandDrop): number {
   else if (drop === 'vein') mana += 2
   else if (drop === 'city') mana += 2
   else if (drop === 'landGrant') mana += 1 // donneur de type : tape pour 1 comme un terrain normal
+  else if (drop === 'landScry') mana += 1 // terrain à scry/surveil : tape pour 1 comme un terrain normal
   // Terrains sans mana (Maze of Ith) : produisent 1 chacun SI un donneur de type est en jeu
   // (Yavimaya/Urborg les rend Forêt/Marais), y compris celui qu'on poserait ce tour-ci.
   const granted = bf.granters > 0 || drop === 'landGrant'
@@ -88,6 +91,11 @@ export function applyDrop(bf: Battlefield, drop: LandDrop): void {
     case 'landGrant':
       bf.plain += 1 // tape pour 1 dès le tour suivant (comme un terrain normal)
       bf.granters += 1
+      bf.city = false
+      break
+    case 'landScry':
+      bf.plain += 1 // tape pour 1 comme un terrain normal
+      bf.scry += 1 // déclenche un filtre scry/surveil 1 (résolu après le développement)
       bf.city = false
       break
     case 'none':

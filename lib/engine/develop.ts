@@ -52,12 +52,15 @@ const VEIN = kindCode.vein
 const CITY = kindCode.city
 const LAND0 = kindCode.land0
 const LANDGRANT = kindCode.landGrant
+const LANDSCRY = kindCode.landScry
 
 /** Choix de la pose de terrain (spec §3.5.1). */
 function chooseDrop(hand: Hand, remaining: number): LandDrop {
   const hasLandT = hand[LANDT]! > 0
-  const immediate = hand[LAND]! + hand[VEIN]! + hand[LANDGRANT]! // terrains "intacts" en réserve
+  // terrains dégagés produisant 1, gardés en réserve (incl. landGrant/landScry)
+  const immediate = hand[LAND]! + hand[VEIN]! + hand[LANDGRANT]! + hand[LANDSCRY]!
   if (hasLandT && immediate >= remaining) return 'landT'
+  if (hand[LANDSCRY]! > 0) return 'landScry' // priorité : pose "gratuite" qui filtre la pioche
   if (hand[LANDGRANT]! > 0) return 'landGrant' // tape pour 1 + active les Maze
   if (hand[LAND]! > 0) return 'land'
   if (hand[VEIN]! > 0) return 'vein'
@@ -75,8 +78,29 @@ function removeDrop(hand: Hand, drop: LandDrop): void {
     case 'city': hand[CITY]!--; break
     case 'land0': hand[LAND0]!--; break
     case 'landGrant': hand[LANDGRANT]!--; break
+    case 'landScry': hand[LANDSCRY]!--; break
     case 'none': break
   }
+}
+
+// — Filtre scry/surveil 1 (cf. game.ts) —
+// On ne JETTE que les cartes qui n'aident jamais le combo précoce ; tout le reste (terrains,
+// cailloux, sorts non-créature castables) peut servir, donc on le GARDE. Jeter une carte
+// "en trop" (encore semi-utile) contre une inconnue ferait en moyenne BAISSER le combo —
+// vérifié en A/B. On reste donc conservateur : le scry ne peut qu'aider ou être neutre.
+const SCRY_BIN = new Set<number>([
+  kindCode.creature, // jamais un sort de combo
+  LAND0, // Maze of Ith : 0 mana
+  kindCode.o6, // sorts beaucoup trop chers pour le combo (≥ 6)
+  kindCode.o7,
+])
+
+/**
+ * Décision scry/surveil 1 sur la carte du dessus (kind).
+ * `true` = on la garde (on la piochera) ; `false` = on s'en débarrasse (on piochera la suivante).
+ */
+export function scryKeep(_hand: Hand, kind: number): boolean {
+  return !SCRY_BIN.has(kind)
 }
 
 /**

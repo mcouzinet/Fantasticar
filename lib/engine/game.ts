@@ -4,7 +4,7 @@ import type { Hand } from './hand'
 import type { ComboContext } from './combo'
 import { bestCombo } from './combo'
 import type { DevelopContext } from './develop'
-import { develop } from './develop'
+import { develop, scryKeep } from './develop'
 import { type Battlefield, promote } from './mana'
 import { openingHand } from './mulligan'
 
@@ -30,6 +30,7 @@ function resetBattlefield(bf: Battlefield): void {
   bf.freeCasts = 0
   bf.maze = 0
   bf.granters = 0
+  bf.scry = 0
 }
 
 /**
@@ -51,6 +52,15 @@ export function playGame(deps: GameDeps, onPlay: boolean): number {
     if (t >= 2 && bestCombo(comboCtx, hand, bf, fCast)) return t
 
     fCast = develop(devCtx, hand, bf, fCast, maxTurn - t)
+
+    // Résolution des scry/surveil 1 déclenchés ce tour (terrains landScry posés au développement).
+    // On regarde la prochaine carte ; si elle n'aide pas la main, on la retire du dessus (bottom/
+    // cimetière) → la prochaine pioche tombe sur la carte suivante. Pas d'anticipation : 1 carte vue.
+    while (bf.scry > 0 && pointer < deckBuf.length) {
+      if (!scryKeep(hand, deckBuf[pointer]!)) pointer++
+      bf.scry -= 1
+    }
+    bf.scry = 0
   }
   return 0
 }
