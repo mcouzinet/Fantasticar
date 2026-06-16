@@ -55,7 +55,7 @@ function barStyle(t3: number) {
     <header class="topbar">
       <NuxtLink to="/" class="back">← Retour au labo</NuxtLink>
       <div class="right">
-        <a class="src" href="https://github.com/mcouzinet/Fantasticar" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <GithubButton />
         <BuyMeCoffee />
       </div>
     </header>

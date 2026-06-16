@@ -45,6 +45,9 @@ onBeforeUnmount(() => {
       <div><dt>Mulligan</dt><dd>London (→5)</dd></div>
       <div><dt>Précision</dt><dd>{{ iterations.toLocaleString('fr-FR') }} itérations</dd></div>
     </dl>
+    <NuxtLink to="/influence" class="influence-cta" title="Influence de chaque catégorie de carte sur le combo">
+      📊 Influence des cartes →
+    </NuxtLink>
   </div>
   <div v-if="props.running || props.progress > 0" class="progress-wrap">
     <div class="sim-line">
@@ -90,6 +93,25 @@ onBeforeUnmount(() => {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-dim);
+}
+/* CTA secondaire mis en valeur, à droite de la rangée de lancement */
+.influence-cta {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  border: 1px solid var(--accent);
+  background: rgba(224, 169, 63, 0.08);
+  padding: 9px 14px;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+.influence-cta:hover {
+  background: rgba(224, 169, 63, 0.18);
 }
 .progress-wrap {
   margin-top: 14px;
