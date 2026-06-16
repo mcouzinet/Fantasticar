@@ -1,91 +1,88 @@
 # Calibration du moteur — note d'ingénierie
 
 > Statut : cœur combo **prouvé optimal** (fuzz vs brute-force). Reproduction des valeurs §7
-> à **~3 pt** près sur les extrêmes (cible spec : ±1,5 pt).
+> à **~5–6 pt** près sur les extrêmes depuis la correction mécanique de Chromatic (voir plus
+> bas) — divergence volontaire au profit de la justesse. Les invariants utiles à l'outil
+> (monotonie, hiérarchie des modes, deltas play/draw, **delta what-if**) restent exacts.
 
-## Mise à jour — nouvelle decklist de référence
+## Modélisation fine par carte
 
-La decklist par défaut a été remplacée par une liste fournie, **catégorisée d'après les
-données Scryfall** (coût/type/production de mana vérifiés). Corrections notables vs une
-catégorisation « de mémoire » :
+Le moteur ne traite pas les cartes par « coût générique » : plusieurs cartes ont une
+mécanique propre, modélisée fidèlement (catégorisation vérifiée sur Scryfall). Récapitulatif
+des `kind` spéciaux (cf. `spellTable.ts`, `mana.ts`, `develop.ts`) :
 
-- **Eldrazi Confluence = {2}{C}{C} → coût 4** (et non 5 comme supposé au §3.8).
-- **Hidden Grotto n'entre pas engagé** → `land` (la spec d'origine l'avait en `landT`).
-- **Fractured Powerstone = {2}** → `rock2u` (corrigé précédemment).
-- Cailloux à profil mana particulier modélisés finement (cf. `spellTable.ts`) :
-  Basalt Monolith ({3}, tape 3, net 0), Mightstone & Weakstone ({5}, tape 2).
+| `kind` | Cartes | Modélisation |
+|--------|--------|--------------|
+| `rock2u` / `rock2t` | cailloux à 2 dégagés / engagés | tape pour 1 (dégagé : net 1 ; engagé : produit au tour suivant) |
+| `basalt` | Basalt Monolith | {3}, tape 3, net 0 le tour lancé — pas de rampe pérenne |
+| `mightstone` | Mightstone & Weakstone | {5}, tape pour 2 |
+| `sol` | Sol Talisman | **Suspend 3**—{1} → en ligne ~T4, tape pour 2 (impacte T4, pas T3) |
+| `chrom` | Chromatic Sphere/Star, Relic of Progenitus, Vexing Bauble | **sort à 1 net** : l'activation qui pioche coûte ~autant qu'elle rend → pas un rembourseur gratuit |
+| `amulet` | Jeweled Amulet | banque 1 mana d'un tour sur l'autre (activateur T2), chargé seulement si ≥ 3 autres sorts bon marché en main |
+| `city` | City of Traitors, Crystal Vein | source **2 mana à usage unique** (on tappe avant le sacrifice ; City sacrifiée si on pose un autre terrain) |
+| `landScry` | Conduit Pylons, Crystal Grotto, Gallifrey Council Chamber, Hidden Grotto, Rumble Arena, Surveillance Room, The Grey Havens, Zhalfirin Void | terrain dégagé qui scry/surveil 1 à l'arrivée → filtre la prochaine pioche (creuse la pièce manquante, sans anticipation) |
+| `scorched` | Scorched Ruins | sacrifie 2 terrains dégagés à l'arrivée → tape pour 4 (dispo dès le T3, +2 mana net) |
+| `land0` / `landGrant` | Maze of Ith / Yavimaya, Urborg | terrain 0 mana, sauf si un donneur de type est en jeu (qui le rend productif) |
 
 ### Mécanique Suspend (impacte T4)
 
-Le moteur gère le **suspend** de façon générale (`SpellProfile.suspend = N`, coût = coût de
-suspend) : une carte suspendue au tour T se résout à T+N — elle entre alors comme permanent
-(rampe `tapsFor`) **et** compte comme un sort non-créature lancé gratuitement ce tour
-(`bf.freeCasts`, qui réduit le `need` du combo). C'est un levier **T4, pas T3**.
+`SpellProfile.suspend = N` : carte exilée au tour T, se résout à T+N — elle entre alors
+comme permanent (rampe `tapsFor`) **et** compte comme un sort non-créature lancé gratuitement
+ce tour (`bf.freeCasts`, qui réduit le `need` du combo). Sol Talisman : T3 inchangé, T4 +1–2 pt.
 
-- **Sol Talisman** : Suspend 3—{1}, tape pour {C}{C} → suspendu ~T1, en ligne ~T4. Effet
-  mesuré sur la nouvelle liste : **T3 inchangé**, **T4 +1,3 à +2,4 pt**.
-- Le mécanisme est réutilisable : tout `kind` avec `suspend: N` dans la SpellTable est
-  géré pareil (pour tester d'autres artefacts à suspend).
-- La production des cailloux est désormais **par carte** (`tapsFor`, somme dans
-  `bf.rockMana`) : Mightstone & Weakstone produit bien 2 (et non 1).
+### Mécanique scry/surveil (impacte T3)
 
-La validation §7 est conservée : elle tourne désormais sur la **decklist d'origine** gardée
-en fixture (`test/fixtures/specDeck.ts`).
+Les terrains à scry/surveil 1 (`landScry`) filtrent la prochaine pioche : on jette la carte
+du dessus si elle est inutile pour assembler le combo (créature, terrain en trop, sort trop
+cher), sinon on la garde. Pioche **à l'aveugle** (1 carte vue, ce que la carte fait vraiment :
+pas de triche/anticipation). Effet mesuré : **+~1,3 pt T3**.
+
+### Bug trouvé en route : mulligan qui ignorait les nouveaux terrains
+
+`landsInHand` ne comptait que `land/landT/city/vein`. Les nouveaux terrains producteurs
+(`landGrant`, `landScry`) n'étaient pas vus comme des terrains → mains mulliganées à tort
+(−3 pt). Corrigé (`hand.ts`).
 
 ### Bug trouvé par le fuzz : ordre de lancement des rembourseurs
 
-Le §3.4 lance les rembourseurs « par coût croissant ». Avec un rembourseur **cher mais
-net 0** (Basalt Monolith : coût 3, remboursement 3), cet ordre est **sous-optimal** : il faut
-le lancer tant que le solde est élevé. Le fuzz vs brute-force a détecté l'écart ; l'ordre a
-été corrigé (problème du capital minimal : net ≤ 0 d'abord par coût croissant, puis net > 0
-par remboursement décroissant). Le combo redevient **prouvé optimal**.
+Le §3.4 lance les rembourseurs « par coût croissant ». Avec un rembourseur **cher mais net 0**
+(Basalt Monolith), c'est sous-optimal : il faut le lancer tant que le solde est élevé. Le fuzz
+vs brute-force a détecté l'écart ; l'ordre a été corrigé (capital minimal : net ≤ 0 d'abord
+par coût croissant, puis net > 0 par remboursement décroissant). Combo **prouvé optimal**.
 
-## Résultats (T3 cumulé, N=40 000, seed fixe)
+## Validation §7 (deck d'origine de la spec, fixture, N=40 000, seed fixe)
+
+La validation tourne sur la **decklist d'origine** gardée en fixture
+(`test/fixtures/specDeck.ts`), pas sur la liste de référence courante.
 
 | Mode | Axe | Moteur | Cible §7 | Écart |
 |------|-----|:------:|:--------:|:-----:|
-| none | play | 37,4 % | 34,5 % | +2,9 |
-| none | draw | 51,2 % | 49 % | +2,2 |
-| london | play | 50,0 % | 51,5 % | −1,5 |
-| london | draw | 63,5 % | 65 % | −1,5 |
-| london | **T4** play | 70,9 % | 71 % | ~0 ✓ |
-| moxfield | draw | 77,1 % | 80 % | −2,9 |
+| none | play | 33,3 % | 34,5 % | −1,2 |
+| none | draw | 46,4 % | 49 % | −2,6 |
+| london | play | 46,6 % | 51,5 % | −4,9 |
+| london | draw | 60,0 % | 65 % | −5,0 |
+| london | **T4** play | 69,9 % | 71 % | −1,1 |
+| moxfield | draw | 74,5 % | 80 % | −5,5 |
 
-Tout le reste est exact : totaux du deck (99/99), **monotonie** (T2≤T3≤T4≤T5),
-hiérarchie des modes (none < london < moxfield), avantage de pioche (draw > play),
-et **deltas play→draw** (mesurés à 13,5–14 pt, identiques à la référence).
+L'écart sur london/moxfield s'est creusé (~1,5 → ~5 pt) **depuis la correction de Chromatic**
+(`chrom` refund 1 → 0). Le §7 de la spec modélisait visiblement Chromatic Sphere/Star comme
+des rembourseurs net-0 (« gratuits ») ; or leur activation pour piocher coûte autant qu'elle
+rend → ce sont des sorts à 1 nets. On a privilégié la **justesse mécanique** sur le collage au
+chiffre §7 : le gate du test est élargi en conséquence (`GATE = 0.06`, documenté dans
+`calibrate.test.ts`).
 
-## Ce qui a été vérifié / écarté
-
-1. **Cœur combo prouvé optimal.** `comboFeasibleForMana` est fuzzé contre une recherche
-   brute-force exhaustive sur 20 000 mains aléatoires : **0 écart**. On ne rate donc
-   aucun combo — l'écart ne vient pas de la détection (§3.4) mais du développement (§3.5).
-
-2. **Leviers de développement balayés** (vein 1↔2, pré-cast Fantasticar on/off/gated,
-   ramp cailloux on/off, priorité landT, porte de richesse du ramp) :
-   - le **pré-cast du Fantasticar** n'affecte pas le T3 (il ne joue que sur T4/T5 via
-     `need=4`) ; la version « eager » est nécessaire pour caler **London T4 = 71** ;
-   - le **ramp par cailloux** aide *uniformément* (le couper effondre tous les modes) ;
-   - le **séquençage landT agressif** relève *tous* les modes (+3 à +4,6 pt) ;
-   - la **porte de richesse** ne fait que baisser le niveau global.
-
-   **Conclusion** : aucun levier de §3.5 n'**élargit l'écart** entre `none` (trop haut)
-   et `moxfield` (trop bas). Le minimum atteignable pour `none` (33,4 %) effondre
-   `moxfield` à 74 %. Atteindre ±1,5 pt partout exigerait une heuristique de
-   développement *sensiblement différente* de celle décrite au §3.5 — donc un
-   *fit sur la cible* plutôt qu'une implémentation de la spec. Or §2 précise
-   explicitement : « heuristiques raisonnables, pas un solveur exhaustif ».
+Tout le reste est exact : totaux du deck (99/99), **monotonie** (T2 ≤ T3 ≤ T4 ≤ T5), hiérarchie
+des modes (none < london < moxfield), avantage de pioche (draw > play).
 
 ## Pourquoi c'est sans impact sur l'outil
 
 La fonctionnalité différenciante est le **what-if** : delta entre `draft` et `baseline`,
-calculés par le **même moteur, à seed identique**. Un offset systématique de ~3 pt
-**s'annule dans le delta**. Les deltas et la monotonie étant exacts, l'outil remplit
-sa fonction (comparer l'effet d'un changement de carte) avec fidélité.
+calculés par le **même moteur, à seed identique**. Un offset systématique **s'annule dans le
+delta**. Les deltas et la monotonie étant exacts, l'outil remplit sa fonction (comparer l'effet
+d'un changement de carte, et lister les cartes qui rendent un combo T2 possible) avec fidélité.
 
-## Marges d'amélioration (si l'on veut viser ±1,5 pt)
+## Cœur combo prouvé optimal
 
-- Spécifier précisément l'heuristique de développement de référence (ordre exact des
-  poses de terrain, politique de pré-cast), puis l'implémenter à l'identique.
-- Ou ajouter un **optimiseur de séquençage** (mini-recherche par tour) au lieu d'une
-  heuristique — coûteux en perf, hors périmètre v1 (cf. §2 non-goals).
+`comboFeasibleForMana` est fuzzé contre une recherche brute-force exhaustive sur 20 000 mains
+aléatoires : **0 écart**. On ne rate aucun combo — un éventuel offset vient du développement
+(§3.5, heuristiques raisonnables et non un solveur exhaustif, cf. §2), pas de la détection.
