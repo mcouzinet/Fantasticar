@@ -3,7 +3,7 @@ import { KINDS, kindCode } from './types'
 import { FANTASTICAR_COST } from './spellTable'
 import type { Hand } from './hand'
 import { zerosInHand } from './hand'
-import { applyDrop, computeMana, type Battlefield, type LandDrop } from './mana'
+import { applyDrop, computeMana, scorchedSacPool, type Battlefield, type LandDrop } from './mana'
 
 /** Cailloux et cartes suspend précalculés depuis la SpellTable. */
 export interface DevelopContext {
@@ -54,18 +54,29 @@ const LAND0 = kindCode.land0
 const LANDGRANT = kindCode.landGrant
 const LANDSCRY = kindCode.landScry
 const SCORCHED = kindCode.scorched
+const UMINE = kindCode.urzaMine
+const UPP = kindCode.urzaPP
+const UTOWER = kindCode.urzaTower
+const UNEXUS = kindCode.planarNexus
 const AMULET = kindCode.amulet
 
 /** Choix de la pose de terrain (spec §3.5.1). */
 function chooseDrop(hand: Hand, bf: Battlefield, remaining: number): LandDrop {
   // Scorched Ruins : gros boost (+2 mana net, source à 4) dès qu'on a 2 terrains dégagés à sacrifier.
-  if (hand[SCORCHED]! > 0 && bf.plain >= 2) return 'scorched'
+  if (hand[SCORCHED]! > 0 && scorchedSacPool(bf) >= 2) return 'scorched'
   const hasLandT = hand[LANDT]! > 0
-  // terrains dégagés produisant du mana, gardés en réserve (land/vein/city/landGrant/landScry)
-  const immediate = hand[LAND]! + hand[VEIN]! + hand[CITY]! + hand[LANDGRANT]! + hand[LANDSCRY]!
+  // terrains dégagés produisant du mana, gardés en réserve (tous sauf landT/land0)
+  const immediate =
+    hand[LAND]! + hand[VEIN]! + hand[CITY]! + hand[LANDGRANT]! + hand[LANDSCRY]! +
+    hand[SCORCHED]! + hand[UMINE]! + hand[UPP]! + hand[UTOWER]! + hand[UNEXUS]!
   if (hasLandT && immediate >= remaining) return 'landT'
   if (hand[LANDSCRY]! > 0) return 'landScry' // priorité : pose "gratuite" qui filtre la pioche
   if (hand[LANDGRANT]! > 0) return 'landGrant' // tape pour 1 + active les Maze
+  // Pièces Tron jouées avant les terrains génériques (construit le set ; Nexus = tous les types).
+  if (hand[UNEXUS]! > 0) return 'planarNexus'
+  if (hand[UTOWER]! > 0) return 'urzaTower'
+  if (hand[UMINE]! > 0) return 'urzaMine'
+  if (hand[UPP]! > 0) return 'urzaPP'
   if (hand[LAND]! > 0) return 'land'
   if (hand[VEIN]! > 0) return 'vein'
   if (hand[CITY]! > 0) return 'city' // dégagée, tape pour 2 → avant un terrain engagé (0 mana ce tour)
@@ -84,6 +95,10 @@ function removeDrop(hand: Hand, drop: LandDrop): void {
     case 'landGrant': hand[LANDGRANT]!--; break
     case 'landScry': hand[LANDSCRY]!--; break
     case 'scorched': hand[SCORCHED]!--; break
+    case 'urzaMine': hand[UMINE]!--; break
+    case 'urzaPP': hand[UPP]!--; break
+    case 'urzaTower': hand[UTOWER]!--; break
+    case 'planarNexus': hand[UNEXUS]!--; break
     case 'none': break
   }
 }

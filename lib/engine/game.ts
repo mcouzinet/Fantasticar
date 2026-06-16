@@ -34,6 +34,10 @@ function resetBattlefield(bf: Battlefield): void {
   bf.bank = 0
   bf.pendingBank = 0
   bf.scorched = 0
+  bf.uMine = 0
+  bf.uPP = 0
+  bf.uTower = 0
+  bf.uNexus = 0
 }
 
 /**

@@ -8,11 +8,12 @@ export function newHand(): Hand {
 }
 
 // Terrains produisant du mana (pour le compte de terrains du mulligan §3.6).
-// landGrant (Yavimaya/Urborg) et landScry tapent pour 1 → comptent comme terrains.
-// land0 (Maze of Ith) est EXCLU : il ne produit pas de mana, ce n'est pas un terrain « utile ».
+// Tous les terrains qui tapent pour ≥ 1 comptent. land0 (Maze of Ith) est EXCLU : il ne
+// produit pas de mana, ce n'est pas un terrain « utile » pour décider de garder une main.
 const LAND_CODES = [
   kindCode.land, kindCode.landT, kindCode.city, kindCode.vein,
-  kindCode.landGrant, kindCode.landScry,
+  kindCode.landGrant, kindCode.landScry, kindCode.scorched,
+  kindCode.urzaMine, kindCode.urzaPP, kindCode.urzaTower, kindCode.planarNexus,
 ] as const
 
 export function landsInHand(hand: Hand): number {

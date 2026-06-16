@@ -24,10 +24,9 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
     'Darksteel Citadel', 'Dust Bowl',
     'Fountainport', 'Gemstone Caverns',
     "Inventors' Fair", "Mishra's Factory", "Mishra's Foundry", 'Mutavault',
-    'Petrified Hamlet', 'Planar Nexus', 'Rishadan Port',
+    'Petrified Hamlet', 'Rishadan Port',
     'Snow-Covered Wastes', 'Talon Gates of Madara',
-    "Thespian's Stage", "Urza's Cave", "Urza's Mine",
-    "Urza's Power Plant", "Urza's Saga", "Urza's Tower", "Urza's Workshop",
+    "Thespian's Stage", "Urza's Cave", "Urza's Saga", "Urza's Workshop",
     'War Room',
   ],
   landT: ['Arid Archway', 'Echoing Deeps', 'Vesuva'], // entrent engagés
@@ -36,6 +35,11 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   city: ['City of Traitors', 'Crystal Vein'],
   vein: [], // kind conservé mais inutilisé (Crystal Vein → city)
   scorched: ['Scorched Ruins'], // sacrifie 2 terrains dégagés à l'arrivée, tape pour 4
+  // Tron (set complet : Mine/PP tapent 2, Tower 3) ; Planar Nexus = toutes les pièces (tape 1).
+  urzaMine: ["Urza's Mine"],
+  urzaPP: ["Urza's Power Plant"],
+  urzaTower: ["Urza's Tower"],
+  planarNexus: ['Planar Nexus'],
   land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
   landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
   // terrains dégagés qui scry/surveil 1 à l'arrivée (filtrent la prochaine pioche)

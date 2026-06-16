@@ -2,7 +2,9 @@
  * Modèle de mana et état de jeu minimal (spec §3.3) + production par caillou et Suspend.
  */
 
-export type LandDrop = 'none' | 'land' | 'landT' | 'vein' | 'city' | 'land0' | 'landGrant' | 'landScry' | 'scorched'
+export type LandDrop =
+  | 'none' | 'land' | 'landT' | 'vein' | 'city' | 'land0' | 'landGrant' | 'landScry' | 'scorched'
+  | 'urzaMine' | 'urzaPP' | 'urzaTower' | 'planarNexus'
 
 /** Une carte en exil suspendu : se résout quand `turnsLeft` atteint 0. */
 export interface SuspendTimer {
@@ -26,6 +28,11 @@ export interface Battlefield {
   bank: number // mana banqué disponible CE tour (Jeweled Amulet), one-shot
   pendingBank: number // mana banqué ce tour, disponible au tour suivant
   scorched: number // Scorched Ruins en jeu (tape pour 4 chacun)
+  // Tron : pièces en jeu. Nexus compte comme Mine/PP/Tower pour les conditions (mais tape 1).
+  uMine: number
+  uPP: number
+  uTower: number
+  uNexus: number // Planar Nexus (tous les types)
 }
 
 export function emptyBattlefield(): Battlefield {
@@ -44,7 +51,33 @@ export function emptyBattlefield(): Battlefield {
     bank: 0,
     pendingBank: 0,
     scorched: 0,
+    uMine: 0,
+    uPP: 0,
+    uTower: 0,
+    uNexus: 0,
   }
+}
+
+/**
+ * Mana du Tron pour des compteurs de pièces donnés. Planar Nexus (`nexus`) compte comme
+ * Mine, Power-Plant ET Tower pour les conditions des autres pièces, mais ne tape que pour 1
+ * (un type de terrain non-basique n'accorde pas l'aptitude, seulement le type).
+ *   Mine/PP → 2 si le set est complet ; Tower → 3 ; sinon 1 chacun.
+ */
+/** Terrains dégagés à ~1 mana sacrifiables par Scorched Ruins (terrains simples + pièces Tron). */
+export function scorchedSacPool(bf: Battlefield): number {
+  return bf.plain + bf.uMine + bf.uPP + bf.uTower + bf.uNexus
+}
+
+export function tronMana(mine: number, pp: number, tower: number, nexus: number): number {
+  const hasMine = mine + nexus > 0
+  const hasPP = pp + nexus > 0
+  const hasTower = tower + nexus > 0
+  let t = nexus // Nexus : 1 chacun
+  t += mine * (hasPP && hasTower ? 2 : 1)
+  t += pp * (hasMine && hasTower ? 2 : 1)
+  t += tower * (hasMine && hasPP ? 3 : 1)
+  return t
 }
 
 /**
@@ -66,6 +99,14 @@ export function computeMana(bf: Battlefield, drop: LandDrop): number {
   else if (drop === 'landGrant') mana += 1 // donneur de type : tape pour 1 comme un terrain normal
   else if (drop === 'landScry') mana += 1 // terrain à scry/surveil : tape pour 1 comme un terrain normal
   else if (drop === 'scorched') mana += 4 - 2 // Scorched Ruins : tape pour 4, en sacrifiant 2 terrains dégagés (comptés dans bf.plain)
+  // Tron : mana interdépendant (la pièce posée ce tour entre dégagée → comptée tout de suite).
+  {
+    const mine = bf.uMine + (drop === 'urzaMine' ? 1 : 0)
+    const pp = bf.uPP + (drop === 'urzaPP' ? 1 : 0)
+    const tower = bf.uTower + (drop === 'urzaTower' ? 1 : 0)
+    const nexus = bf.uNexus + (drop === 'planarNexus' ? 1 : 0)
+    mana += tronMana(mine, pp, tower, nexus)
+  }
   // Terrains sans mana (Maze of Ith) : produisent 1 chacun SI un donneur de type est en jeu
   // (Yavimaya/Urborg les rend Forêt/Marais), y compris celui qu'on poserait ce tour-ci.
   const granted = bf.granters > 0 || drop === 'landGrant'
@@ -108,11 +149,24 @@ export function applyDrop(bf: Battlefield, drop: LandDrop): void {
       bf.scry += 1 // déclenche un filtre scry/surveil 1 (résolu après le développement)
       bf.city = false
       break
-    case 'scorched':
-      bf.plain -= 2 // sacrifie 2 terrains dégagés à l'arrivée (appelant garantit plain ≥ 2)
+    case 'scorched': {
+      // sacrifie 2 terrains dégagés à ~1 mana : d'abord les terrains simples, puis les pièces
+      // Tron si besoin (l'appelant garantit que le pool plain+Tron ≥ 2).
+      let need = 2
+      const fromPlain = Math.min(need, bf.plain)
+      bf.plain -= fromPlain
+      need -= fromPlain
+      for (const k of ['uNexus', 'uMine', 'uPP', 'uTower'] as const) {
+        while (need > 0 && bf[k] > 0) { bf[k] -= 1; need -= 1 }
+      }
       bf.scorched += 1 // tape pour 4, dégagé dès ce tour
       bf.city = false
       break
+    }
+    case 'urzaMine': bf.uMine += 1; bf.city = false; break
+    case 'urzaPP': bf.uPP += 1; bf.city = false; break
+    case 'urzaTower': bf.uTower += 1; bf.city = false; break
+    case 'planarNexus': bf.uNexus += 1; bf.city = false; break
     case 'none':
       break
   }

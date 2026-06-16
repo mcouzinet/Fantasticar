@@ -28,6 +28,11 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   landScry: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
   // Scorched Ruins : sacrifie 2 terrains dégagés à l'arrivée, tape pour 4 (cf. mana/develop).
   scorched: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  // Tron : production interdépendante calculée dans mana.ts (Mine/PP→2, Tower→3 si set complet).
+  urzaMine: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  urzaPP: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  urzaTower: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  planarNexus: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
 
   // — Sorts non-créature : sorts de combo —
   zero: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },

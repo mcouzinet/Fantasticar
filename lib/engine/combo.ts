@@ -2,7 +2,7 @@ import type { Kind, SpellTable } from './types'
 import { KINDS, kindCode } from './types'
 import { FANTASTICAR_COST } from './spellTable'
 import type { Hand } from './hand'
-import { computeMana, type Battlefield, type LandDrop } from './mana'
+import { computeMana, scorchedSacPool, type Battlefield, type LandDrop } from './mana'
 
 /**
  * Contexte de combo précalculé à partir de la SpellTable : on sépare les sorts de
@@ -135,7 +135,11 @@ export function bestCombo(
   if (hand[kindCode.vein]! > 0 && feasible(k, m, computeMana(bf, 'vein'), fCast, f, free)) return true
   if (hand[kindCode.city]! > 0 && feasible(k, m, computeMana(bf, 'city'), fCast, f, free)) return true
   if (hand[kindCode.land0]! > 0 && feasible(k, m, computeMana(bf, 'land0'), fCast, f, free)) return true
-  if (hand[kindCode.scorched]! > 0 && bf.plain >= 2 && feasible(k, m, computeMana(bf, 'scorched'), fCast, f, free)) return true
+  if (hand[kindCode.scorched]! > 0 && scorchedSacPool(bf) >= 2 && feasible(k, m, computeMana(bf, 'scorched'), fCast, f, free)) return true
+  if (hand[kindCode.urzaMine]! > 0 && feasible(k, m, computeMana(bf, 'urzaMine'), fCast, f, free)) return true
+  if (hand[kindCode.urzaPP]! > 0 && feasible(k, m, computeMana(bf, 'urzaPP'), fCast, f, free)) return true
+  if (hand[kindCode.urzaTower]! > 0 && feasible(k, m, computeMana(bf, 'urzaTower'), fCast, f, free)) return true
+  if (hand[kindCode.planarNexus]! > 0 && feasible(k, m, computeMana(bf, 'planarNexus'), fCast, f, free)) return true
   return false
 }
 
@@ -189,11 +193,15 @@ export interface ComboLine {
   spellKinds: number[] // kinds des sorts non-créature lancés depuis la main (hors Fantasticar)
 }
 
-const DROP_CANDIDATES: LandDrop[] = ['none', 'land', 'landGrant', 'landScry', 'landT', 'vein', 'city', 'land0', 'scorched']
+const DROP_CANDIDATES: LandDrop[] = [
+  'none', 'land', 'landGrant', 'landScry', 'landT', 'vein', 'city', 'land0', 'scorched',
+  'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus',
+]
 const DROP_KIND: Partial<Record<LandDrop, number>> = {
   land: kindCode.land, landGrant: kindCode.landGrant, landScry: kindCode.landScry,
   landT: kindCode.landT, vein: kindCode.vein, city: kindCode.city, land0: kindCode.land0,
   scorched: kindCode.scorched,
+  urzaMine: kindCode.urzaMine, urzaPP: kindCode.urzaPP, urzaTower: kindCode.urzaTower, planarNexus: kindCode.planarNexus,
 }
 
 /**
@@ -221,7 +229,7 @@ export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast
 
   for (const drop of DROP_CANDIDATES) {
     if (drop !== 'none' && hand[DROP_KIND[drop]!]! <= 0) continue
-    if (drop === 'scorched' && bf.plain < 2) continue // besoin de 2 terrains dégagés à sacrifier
+    if (drop === 'scorched' && scorchedSacPool(bf) < 2) continue // besoin de 2 terrains dégagés à sacrifier
     const mana = computeMana(bf, drop)
     if (need <= 0) {
       if (mana >= fCost) return { drop, spellKinds: [] }
