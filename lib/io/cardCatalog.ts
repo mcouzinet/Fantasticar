@@ -52,6 +52,10 @@ export const CARD_CATALOG: Record<string, Kind> = {
 
   // — Caillou coût 3 —
   'Patchwork Banner': 'rock3',
+  'Honor-Worn Shaku': 'rock3', // {3}, {T}: {C}
+
+  // — Caillou coût 4 (tape pour 3) —
+  'Thran Dynamo': 'dynamo',
 
   // — Sorts à 0 —
   'Chalice of the Void': 'zero', // {X}{X}, joué X=0
@@ -70,6 +74,7 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Relic of Progenitus': 'chrom', // {1} ; activation pioche = {1},T,sac (sans mana) → sort à 1 net
   'Vexing Bauble': 'chrom', // {1} ; activation pioche = {1},T,sac (sans mana) → sort à 1 net
   "Conjurer's Bauble": 'one', // {1} ; sac (sans coût) → pioche
+  "Wayfarer's Bauble": 'one', // {1} ; rampe lente ({2},sac → terrain de base engagé)
   'Candy Trail': 'one',
   'Currency Converter': 'one',
   'Eldritch Immunity': 'one',
@@ -88,6 +93,9 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Ugin, the Ineffable': 'o6',
 
   // — Créatures —
+  // Metalworker : artefact-créature qui produit beaucoup de mana, mais créature (mal d'invocation,
+  // conditionnel aux artefacts en main) → modélisé conservativement en créature (mana non simulé).
+  Metalworker: 'creature',
   'Arcbound Ravager': 'creature',
   'Compass Gnome': 'creature',
   'It That Heralds the End': 'creature',

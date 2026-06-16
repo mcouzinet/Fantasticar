@@ -9,7 +9,7 @@ export type Kind =
   | 'scorched' // Scorched Ruins : sacrifie 2 terrains dégagés à l'arrivée, tape pour 4
   | 'urzaMine' | 'urzaPP' | 'urzaTower' | 'planarNexus' // Tron : Mine/PP tapent 2, Tower 3 (set complet) ; Nexus = tous les types
   | 'zero' | 'amulet' | 'rock2u' | 'rock2t' | 'rock3'
-  | 'basalt' | 'mightstone' | 'sol' // cailloux à profil mana particulier
+  | 'basalt' | 'mightstone' | 'dynamo' | 'sol' // cailloux à profil mana particulier
   | 'one' | 'chrom' | 'two'
   | 'o3' | 'o4' | 'o5' | 'o6' | 'o7'
   | 'creature'
@@ -20,7 +20,7 @@ export const KINDS: readonly Kind[] = [
   'land0', 'landGrant', 'landScry', 'scorched',
   'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus',
   'zero', 'amulet', 'rock2u', 'rock2t', 'rock3',
-  'basalt', 'mightstone', 'sol',
+  'basalt', 'mightstone', 'dynamo', 'sol',
   'one', 'chrom', 'two',
   'o3', 'o4', 'o5', 'o6', 'o7',
   'creature',

@@ -27,6 +27,7 @@ export const KIND_META: Record<Kind, KindMeta> = {
   rock3: { label: 'Caillou 3', full: 'Caillou — coût 3', color: 'var(--k-rock)' },
   basalt: { label: 'Monolith', full: 'Basalt Monolith (3 → 3, net 0)', color: 'var(--k-rock)' },
   mightstone: { label: 'Caillou 5', full: 'Mightstone & Weakstone (5 → 2)', color: 'var(--k-rock)' },
+  dynamo: { label: 'Caillou 4', full: 'Thran Dynamo (4 → tape pour 3)', color: 'var(--k-rock)' },
   sol: { label: 'Suspend', full: 'Sol Talisman (Suspend 3 → caillou 2)', color: 'var(--k-rock)' },
   one: { label: '1', full: 'Sort non-créature — coût 1', color: 'var(--k-one)' },
   chrom: { label: 'Chrom', full: 'Cantrip à 1 (Chromatic, Relic — 1 pour piocher)', color: 'var(--k-one)' },

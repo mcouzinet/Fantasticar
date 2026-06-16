@@ -47,6 +47,8 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   basalt: { cost: 3, refund: 3, isComboSpell: true, producesMana: false, tappedRock: false },
   // The Mightstone and Weakstone : {5}, tape pour {C}{C} → tapsFor 2, refund 2.
   mightstone: { cost: 5, refund: 2, isComboSpell: true, producesMana: true, tappedRock: false, tapsFor: 2 },
+  // Thran Dynamo : {4}, tape pour {C}{C}{C} → tapsFor 3, refund 3 (net 1 le tour lancé).
+  dynamo: { cost: 4, refund: 3, isComboSpell: true, producesMana: true, tappedRock: false, tapsFor: 3 },
   // Sol Talisman : Suspend 3—{1} (paie {1}, 3 marqueurs temps → lancé à T+3, ~T4), tape pour
   //   {C}{C}. Déployé via le mécanisme suspend : à la résolution il entre (rampe +2) ET compte
   //   comme un sort non-créature lancé ce tour (impacte donc le combo T4, pas T3).

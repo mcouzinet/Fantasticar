@@ -66,6 +66,7 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   rock3: [], // caillou coût 3 (type Solar Transformer) — aucun dans cette liste
   basalt: ['Basalt Monolith'],
   mightstone: ['The Mightstone and Weakstone'],
+  dynamo: [], // Thran Dynamo (candidat, catalogue) — aucun dans la liste de référence
   sol: ['Sol Talisman'],
 
   // — SORTS À 1 (10) —

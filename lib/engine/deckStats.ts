@@ -21,7 +21,7 @@ export interface GroupDef {
 export const GROUPS: GroupDef[] = [
   { id: 'lands', label: 'Terrains', kinds: ['land', 'landT', 'city', 'vein', 'land0', 'landGrant', 'landScry', 'scorched', 'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus'] },
   { id: 'zeros', label: 'Sorts à 0', kinds: ['zero', 'amulet'] },
-  { id: 'rocks', label: 'Cailloux', kinds: ['rock2u', 'rock3', 'basalt', 'mightstone', 'sol'] },
+  { id: 'rocks', label: 'Cailloux', kinds: ['rock2u', 'rock3', 'basalt', 'mightstone', 'dynamo', 'sol'] },
   { id: 'rocksTapped', label: 'Cailloux engagés', kinds: ['rock2t'] },
   { id: 'ones', label: 'Sorts à 1', kinds: ['one', 'chrom'] },
   { id: 'twos', label: 'Sorts à 2', kinds: ['two'] },
