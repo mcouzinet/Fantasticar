@@ -19,7 +19,7 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Cookie&family=JetBrains+Mono:wght@500;700&display=swap',
         },
       ],
       // Mesure d'audience anonyme, sans cookie (GoatCounter).

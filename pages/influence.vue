@@ -54,7 +54,10 @@ function barStyle(t3: number) {
   <div class="shell">
     <header class="topbar">
       <NuxtLink to="/" class="back">← Retour au labo</NuxtLink>
-      <a class="src" href="https://github.com/mcouzinet/Fantasticar" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <div class="right">
+        <a class="src" href="https://github.com/mcouzinet/Fantasticar" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <BuyMeCoffee />
+      </div>
     </header>
 
     <div class="wrap">
@@ -124,6 +127,11 @@ function barStyle(t3: number) {
   padding-bottom: 14px;
   margin-bottom: 8px;
   border-bottom: 1px solid var(--border);
+}
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .back,
 .src {

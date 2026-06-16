@@ -106,6 +106,7 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
           </svg>
           GitHub
         </a>
+        <BuyMeCoffee />
       </div>
     </header>
 
