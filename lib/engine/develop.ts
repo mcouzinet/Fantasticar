@@ -84,23 +84,36 @@ function removeDrop(hand: Hand, drop: LandDrop): void {
 }
 
 // — Filtre scry/surveil 1 (cf. game.ts) —
-// On ne JETTE que les cartes qui n'aident jamais le combo précoce ; tout le reste (terrains,
-// cailloux, sorts non-créature castables) peut servir, donc on le GARDE. Jeter une carte
-// "en trop" (encore semi-utile) contre une inconnue ferait en moyenne BAISSER le combo —
-// vérifié en A/B. On reste donc conservateur : le scry ne peut qu'aider ou être neutre.
-const SCRY_BIN = new Set<number>([
-  kindCode.creature, // jamais un sort de combo
-  LAND0, // Maze of Ith : 0 mana
-  kindCode.o6, // sorts beaucoup trop chers pour le combo (≥ 6)
-  kindCode.o7,
-])
+// On garde une carte tant que sa catégorie manque encore pour assembler le combo ; sinon on
+// la jette (bottom/cimetière) pour piocher la suivante et creuser la pièce manquante.
+const MANA_OK = 3 // sources de mana visées : de quoi lancer le Fantasticar, puis on creuse les sorts
+const SPELLS_OK = 4 // sorts non-créature bon marché visés (les 4 du combo)
+
+const ALWAYS_BIN = new Set<number>([kindCode.creature, LAND0, kindCode.o6, kindCode.o7])
+const ROCKS = [
+  kindCode.rock2u, kindCode.rock2t, kindCode.rock3,
+  kindCode.basalt, kindCode.mightstone, kindCode.sol,
+]
+const MANA_LANDS = [LAND, LANDT, VEIN, CITY, LANDGRANT, LANDSCRY]
+const CHEAP_SPELLS = [kindCode.zero, kindCode.one, kindCode.chrom, kindCode.two]
 
 /**
- * Décision scry/surveil 1 sur la carte du dessus (kind).
- * `true` = on la garde (on la piochera) ; `false` = on s'en débarrasse (on piochera la suivante).
+ * Décision scry/surveil 1 sur la carte du dessus (kind), selon l'état de la main.
+ * `true` = on la garde ; `false` = on s'en débarrasse (on piochera la suivante).
  */
-export function scryKeep(_hand: Hand, kind: number): boolean {
-  return !SCRY_BIN.has(kind)
+export function scryKeep(hand: Hand, kind: number): boolean {
+  if (ALWAYS_BIN.has(kind)) return false // jamais utile au combo précoce
+  let mana = 0
+  for (const k of MANA_LANDS) mana += hand[k]!
+  for (const k of ROCKS) mana += hand[k]!
+  let cheap = 0
+  for (const k of CHEAP_SPELLS) cheap += hand[k]!
+  // terrain : utile seulement tant qu'on manque de sources de mana
+  if (MANA_LANDS.includes(kind)) return mana < MANA_OK
+  // caillou : mana ET carburant de combo
+  if (ROCKS.includes(kind)) return mana < MANA_OK || cheap < SPELLS_OK
+  // sorts non-créature castables (bon marché + o3/o4/o5) : utiles tant qu'on n'a pas les 4
+  return cheap < SPELLS_OK
 }
 
 /**
