@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type { T2RecipesResult } from '~/lib/engine/trace'
+import { KIND_META } from '~/lib/ui/kinds'
 
 const props = defineProps<{ data: T2RecipesResult | null }>()
 
 const rows = computed(() => {
   if (!props.data || props.data.t2Count === 0) return []
-  const { cards, t2Count } = props.data
-  const list = cards
-    .filter((c) => c.name !== 'The Fantasticar') // toujours présent (commander) → non informatif
-    .map((c) => ({ name: c.name, pct: c.count / t2Count }))
-  return list
+  const { groups, t2Count } = props.data
+  return groups
+    .map((g) => ({ label: KIND_META[g.kind].full, pct: g.count / t2Count }))
+    .filter((r) => r.pct >= 0.005) // masque les catégories quasi absentes (< 0,5 %)
 })
 const maxPct = computed(() => rows.value.reduce((m, r) => Math.max(m, r.pct), 0) || 1)
 </script>
@@ -21,15 +21,15 @@ const maxPct = computed(() => rows.value.reduce((m, r) => Math.max(m, r.pct), 0)
     <template v-if="data && data.t2Count > 0">
       <p class="intro faint">
         Sur <b>{{ data.t2Count.toLocaleString('fr-FR') }}</b> combos T2 (échantillon de
-        {{ data.games.toLocaleString('fr-FR') }} parties). Fréquence à laquelle chaque carte apparaît
-        dans la ligne gagnante. <b>The Fantasticar</b> y est toujours (commander, hors des 99).
-        À T2 il faut quasi toujours une <b>source de 2 mana</b> (Crystal Vein / City of Traitors /
-        Jeweled Amulet) + <b>3 sorts à 0</b> au choix — d'où les sorts à 0 tous autour de ~12 %.
+        {{ data.games.toLocaleString('fr-FR') }} parties). Pour chaque <b>catégorie</b>, part des
+        combos T2 qui en utilisent au moins une carte. À T2 il faut quasi toujours une
+        <b>source de 2 mana</b> (City of Traitors / Crystal Vein) + des <b>sorts à 0</b> ;
+        Jeweled Amulet aide une partie du temps.
       </p>
 
       <ul class="bars">
-        <li v-for="r in rows" :key="r.name">
-          <span class="nm" :title="r.name">{{ r.name }}</span>
+        <li v-for="r in rows" :key="r.label">
+          <span class="nm" :title="r.label">{{ r.label }}</span>
           <span class="track"><span class="fill" :style="{ width: `${(r.pct / maxPct) * 100}%` }" /></span>
           <span class="pct">{{ (r.pct * 100).toFixed(0) }}%</span>
         </li>
@@ -59,7 +59,7 @@ const maxPct = computed(() => rows.value.reduce((m, r) => Math.max(m, r.pct), 0)
 }
 .bars li {
   display: grid;
-  grid-template-columns: 190px 1fr 40px;
+  grid-template-columns: 280px 1fr 40px;
   align-items: center;
   gap: 10px;
 }

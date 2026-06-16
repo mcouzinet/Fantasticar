@@ -1,5 +1,5 @@
-import type { Deck, SimConfig, SpellTable } from './types'
-import { KIND_COUNT, kindCode } from './types'
+import type { Deck, Kind, SimConfig, SpellTable } from './types'
+import { KIND_COUNT, KINDS, kindCode } from './types'
 import { DEFAULT_SPELL_TABLE } from './spellTable'
 import { mulberry32 } from './prng'
 import { newHand } from './hand'
@@ -8,13 +8,13 @@ import { buildComboContext, traceCombo } from './combo'
 import { buildDevelopContext, develop, scryKeep } from './develop'
 import { openingHand } from './mulligan'
 
-export interface T2CardFreq {
-  name: string // nom de carte
-  count: number // nb de combos T2 où la carte apparaît
+export interface T2Group {
+  kind: Kind // catégorie de carte
+  count: number // nb de combos T2 utilisant AU MOINS une carte de cette catégorie
 }
 
 export interface T2RecipesResult {
-  cards: T2CardFreq[] // cartes présentes dans les combos T2, triées par fréquence décroissante
+  groups: T2Group[] // catégories présentes dans les combos T2, triées par fréquence décroissante
   t2Count: number // nombre total de combos T2 échantillonnés (2 axes)
   games: number // parties simulées (2 × itérations)
 }
@@ -22,6 +22,8 @@ export interface T2RecipesResult {
 const DROP_KIND: Partial<Record<LandDrop, number>> = {
   land: kindCode.land, landGrant: kindCode.landGrant, landScry: kindCode.landScry,
   landT: kindCode.landT, vein: kindCode.vein, city: kindCode.city, land0: kindCode.land0,
+  scorched: kindCode.scorched,
+  urzaMine: kindCode.urzaMine, urzaPP: kindCode.urzaPP, urzaTower: kindCode.urzaTower, planarNexus: kindCode.planarNexus,
 }
 
 /**
@@ -41,8 +43,10 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
   }
   const total = kindByCard.length
   const baseKind = Int8Array.from(kindByCard)
+  const nameToKind = new Map<string, number>() // nom → kindCode (pour regrouper par catégorie)
+  for (let i = 0; i < total; i++) nameToKind.set(nameByCard[i]!, kindByCard[i]!)
 
-  const cardCount = new Map<string, number>() // nom → nb de combos T2 contenant la carte
+  const kindCount = new Map<number, number>() // kindCode → nb de combos T2 utilisant ≥1 carte du kind
   let t2Count = 0
 
   const hand = newHand()
@@ -90,7 +94,10 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
               if (line.drop !== 'none') recipe.push(popName(handCards, DROP_KIND[line.drop]!))
               for (const sk of line.spellKinds) recipe.push(popName(handCards, sk))
               recipe.push('The Fantasticar')
-              for (const n of new Set(recipe)) cardCount.set(n, (cardCount.get(n) ?? 0) + 1)
+              // regroupe par catégorie : 1 incrément par kind présent dans la recette
+              const kinds = new Set<number>()
+              for (const n of recipe) { const k = nameToKind.get(n); if (k !== undefined) kinds.add(k) }
+              for (const k of kinds) kindCount.set(k, (kindCount.get(k) ?? 0) + 1)
             }
             break // la partie s'arrête au combo
           }
@@ -116,9 +123,9 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
   runAxis(true, config.seed)
   runAxis(false, (config.seed ^ 0x9e3779b9) >>> 0)
 
-  const cards: T2CardFreq[] = [...cardCount.entries()]
-    .map(([name, count]) => ({ name, count }))
+  const groups: T2Group[] = [...kindCount.entries()]
+    .map(([code, count]) => ({ kind: KINDS[code]!, count }))
     .sort((a, b) => b.count - a.count)
 
-  return { cards, t2Count, games: config.iterations * 2 }
+  return { groups, t2Count, games: config.iterations * 2 }
 }
