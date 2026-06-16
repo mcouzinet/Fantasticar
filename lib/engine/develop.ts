@@ -87,7 +87,7 @@ function removeDrop(hand: Hand, drop: LandDrop): void {
 // On garde une carte tant que sa catégorie manque encore pour assembler le combo ; sinon on
 // la jette (bottom/cimetière) pour piocher la suivante et creuser la pièce manquante.
 const MANA_OK = 3 // sources de mana visées : de quoi lancer le Fantasticar, puis on creuse les sorts
-const SPELLS_OK = 4 // sorts non-créature bon marché visés (les 4 du combo)
+const SPELLS_OK = 3 // sorts non-créature à trouver en main : 3 + le Fantasticar (zone de commandement) = les 4
 
 const ALWAYS_BIN = new Set<number>([kindCode.creature, LAND0, kindCode.o6, kindCode.o7])
 const ROCKS = [

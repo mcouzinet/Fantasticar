@@ -37,8 +37,8 @@ describe('scryKeep — garde la pièce manquante, jette le superflu (contextuel)
     expect(scryKeep(handOf('land', 'land', 'land', 'land', 'zero', 'zero'), k('land'))).toBe(false)
   })
 
-  it('garde un sort bon marché tant qu’on n’a pas les 4, le jette ensuite', () => {
-    expect(scryKeep(handOf('zero', 'zero'), k('zero'))).toBe(true) // 2 < 4 → on creuse encore
-    expect(scryKeep(handOf('zero', 'zero', 'zero', 'one'), k('zero'))).toBe(false) // déjà 4
+  it('garde un sort bon marché tant qu’on n’a pas les 3 (le 4e du combo = le Fantasticar)', () => {
+    expect(scryKeep(handOf('zero', 'zero'), k('zero'))).toBe(true) // 2 < 3 → on creuse encore
+    expect(scryKeep(handOf('zero', 'zero', 'one'), k('zero'))).toBe(false) // déjà 3 en main + Fantasticar
   })
 })
