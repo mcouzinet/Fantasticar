@@ -148,6 +148,7 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
                 const code = nameToKind.get(n)
                 if (code === undefined) continue // « The Fantasticar » (commander)
                 const kind = KINDS[code]!
+                if (kind === 'sol') continue // Sol Talisman : suspend 3, ne se résout jamais avant le T2
                 let tok: string
                 if (kind === 'city') tok = n
                 else if (kind === 'amulet') tok = amuletIsMana ? 'Jeweled Amulet' : 'sort à 0'
