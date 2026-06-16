@@ -18,6 +18,8 @@ function deltaPt(cur: number, base: number) {
   return (cur - base) * 100
 }
 
+const avg = (r: SimResult) => (r.onPlay.t3 + r.onDraw.t3) / 2
+
 const gauges = computed(() => [
   {
     key: 'play',
@@ -25,6 +27,13 @@ const gauges = computed(() => [
     value: props.primary.onPlay.t3,
     base: props.compare?.onPlay.t3,
     color: 'var(--accent-2)',
+  },
+  {
+    key: 'avg',
+    label: 'Moyenne play/draw',
+    value: avg(props.primary),
+    base: props.compare ? avg(props.compare) : undefined,
+    color: 'var(--good)',
   },
   {
     key: 'draw',
@@ -105,9 +114,14 @@ const gauges = computed(() => [
 }
 .gauges {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
-  max-width: 560px;
+  max-width: 760px;
+}
+@media (max-width: 560px) {
+  .gauges {
+    grid-template-columns: 1fr;
+  }
 }
 .gauge {
   display: flex;
