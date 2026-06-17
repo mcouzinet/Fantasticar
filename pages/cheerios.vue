@@ -61,9 +61,33 @@ const SCORE_LABEL: Record<number, string> = {
 // Tri par pertinence décroissante en conservant l'ordre fourni au sein d'un tier.
 const sorted = CHEERIOS.map((c, i) => ({ ...c, i })).sort((a, b) => b.score - a.score || a.i - b.i)
 
-// Image de la carte (Scryfall, endpoint « named » → toujours résolu, toutes éditions confondues).
+// Images : on résout les 31 cartes en UNE seule requête « cards/collection » (méthode
+// recommandée par Scryfall). Elle renvoie des URLs du CDN, NON rate-limitées — contrairement
+// à 31 appels « named » en parallèle qui se faisaient jeter (429 → repli céréales).
+const FALLBACK = '/cherrios.png'
+const imgByName = ref<Record<string, string>>({})
+onMounted(async () => {
+  const map: Record<string, string> = {}
+  try {
+    const res = await fetch('https://api.scryfall.com/cards/collection', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifiers: CHEERIOS.map((c) => ({ name: c.name })) }),
+    })
+    const data = await res.json()
+    for (const card of data?.data ?? []) {
+      const uri = card?.image_uris?.normal ?? card?.card_faces?.[0]?.image_uris?.normal
+      if (uri) map[card.name] = uri
+    }
+  } catch {
+    /* hors-ligne / Scryfall indispo : on tombera sur le motif céréales */
+  }
+  // Tout ce qui manque → motif céréales (repli thématique).
+  for (const c of CHEERIOS) if (!map[c.name]) map[c.name] = FALLBACK
+  imgByName.value = map
+})
 function imgUrl(name: string) {
-  return `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}&format=image&version=normal`
+  return imgByName.value[name] ?? FALLBACK
 }
 function scryfallUrl(name: string) {
   return `https://scryfall.com/search?q=${encodeURIComponent('!"' + name + '"')}`
@@ -130,13 +154,16 @@ const previewStyle = computed(() => {
           @mouseleave="hidePreview"
         >
           <img
+            v-if="imgByName[c.name]"
             class="thumb"
+            :class="{ 'is-fallback': imgByName[c.name] === FALLBACK }"
             :src="imgUrl(c.name)"
             :alt="c.name"
             loading="lazy"
             referrerpolicy="no-referrer"
             @error="onImgError"
           />
+          <span v-else class="thumb thumb-ph" aria-hidden="true" />
           <a class="name" :href="scryfallUrl(c.name)" target="_blank" rel="noopener noreferrer">{{ c.name }}</a>
           <span class="stars" :aria-label="`${c.score} sur 5`">
             <span v-for="n in 5" :key="n" :class="n <= c.score ? 'on' : 'off'">★</span>
