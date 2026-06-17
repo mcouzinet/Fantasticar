@@ -52,13 +52,7 @@ function barStyle(t3: number) {
 
 <template>
   <div class="shell">
-    <header class="topbar">
-      <NuxtLink to="/" class="back">← Retour au labo</NuxtLink>
-      <div class="right">
-        <GithubButton />
-        <BuyMeCoffee />
-      </div>
-    </header>
+    <AppNav />
 
     <div class="wrap">
       <h1>Influence des cartes <span class="accent">sur le combo</span></h1>
@@ -119,29 +113,6 @@ function barStyle(t3: number) {
 .shell {
   width: 100%;
   padding: 16px 24px 48px;
-}
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 14px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
-.right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.back,
-.src {
-  font-size: 13px;
-  color: var(--text-dim);
-  text-decoration: none;
-}
-.back:hover,
-.src:hover {
-  color: var(--text);
 }
 .wrap {
   max-width: 1080px;

@@ -76,27 +76,15 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
 
 <template>
   <div class="shell">
-    <header class="topbar">
-      <div class="brand">
-        <FantasticarMark class="brand-mark" />
-        <div>
-          <h1>Fantasticar <span class="accent">Combo Lab</span></h1>
-          <p class="muted">
-            Probabilité de déclencher le combo (4 sorts non-créature / tour) — Duel Commander, goldfish.
-          </p>
-        </div>
-      </div>
-      <div class="topbar-actions">
-        <button class="ghost sm" title="Aide" @click="helpOpen = true">Aide</button>
-        <button class="ghost sm" title="Méthodologie & hypothèses" @click="methodoOpen = true">Méthodologie</button>
-        <button class="ghost sm" title="Copier un lien de partage de ta liste" @click="share">{{ shareLabel }}</button>
-        <button class="ghost sm" title="Recharger la liste de référence" @click="deck.resetToReference()">
-          ↺ Liste de référence
-        </button>
-        <GithubButton />
-        <BuyMeCoffee />
-      </div>
-    </header>
+    <AppNav>
+      <button class="ghost sm" title="Aide" @click="helpOpen = true">Aide</button>
+      <button class="ghost sm" title="Méthodologie & hypothèses" @click="methodoOpen = true">Méthodologie</button>
+      <button class="ghost sm" title="Copier un lien de partage de ta liste" @click="share">{{ shareLabel }}</button>
+      <button class="ghost sm" title="Recharger la liste de référence" @click="deck.resetToReference()">
+        ↺ Liste de référence
+      </button>
+    </AppNav>
+    <p class="tagline muted">Proba du combo (4 sorts non-créature / tour) — Duel Commander, goldfish.</p>
 
     <main class="dash">
       <!-- ZONE DECK (decklist seule → plus de hauteur) -->
@@ -170,59 +158,8 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   margin: 0;
   padding: 20px 24px 36px;
 }
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
-}
-.topbar-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-/* Liens stylés comme des boutons .ghost.sm (les règles button.* ne s'appliquent pas à un <a>). */
-.topbar-actions .navlink {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font: inherit;
-  font-size: 12px;
-  color: var(--text);
-  text-decoration: none;
-  border: 1px solid var(--border);
-  background: transparent;
-  padding: 3px 8px;
-  border-radius: 8px;
-  transition: background 0.12s, border-color 0.12s;
-}
-.topbar-actions .navlink:hover {
-  background: #232c38;
-  border-color: #3a4654;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.brand-mark {
-  flex-shrink: 0;
-}
-.brand h1 {
-  font-size: 23px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.brand .accent {
-  color: var(--accent);
-}
-.brand p {
-  margin: 3px 0 0;
+.tagline {
+  margin: -8px 0 16px;
   font-size: 12.5px;
 }
 
@@ -341,12 +278,6 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
   }
 }
 @media (max-width: 920px) {
-  .topbar {
-    flex-wrap: wrap;
-  }
-  .topbar-actions {
-    flex-shrink: 1;
-  }
   .dash {
     grid-template-columns: 1fr;
     grid-template-areas:
