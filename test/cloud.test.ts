@@ -2,11 +2,13 @@ import { describe, it, expect } from 'vitest'
 import { emptyBattlefield, computeMana, applyDrop, promote } from '../lib/engine/mana'
 import { DEFAULT_SPELL_TABLE, FANTASTICAR_COST } from '../lib/engine/spellTable'
 import { buildComboContext, bestCombo, comboFeasibleForMana } from '../lib/engine/combo'
+import { buildDevelopContext, develop } from '../lib/engine/develop'
 import { KINDS, kindCode } from '../lib/engine/types'
 import { newHand } from '../lib/engine/hand'
 import { mulberry32 } from '../lib/engine/prng'
 
 const ctx = buildComboContext(DEFAULT_SPELL_TABLE)
+const devCtx = buildDevelopContext(DEFAULT_SPELL_TABLE)
 
 describe('Untaidake, the Cloud Keeper (mana légendaire {C}{C}{C})', () => {
   it('entre engagé : 0 mana le tour posé, +1 générique au tour suivant', () => {
@@ -27,6 +29,22 @@ describe('Untaidake, the Cloud Keeper (mana légendaire {C}{C}{C})', () => {
     expect(comboFeasibleForMana(ctx, hand, 1, false, 0, 1)).toBe(false)
     // Avec 1 mana de plus, on lance le rock2u (générique) ET l'Untaidake paie F : faisable.
     expect(comboFeasibleForMana(ctx, hand, 2, false, 0, 1)).toBe(true)
+  })
+
+  it('Untaidake est posé en priorité (engagé → en ligne le tour suivant), avant un terrain simple', () => {
+    const hand = newHand()
+    hand[kindCode.cloud] = 1
+    hand[kindCode.land] = 1
+    const bf = emptyBattlefield()
+    develop(devCtx, hand, bf, false, 4) // T1, 4 tours restants
+    expect(bf.cloudTapped).toBe(1) // Untaidake posé ce tour
+    expect(hand[kindCode.cloud]).toBe(0)
+    expect(hand[kindCode.land]).toBe(1) // le terrain simple est gardé pour plus tard
+    promote(bf)
+    expect(computeMana(bf, 'none')).toBe(1) // Untaidake dégagé → tape {C}
+    const spells = newHand()
+    spells[kindCode.zero] = 3
+    expect(bestCombo(ctx, spells, bf, false)).toBe(true) // T2 : Untaidake paie le Fantasticar, 3 zeros gratuits
   })
 
   it('un seul Untaidake disponible paie tout le Fantasticar (combo sans autre mana)', () => {

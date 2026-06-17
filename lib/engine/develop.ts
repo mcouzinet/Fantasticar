@@ -63,13 +63,18 @@ const AMULET = kindCode.amulet
 function chooseDrop(hand: Hand, bf: Battlefield, remaining: number): LandDrop {
   // Scorched Ruins : gros boost (+2 mana net, source à 4) dès qu'on a 2 terrains dégagés à sacrifier.
   if (hand[SCORCHED]! > 0 && scorchedSacPool(bf) >= 2) return 'scorched'
-  // terrains engagés à poser tôt (entrent tapped) : Untaidake d'abord (rampe + remise Fantasticar).
-  const hasTapped = hand[LANDT]! > 0 || hand[CLOUD]! > 0
+  // Untaidake : terrain ENGAGÉ qui tape {C}{C}{C} (paie le Fantasticar). Il entre tapped → on le pose
+  // au plus tôt pour qu'il soit en ligne dès le tour suivant (un Untaidake posé T1 débloque le combo
+  // T2, comme City of Traitors + terrain). Le +1 de mana « immédiat » perdu ce tour est rarement
+  // utilisable tôt (pas de caillou à 1). Inutile au tout dernier tour (jamais dégagé).
+  if (hand[CLOUD]! > 0 && remaining >= 1) return 'cloud'
+  // terrains engagés simples (landT) : posés tôt si on a déjà de quoi développer les tours suivants.
+  const hasLandT = hand[LANDT]! > 0
   // terrains dégagés produisant du mana, gardés en réserve (tous sauf landT/cloud/land0)
   const immediate =
     hand[LAND]! + hand[VEIN]! + hand[CITY]! + hand[LANDGRANT]! + hand[LANDSCRY]! +
     hand[SCORCHED]! + hand[UMINE]! + hand[UPP]! + hand[UTOWER]! + hand[UNEXUS]!
-  if (hasTapped && immediate >= remaining) return hand[CLOUD]! > 0 ? 'cloud' : 'landT'
+  if (hasLandT && immediate >= remaining) return 'landT'
   if (hand[LANDSCRY]! > 0) return 'landScry' // priorité : pose "gratuite" qui filtre la pioche
   if (hand[LANDGRANT]! > 0) return 'landGrant' // tape pour 1 + active les Maze
   // Pièces Tron jouées avant les terrains génériques (construit le set ; Nexus = tous les types).
