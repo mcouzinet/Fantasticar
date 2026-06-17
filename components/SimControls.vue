@@ -8,6 +8,15 @@ const emit = defineEmits<{ run: [] }>()
 const sim = useSim()
 const iterations = computed(() => sim.lastConfig.value.iterations)
 
+// Mode de mulligan : modifiable → relance la simulation à chaque changement.
+const mulligan = computed({
+  get: () => sim.lastConfig.value.mulligan,
+  set: (v) => {
+    sim.lastConfig.value = { ...sim.lastConfig.value, mulligan: v }
+    emit('run')
+  },
+})
+
 // Messages thématiques pendant le calcul (clin d'œil au combo).
 const messages = [
   'Mise à feu des réacteurs…',
@@ -42,7 +51,16 @@ onBeforeUnmount(() => {
       {{ props.running ? 'Calcul…' : '▶ Lancer la simulation' }}
     </button>
     <dl class="config">
-      <div><dt>Mulligan</dt><dd>London (→5)</dd></div>
+      <div>
+        <dt><label for="mull">Mulligan</label></dt>
+        <dd>
+          <select id="mull" v-model="mulligan" class="mull" :disabled="props.running">
+            <option value="none">Aucun</option>
+            <option value="london">London (→5)</option>
+            <option value="moxfield">Moxfield</option>
+          </select>
+        </dd>
+      </div>
       <div><dt>Précision</dt><dd>{{ iterations.toLocaleString('fr-FR') }} itérations</dd></div>
     </dl>
     <NuxtLink to="/influence" class="influence-cta" title="Influence de chaque catégorie de carte sur le combo">
@@ -93,6 +111,19 @@ onBeforeUnmount(() => {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-dim);
+}
+.config dt label {
+  cursor: pointer;
+}
+.mull {
+  padding: 3px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.mull:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 /* CTA secondaire mis en valeur, à droite de la rangée de lancement */
 .influence-cta {
