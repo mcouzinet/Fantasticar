@@ -56,18 +56,20 @@ const UMINE = kindCode.urzaMine
 const UPP = kindCode.urzaPP
 const UTOWER = kindCode.urzaTower
 const UNEXUS = kindCode.planarNexus
+const CLOUD = kindCode.cloud
 const AMULET = kindCode.amulet
 
 /** Choix de la pose de terrain (spec §3.5.1). */
 function chooseDrop(hand: Hand, bf: Battlefield, remaining: number): LandDrop {
   // Scorched Ruins : gros boost (+2 mana net, source à 4) dès qu'on a 2 terrains dégagés à sacrifier.
   if (hand[SCORCHED]! > 0 && scorchedSacPool(bf) >= 2) return 'scorched'
-  const hasLandT = hand[LANDT]! > 0
-  // terrains dégagés produisant du mana, gardés en réserve (tous sauf landT/land0)
+  // terrains engagés à poser tôt (entrent tapped) : Untaidake d'abord (rampe + remise Fantasticar).
+  const hasTapped = hand[LANDT]! > 0 || hand[CLOUD]! > 0
+  // terrains dégagés produisant du mana, gardés en réserve (tous sauf landT/cloud/land0)
   const immediate =
     hand[LAND]! + hand[VEIN]! + hand[CITY]! + hand[LANDGRANT]! + hand[LANDSCRY]! +
     hand[SCORCHED]! + hand[UMINE]! + hand[UPP]! + hand[UTOWER]! + hand[UNEXUS]!
-  if (hasLandT && immediate >= remaining) return 'landT'
+  if (hasTapped && immediate >= remaining) return hand[CLOUD]! > 0 ? 'cloud' : 'landT'
   if (hand[LANDSCRY]! > 0) return 'landScry' // priorité : pose "gratuite" qui filtre la pioche
   if (hand[LANDGRANT]! > 0) return 'landGrant' // tape pour 1 + active les Maze
   // Pièces Tron jouées avant les terrains génériques (construit le set ; Nexus = tous les types).
@@ -78,6 +80,7 @@ function chooseDrop(hand: Hand, bf: Battlefield, remaining: number): LandDrop {
   if (hand[LAND]! > 0) return 'land'
   if (hand[VEIN]! > 0) return 'vein'
   if (hand[CITY]! > 0) return 'city' // dégagée, tape pour 2 → avant un terrain engagé (0 mana ce tour)
+  if (hand[CLOUD]! > 0) return 'cloud' // Untaidake (engagé) avant un landT nu : il rampe + remise Fantasticar
   if (hand[LANDT]! > 0) return 'landT'
   if (hand[LAND0]! > 0) return 'land0' // Maze : dernier recours (0 mana sauf donneur)
   return 'none'
@@ -97,6 +100,7 @@ function removeDrop(hand: Hand, drop: LandDrop): void {
     case 'urzaPP': hand[UPP]!--; break
     case 'urzaTower': hand[UTOWER]!--; break
     case 'planarNexus': hand[UNEXUS]!--; break
+    case 'cloud': hand[CLOUD]!--; break
     case 'none': break
   }
 }
@@ -112,7 +116,7 @@ const ROCKS = [
   kindCode.rock2u, kindCode.rock2t, kindCode.rock3,
   kindCode.basalt, kindCode.mightstone, kindCode.sol,
 ]
-const MANA_LANDS = [LAND, LANDT, VEIN, CITY, LANDGRANT, LANDSCRY]
+const MANA_LANDS = [LAND, LANDT, VEIN, CITY, LANDGRANT, LANDSCRY, CLOUD]
 const CHEAP_SPELLS = [kindCode.zero, kindCode.one, kindCode.chrom, kindCode.two]
 
 /**

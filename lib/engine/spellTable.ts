@@ -33,6 +33,9 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   urzaPP: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
   urzaTower: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
   planarNexus: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  // Untaidake, the Cloud Keeper : terrain qui entre engagé. Tape pour {C} (1 mana générique) OU
+  // {C}{C}{C} réservé aux sorts légendaires → paie le Fantasticar (cf. mana.ts/combo.ts).
+  cloud: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
 
   // — Sorts non-créature : sorts de combo —
   zero: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },

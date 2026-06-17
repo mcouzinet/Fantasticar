@@ -54,6 +54,10 @@ export function buildComboContext(table: SpellTable): ComboContext {
 /**
  * Faisabilité du combo pour un mana donné (sans énumération de pose de terrain).
  * Exposé pour les tests (fuzz vs brute-force).
+ *
+ * `clouds` = nb d'Untaidake DÉGAGÉS disponibles. `mana` est le pool générique SANS eux. Chaque
+ * Untaidake est soit +1 générique (mana flexible), soit {C}{C}{C} réservé au Fantasticar (le seul
+ * sort légendaire) — choix exploré dans `feasible`.
  */
 export function comboFeasibleForMana(
   ctx: ComboContext,
@@ -61,6 +65,7 @@ export function comboFeasibleForMana(
   mana: number,
   fCast: boolean,
   free = 0,
+  clouds = 0,
 ): boolean {
   let k = 0
   for (let i = 0; i < ctx.refunderKinds.length && k < MAX_REFUNDERS; i++) {
@@ -79,7 +84,7 @@ export function comboFeasibleForMana(
     const cost = ctx.otherCost[i]!
     while (n-- > 0 && m < othCost.length) othCost[m++] = cost
   }
-  return feasible(k, m, mana, fCast, ctx.fantasticarCost, free)
+  return feasible(k, m, mana, fCast, ctx.fantasticarCost, free, clouds)
 }
 
 const MAX_REFUNDERS = 6 // cap §3.4 : borne l'énumération de sous-ensembles à 2^6
@@ -127,21 +132,25 @@ export function bestCombo(
   // 3. Tester chaque pose de terrain candidate (free = sorts gratuits sortis de suspend ce tour).
   const free = bf.freeCasts
   const f = ctx.fantasticarCost
+  const c = bf.cloud // Untaidake dégagés : mana légendaire {C}{C}{C} pour le Fantasticar (cf. feasible)
   // combo = true : c'est le tour du combo → Crystal Vein peut être sacrifiée pour {C}{C} (+1).
-  const cm = (drop: LandDrop): number => computeMana(bf, drop, true)
-  if (feasible(k, m, cm('none'), fCast, f, free)) return true
-  if (hand[kindCode.land]! > 0 && feasible(k, m, cm('land'), fCast, f, free)) return true
-  if (hand[kindCode.landGrant]! > 0 && feasible(k, m, cm('landGrant'), fCast, f, free)) return true
-  if (hand[kindCode.landScry]! > 0 && feasible(k, m, cm('landScry'), fCast, f, free)) return true
-  if (hand[kindCode.landT]! > 0 && feasible(k, m, cm('landT'), fCast, f, free)) return true
-  if (hand[kindCode.vein]! > 0 && feasible(k, m, cm('vein'), fCast, f, free)) return true
-  if (hand[kindCode.city]! > 0 && feasible(k, m, cm('city'), fCast, f, free)) return true
-  if (hand[kindCode.land0]! > 0 && feasible(k, m, cm('land0'), fCast, f, free)) return true
-  if (hand[kindCode.scorched]! > 0 && scorchedSacPool(bf) >= 2 && feasible(k, m, cm('scorched'), fCast, f, free)) return true
-  if (hand[kindCode.urzaMine]! > 0 && feasible(k, m, cm('urzaMine'), fCast, f, free)) return true
-  if (hand[kindCode.urzaPP]! > 0 && feasible(k, m, cm('urzaPP'), fCast, f, free)) return true
-  if (hand[kindCode.urzaTower]! > 0 && feasible(k, m, cm('urzaTower'), fCast, f, free)) return true
-  if (hand[kindCode.planarNexus]! > 0 && feasible(k, m, cm('planarNexus'), fCast, f, free)) return true
+  // On retire les Untaidake du pool générique (computeMana les compte +1) : `feasible` gère leur
+  // double emploi (générique vs légendaire) via le paramètre `clouds`.
+  const cm = (drop: LandDrop): number => computeMana(bf, drop, true) - c
+  if (feasible(k, m, cm('none'), fCast, f, free, c)) return true
+  if (hand[kindCode.land]! > 0 && feasible(k, m, cm('land'), fCast, f, free, c)) return true
+  if (hand[kindCode.landGrant]! > 0 && feasible(k, m, cm('landGrant'), fCast, f, free, c)) return true
+  if (hand[kindCode.landScry]! > 0 && feasible(k, m, cm('landScry'), fCast, f, free, c)) return true
+  if (hand[kindCode.landT]! > 0 && feasible(k, m, cm('landT'), fCast, f, free, c)) return true
+  if (hand[kindCode.vein]! > 0 && feasible(k, m, cm('vein'), fCast, f, free, c)) return true
+  if (hand[kindCode.city]! > 0 && feasible(k, m, cm('city'), fCast, f, free, c)) return true
+  if (hand[kindCode.land0]! > 0 && feasible(k, m, cm('land0'), fCast, f, free, c)) return true
+  if (hand[kindCode.scorched]! > 0 && scorchedSacPool(bf) >= 2 && feasible(k, m, cm('scorched'), fCast, f, free, c)) return true
+  if (hand[kindCode.urzaMine]! > 0 && feasible(k, m, cm('urzaMine'), fCast, f, free, c)) return true
+  if (hand[kindCode.urzaPP]! > 0 && feasible(k, m, cm('urzaPP'), fCast, f, free, c)) return true
+  if (hand[kindCode.urzaTower]! > 0 && feasible(k, m, cm('urzaTower'), fCast, f, free, c)) return true
+  if (hand[kindCode.planarNexus]! > 0 && feasible(k, m, cm('planarNexus'), fCast, f, free, c)) return true
+  if (hand[kindCode.cloud]! > 0 && feasible(k, m, cm('cloud'), fCast, f, free, c)) return true
   return false
 }
 
@@ -153,37 +162,44 @@ export function bestCombo(
  * @param k nb de rembourseurs disponibles (refCost/refRefund remplis)
  * @param m nb d'autres sorts (othCost rempli, trié croissant)
  */
-function feasible(k: number, m: number, mana: number, fCast: boolean, fanCost: number, free: number): boolean {
-  const fCost = fCast ? 0 : fanCost
+function feasible(k: number, m: number, mana: number, fCast: boolean, fanCost: number, free: number, clouds = 0): boolean {
   // `free` sorts non-créature ont déjà été lancés gratuitement ce tour (sorties de suspend).
   const need = (fCast ? 4 : 3) - free // sorts restants à lancer depuis la main
-  if (need <= 0) return mana >= fCost // les sorts gratuits (+ Fantasticar) suffisent
-
   const subsets = 1 << k
-  for (let mask = 0; mask < subsets; mask++) {
-    let bal = mana
-    let cnt = 0
-    let valid = true
-    for (let i = 0; i < k; i++) {
-      if ((mask & (1 << i)) === 0) continue
-      const cost = refCost[i]!
-      if (bal < cost) {
-        valid = false
-        break
-      }
-      bal -= cost - refRefund[i]!
-      cnt++
+  // Répartition des Untaidake : j tapés en {C}{C}{C} pour le Fantasticar (couvrent 3·j de son coût,
+  // mana réservé aux légendaires), les (clouds−j) restants en +1 générique (mana flexible).
+  for (let j = 0; j <= clouds; j++) {
+    const pool = mana + (clouds - j)
+    const fCost = fCast ? 0 : Math.max(0, fanCost - 3 * j)
+    if (need <= 0) {
+      if (pool >= fCost) return true // les sorts gratuits (+ Fantasticar) suffisent
+      continue
     }
-    if (!valid || bal < fCost) continue
-    bal -= fCost // on lance le Fantasticar
-    for (let j = 0; j < m && cnt < need; j++) {
-      const c = othCost[j]!
-      if (bal >= c) {
-        bal -= c
+    for (let mask = 0; mask < subsets; mask++) {
+      let bal = pool
+      let cnt = 0
+      let valid = true
+      for (let i = 0; i < k; i++) {
+        if ((mask & (1 << i)) === 0) continue
+        const cost = refCost[i]!
+        if (bal < cost) {
+          valid = false
+          break
+        }
+        bal -= cost - refRefund[i]!
         cnt++
       }
+      if (!valid || bal < fCost) continue
+      bal -= fCost // reste du Fantasticar payé en générique (part légendaire déjà couverte par les j Untaidake)
+      for (let s = 0; s < m && cnt < need; s++) {
+        const c = othCost[s]!
+        if (bal >= c) {
+          bal -= c
+          cnt++
+        }
+      }
+      if (cnt >= need) return true
     }
-    if (cnt >= need) return true
   }
   return false
 }
@@ -197,13 +213,14 @@ export interface ComboLine {
 
 const DROP_CANDIDATES: LandDrop[] = [
   'none', 'land', 'landGrant', 'landScry', 'landT', 'vein', 'city', 'land0', 'scorched',
-  'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus',
+  'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus', 'cloud',
 ]
 const DROP_KIND: Partial<Record<LandDrop, number>> = {
   land: kindCode.land, landGrant: kindCode.landGrant, landScry: kindCode.landScry,
   landT: kindCode.landT, vein: kindCode.vein, city: kindCode.city, land0: kindCode.land0,
   scorched: kindCode.scorched,
   urzaMine: kindCode.urzaMine, urzaPP: kindCode.urzaPP, urzaTower: kindCode.urzaTower, planarNexus: kindCode.planarNexus,
+  cloud: kindCode.cloud,
 }
 
 /**
@@ -226,32 +243,36 @@ export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast
 
   const free = bf.freeCasts
   const fanCost = ctx.fantasticarCost
+  const clouds = bf.cloud
   const need = (fCast ? 4 : 3) - free
-  const fCost = fCast ? 0 : fanCost
 
   for (const drop of DROP_CANDIDATES) {
     if (drop !== 'none' && hand[DROP_KIND[drop]!]! <= 0) continue
     if (drop === 'scorched' && scorchedSacPool(bf) < 2) continue // besoin de 2 terrains dégagés à sacrifier
-    const mana = computeMana(bf, drop, true) // tour du combo : Crystal Vein peut se sacrifier (+1)
-    if (need <= 0) {
-      if (mana >= fCost) return { drop, spellKinds: [] }
-      continue
-    }
-    const k = refKind.length
-    for (let mask = 0; mask < (1 << k); mask++) {
-      let bal = mana, cnt = 0, valid = true
-      const used: number[] = []
-      for (let i = 0; i < k; i++) {
-        if ((mask & (1 << i)) === 0) continue
-        if (bal < refCost2[i]!) { valid = false; break }
-        bal -= refCost2[i]! - refRefund2[i]!; cnt++; used.push(refKind[i]!)
+    const manaBase = computeMana(bf, drop, true) - clouds // tour du combo (Crystal Vein +1) ; Untaidake gérés via j
+    for (let j = 0; j <= clouds; j++) {
+      const mana = manaBase + (clouds - j)
+      const fCost = fCast ? 0 : Math.max(0, fanCost - 3 * j)
+      if (need <= 0) {
+        if (mana >= fCost) return { drop, spellKinds: [] }
+        continue
       }
-      if (!valid || bal < fCost) continue
-      bal -= fCost
-      for (let j = 0; j < othKind.length && cnt < need; j++) {
-        if (bal >= othCost2[j]!) { bal -= othCost2[j]!; cnt++; used.push(othKind[j]!) }
+      const k = refKind.length
+      for (let mask = 0; mask < (1 << k); mask++) {
+        let bal = mana, cnt = 0, valid = true
+        const used: number[] = []
+        for (let i = 0; i < k; i++) {
+          if ((mask & (1 << i)) === 0) continue
+          if (bal < refCost2[i]!) { valid = false; break }
+          bal -= refCost2[i]! - refRefund2[i]!; cnt++; used.push(refKind[i]!)
+        }
+        if (!valid || bal < fCost) continue
+        bal -= fCost
+        for (let s = 0; s < othKind.length && cnt < need; s++) {
+          if (bal >= othCost2[s]!) { bal -= othCost2[s]!; cnt++; used.push(othKind[s]!) }
+        }
+        if (cnt >= need) return { drop, spellKinds: used }
       }
-      if (cnt >= need) return { drop, spellKinds: used }
     }
   }
   return null

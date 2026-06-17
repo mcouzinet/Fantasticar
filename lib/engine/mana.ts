@@ -4,7 +4,7 @@
 
 export type LandDrop =
   | 'none' | 'land' | 'landT' | 'vein' | 'city' | 'land0' | 'landGrant' | 'landScry' | 'scorched'
-  | 'urzaMine' | 'urzaPP' | 'urzaTower' | 'planarNexus'
+  | 'urzaMine' | 'urzaPP' | 'urzaTower' | 'planarNexus' | 'cloud'
 
 /** Une carte en exil suspendu : se résout quand `turnsLeft` atteint 0. */
 export interface SuspendTimer {
@@ -33,6 +33,10 @@ export interface Battlefield {
   uPP: number
   uTower: number
   uNexus: number // Planar Nexus (tous les types)
+  // Untaidake, the Cloud Keeper : entre engagé. Une fois dégagé, tape pour {C} (compté en mana
+  // générique) OU {C}{C}{C} réservé aux légendaires → réduit le coût du Fantasticar (cf. combo.ts).
+  cloud: number // Untaidake dégagés (disponibles ce tour)
+  cloudTapped: number // Untaidake posés ce tour (engagés → cloud au tour suivant)
 }
 
 export function emptyBattlefield(): Battlefield {
@@ -55,6 +59,8 @@ export function emptyBattlefield(): Battlefield {
     uPP: 0,
     uTower: 0,
     uNexus: 0,
+    cloud: 0,
+    cloudTapped: 0,
   }
 }
 
@@ -92,7 +98,7 @@ export function tronMana(mine: number, pp: number, tower: number, nexus: number)
  * que `combo=true` (le tour du combo), pas pendant la rampe où on la garde.
  */
 export function computeMana(bf: Battlefield, drop: LandDrop, combo = false): number {
-  let mana = bf.plain + bf.rockMana + bf.veins + bf.bank + 4 * bf.scorched // vein : 1/tour (récurrent)
+  let mana = bf.plain + bf.rockMana + bf.veins + bf.bank + 4 * bf.scorched + bf.cloud // vein : 1/tour ; cloud : tape {C} (générique)
   if (bf.city) mana += 2
   if (drop === 'land') mana += 1
   else if (drop === 'vein') mana += 1 // Crystal Vein tape 1 ce tour
@@ -171,6 +177,7 @@ export function applyDrop(bf: Battlefield, drop: LandDrop): void {
     case 'urzaPP': bf.uPP += 1; bf.city = false; break
     case 'urzaTower': bf.uTower += 1; bf.city = false; break
     case 'planarNexus': bf.uNexus += 1; bf.city = false; break
+    case 'cloud': bf.cloudTapped += 1; bf.city = false; break // Untaidake entre engagé
     case 'none':
       break
   }
@@ -184,6 +191,8 @@ export function applyDrop(bf: Battlefield, drop: LandDrop): void {
 export function promote(bf: Battlefield): void {
   bf.plain += bf.tapped
   bf.tapped = 0
+  bf.cloud += bf.cloudTapped // Untaidake posés au tour précédent se dégagent
+  bf.cloudTapped = 0
   bf.rockMana += bf.pendingRockMana
   bf.pendingRockMana = 0
   // mana banqué (Jeweled Amulet) : dispo ce tour-ci, one-shot (perdu s'il n'est pas rechargé).

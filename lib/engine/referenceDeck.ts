@@ -38,6 +38,7 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   urzaPP: ["Urza's Power Plant"],
   urzaTower: ["Urza's Tower"],
   planarNexus: ['Planar Nexus'],
+  cloud: [], // Untaidake (mana légendaire {C}{C}{C}) — candidat catalogue, absent de la liste
   land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
   landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
   // terrains dégagés qui scry/surveil 1 à l'arrivée (filtrent la prochaine pioche)

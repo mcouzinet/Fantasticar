@@ -8,6 +8,7 @@ export type Kind =
   | 'landScry' // terrain dégagé qui scry/surveil 1 à l'arrivée (filtre la prochaine pioche)
   | 'scorched' // Scorched Ruins : sacrifie 2 terrains dégagés à l'arrivée, tape pour 4
   | 'urzaMine' | 'urzaPP' | 'urzaTower' | 'planarNexus' // Tron : Mine/PP tapent 2, Tower 3 (set complet) ; Nexus = tous les types
+  | 'cloud' // Untaidake : terrain engagé qui tape {C}{C}{C} pour les sorts légendaires (paie le Fantasticar)
   | 'zero' | 'amulet' | 'rock2u' | 'rock2t' | 'rock3'
   | 'basalt' | 'mightstone' | 'dynamo' | 'sol' // cailloux à profil mana particulier
   | 'one' | 'chrom' | 'two'
@@ -19,6 +20,7 @@ export const KINDS: readonly Kind[] = [
   'land', 'landT', 'city', 'vein',
   'land0', 'landGrant', 'landScry', 'scorched',
   'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus',
+  'cloud',
   'zero', 'amulet', 'rock2u', 'rock2t', 'rock3',
   'basalt', 'mightstone', 'dynamo', 'sol',
   'one', 'chrom', 'two',

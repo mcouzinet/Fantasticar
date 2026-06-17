@@ -42,7 +42,10 @@ export const CARD_CATALOG: Record<string, Kind> = {
   Cloudpost: 'landT',
   'Guildless Commons': 'landT',
   'Ruins of Oran-Rief': 'landT',
-  'Untaidake, the Cloud Keeper': 'landT',
+
+  // — Terrain à mana légendaire (entre engagé, tape {C}{C}{C} pour les sorts légendaires) —
+  // Untaidake : paie le Fantasticar (seul sort légendaire du combo). Cf. mana.ts/combo.ts.
+  'Untaidake, the Cloud Keeper': 'cloud',
 
   // — Cailloux coût 2 engagés —
   'Coldsteel Heart': 'rock2t',

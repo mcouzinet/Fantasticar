@@ -38,6 +38,8 @@ function resetBattlefield(bf: Battlefield): void {
   bf.uPP = 0
   bf.uTower = 0
   bf.uNexus = 0
+  bf.cloud = 0
+  bf.cloudTapped = 0
 }
 
 /**
