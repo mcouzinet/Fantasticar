@@ -13,7 +13,8 @@ import type { Card, Deck, Kind } from './types'
  *  - X = 0 (Astral Cornucopia, Everflowing Chalice, Chimeric Mass, Orochi Hatchery,
  *    Engineered Explosives, Sigil, Briber's Purse, Kozilek's Command…).
  *  - Forsaken Monument modélisé en sort à 5 « nu » : son doublement de mana est ignoré.
- *  - Tron non assemblé ; Gemstone Caverns = land standard.
+ *  - Tron non assemblé. Gemstone Caverns : terrain normal, sauf qu'il démarre en jeu sur la draw
+ *    s'il est en main d'ouverture (kind `gemstone`, géré dans game.ts/trace.ts).
  *  - Cailloux spéciaux (Basalt Monolith, Mightstone & Weakstone, Sol Talisman) : voir
  *    spellTable.ts pour le détail de leur modélisation.
  */
@@ -22,7 +23,7 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   land: [
     'Abstergo Entertainment', 'Blast Zone', 'Castle Doom', 'Command Beacon',
     'Darksteel Citadel', 'Dust Bowl',
-    'Fountainport', 'Gemstone Caverns',
+    'Fountainport',
     "Inventors' Fair", "Mishra's Factory", "Mishra's Foundry", 'Mutavault',
     'Petrified Hamlet', 'Rishadan Port',
     'Snow-Covered Wastes', 'Talon Gates of Madara',
@@ -39,6 +40,7 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   urzaTower: ["Urza's Tower"],
   planarNexus: ['Planar Nexus'],
   cloud: [], // Untaidake (mana légendaire {C}{C}) — candidat catalogue, absent de la liste
+  gemstone: ['Gemstone Caverns'], // terrain normal, mais démarre en jeu sur la draw (gagne un tour)
   land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
   landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
   // terrains dégagés qui scry/surveil 1 à l'arrivée (filtrent la prochaine pioche)

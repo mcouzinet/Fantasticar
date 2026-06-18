@@ -14,7 +14,7 @@ const LAND_CODES = [
   kindCode.land, kindCode.landT, kindCode.city, kindCode.vein,
   kindCode.landGrant, kindCode.landScry, kindCode.scorched,
   kindCode.urzaMine, kindCode.urzaPP, kindCode.urzaTower, kindCode.planarNexus,
-  kindCode.cloud,
+  kindCode.cloud, kindCode.gemstone,
 ] as const
 
 export function landsInHand(hand: Hand): number {

@@ -36,6 +36,9 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   // Untaidake, the Cloud Keeper : terrain qui entre engagé. Tape {C}{C} réservé aux sorts légendaires
   // (aucun mana générique) → couvre 2 du coût du Fantasticar (cf. mana.ts/combo.ts).
   cloud: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  // Gemstone Caverns : terrain normal (converti en `land` par le moteur). Particularité gérée dans
+  // game.ts/trace.ts : sur la draw, s'il est en main d'ouverture, il démarre en jeu (+exil d'une carte).
+  gemstone: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
 
   // — Sorts non-créature : sorts de combo —
   zero: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },

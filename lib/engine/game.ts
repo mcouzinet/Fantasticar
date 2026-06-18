@@ -1,4 +1,5 @@
 import type { MulliganMode } from './types'
+import { kindCode } from './types'
 import type { Rng } from './prng'
 import type { Hand } from './hand'
 import type { ComboContext } from './combo'
@@ -7,6 +8,27 @@ import type { DevelopContext } from './develop'
 import { develop, scryKeep } from './develop'
 import { type Battlefield, promote } from './mana'
 import { openingHand } from './mulligan'
+
+const GEM = kindCode.gemstone
+const LAND = kindCode.land
+
+// Carte exilée par Gemstone Caverns (free-start) : on sacrifie la moins utile au combo.
+// Ordre = du plus jetable au plus précieux ; on exile le premier kind présent en main.
+const EXILE_ORDER: number[] = [
+  kindCode.creature, kindCode.o7, kindCode.o6, kindCode.o5, kindCode.o4, kindCode.o3,
+  kindCode.mightstone, kindCode.land0, kindCode.sol, kindCode.dynamo, kindCode.rock3,
+  kindCode.two, kindCode.landT, kindCode.one, kindCode.chrom,
+  kindCode.rock2t, kindCode.rock2u, kindCode.basalt,
+  kindCode.landScry, kindCode.landGrant, kindCode.land,
+  kindCode.urzaMine, kindCode.urzaPP, kindCode.urzaTower, kindCode.planarNexus,
+  kindCode.scorched, kindCode.vein, kindCode.city, kindCode.cloud,
+  kindCode.zero, kindCode.amulet,
+]
+function exileWorst(hand: Hand): void {
+  for (const c of EXILE_ORDER) {
+    if (hand[c]! > 0) { hand[c]!--; return }
+  }
+}
 
 export interface GameDeps {
   deckBuf: Int8Array
@@ -49,12 +71,27 @@ export function playGame(deps: GameDeps, onPlay: boolean): number {
   const { deckBuf, rng, hand, bf, comboCtx, devCtx, mode, maxTurn } = deps
   let pointer = openingHand(deckBuf, rng, mode, hand)
   resetBattlefield(bf)
+
+  // Gemstone Caverns : sur la draw, s'il est en main d'ouverture, on peut le démarrer en jeu (avec
+  // un marqueur chance → tape pour 1) en exilant une carte. On gagne ainsi ~un tour de mana.
+  // Sur le play, ou pioché plus tard, c'est un terrain normal.
+  if (!onPlay && hand[GEM]! > 0) {
+    hand[GEM]!-- // ce Gemstone part sur le champ de bataille
+    bf.plain += 1 // en jeu dès le départ (dégagé, tape pour 1)
+    exileWorst(hand) // exil d'une carte de la main
+  }
+  hand[LAND]! += hand[GEM]! // tout Gemstone restant = terrain normal
+  hand[GEM]! = 0
+
   let fCast = false
 
   for (let t = 1; t <= maxTurn; t++) {
     if (t > 1 || !onPlay) {
-      // Pioche (le deck ne s'épuise pas en ≤ 5 tours).
-      if (pointer < deckBuf.length) hand[deckBuf[pointer++]!]!++
+      // Pioche (le deck ne s'épuise pas en ≤ 5 tours) ; un Gemstone pioché = simple terrain.
+      if (pointer < deckBuf.length) {
+        const code = deckBuf[pointer++]!
+        hand[code === GEM ? LAND : code]!++
+      }
     }
     promote(bf) // les landT posés au tour précédent deviennent plain ; cailloux prêts
 

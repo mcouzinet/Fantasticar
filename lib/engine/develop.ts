@@ -121,7 +121,7 @@ const ROCKS = [
   kindCode.rock2u, kindCode.rock2t, kindCode.rock3,
   kindCode.basalt, kindCode.mightstone, kindCode.sol,
 ]
-const MANA_LANDS = [LAND, LANDT, VEIN, CITY, LANDGRANT, LANDSCRY, CLOUD]
+const MANA_LANDS = [LAND, LANDT, VEIN, CITY, LANDGRANT, LANDSCRY, CLOUD, kindCode.gemstone]
 const CHEAP_SPELLS = [kindCode.zero, kindCode.one, kindCode.chrom, kindCode.two]
 
 /**

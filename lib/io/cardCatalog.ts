@@ -47,6 +47,9 @@ export const CARD_CATALOG: Record<string, Kind> = {
   // Untaidake : paie le Fantasticar (seul sort légendaire du combo). Cf. mana.ts/combo.ts.
   'Untaidake, the Cloud Keeper': 'cloud',
 
+  // — Terrain « accélérateur » : Gemstone Caverns démarre en jeu sur la draw (gagne un tour) —
+  'Gemstone Caverns': 'gemstone',
+
   // — Cailloux coût 2 engagés —
   'Coldsteel Heart': 'rock2t',
   'Guardian Idol': 'rock2t',

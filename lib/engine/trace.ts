@@ -27,6 +27,7 @@ const TOKEN: Partial<Record<Kind, string>> = {
   one: 'sort à 1', chrom: 'sort à 1', two: 'sort à 2',
   o3: 'sort cher', o4: 'sort cher', o5: 'sort cher', o6: 'sort cher', o7: 'sort cher',
   land: 'terrain', landT: 'terrain', landScry: 'terrain', landGrant: 'terrain', land0: 'terrain',
+  gemstone: 'terrain',
   amulet: 'Jeweled Amulet',
   // planarNexus + pièces Tron : jeton dynamique (terrain Tron seulement si le set est productif).
   scorched: 'Scorched Ruins',
@@ -48,6 +49,20 @@ function signature(tokens: Map<string, number>): string {
     .map(([tok, n]) => (n > 1 ? `${n}× ${tok}` : tok))
     .join(' + ')
 }
+
+const GEM = kindCode.gemstone
+const LAND = kindCode.land
+// Gemstone Caverns (free-start sur la draw) : carte exilée = la moins utile au combo (cf. game.ts).
+const EXILE_ORDER: number[] = [
+  kindCode.creature, kindCode.o7, kindCode.o6, kindCode.o5, kindCode.o4, kindCode.o3,
+  kindCode.mightstone, kindCode.land0, kindCode.sol, kindCode.dynamo, kindCode.rock3,
+  kindCode.two, kindCode.landT, kindCode.one, kindCode.chrom,
+  kindCode.rock2t, kindCode.rock2u, kindCode.basalt,
+  kindCode.landScry, kindCode.landGrant, kindCode.land,
+  kindCode.urzaMine, kindCode.urzaPP, kindCode.urzaTower, kindCode.planarNexus,
+  kindCode.scorched, kindCode.vein, kindCode.city, kindCode.cloud,
+  kindCode.zero, kindCode.amulet,
+]
 
 const DROP_KIND: Partial<Record<LandDrop, number>> = {
   land: kindCode.land, landGrant: kindCode.landGrant, landScry: kindCode.landScry,
@@ -104,12 +119,26 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
 
       const bf = emptyBattlefield()
       const battlefield: string[] = [] // cartes posées/lancées (sources de mana des tours précédents)
+
+      // Gemstone Caverns : sur la draw, s'il est en main d'ouverture, il démarre en jeu (+exil).
+      if (!onPlay && hand[GEM]! > 0) {
+        hand[GEM]!--
+        battlefield.push(handCards[GEM]!.pop() ?? 'Gemstone Caverns') // en jeu → 'terrain' dans la recette
+        bf.plain += 1
+        for (const c of EXILE_ORDER) { if (hand[c]! > 0) { hand[c]!--; handCards[c]!.pop(); break } }
+      }
+      while (hand[GEM]! > 0) { // tout Gemstone restant = terrain normal (nom transféré)
+        hand[GEM]!--; hand[LAND]!++
+        const n = handCards[GEM]!.pop(); if (n) handCards[LAND]!.push(n)
+      }
+
       let fCast = false
 
       for (let t = 1; t <= config.maxTurn; t++) {
         if (t > 1 || !onPlay) {
           if (pointer < total) {
-            const kc = deckBuf[pointer]!
+            const raw = deckBuf[pointer]!
+            const kc = raw === GEM ? LAND : raw // un Gemstone pioché = simple terrain
             hand[kc]!++; handCards[kc]!.push(nameByCard[idBuf[pointer]!]!); pointer++
           }
         }
