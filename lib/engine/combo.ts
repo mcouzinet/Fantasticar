@@ -55,9 +55,9 @@ export function buildComboContext(table: SpellTable): ComboContext {
  * Faisabilité du combo pour un mana donné (sans énumération de pose de terrain).
  * Exposé pour les tests (fuzz vs brute-force).
  *
- * `clouds` = nb d'Untaidake DÉGAGÉS disponibles. `mana` est le pool générique SANS eux. Chaque
- * Untaidake est soit +1 générique (mana flexible), soit {C}{C}{C} réservé au Fantasticar (le seul
- * sort légendaire) — choix exploré dans `feasible`.
+ * `clouds` = nb d'Untaidake DÉGAGÉS disponibles. Chacun tape {C}{C} réservé aux sorts légendaires :
+ * ils couvrent 2·clouds du coût du Fantasticar (le seul légendaire) et n'ajoutent AUCUN mana
+ * générique. `mana` est le pool générique (sans eux). Géré dans `feasible`.
  */
 export function comboFeasibleForMana(
   ctx: ComboContext,
@@ -88,6 +88,7 @@ export function comboFeasibleForMana(
 }
 
 const MAX_REFUNDERS = 6 // cap §3.4 : borne l'énumération de sous-ensembles à 2^6
+const LEG_PER_CLOUD = 2 // Untaidake : {C}{C} légendaires par terrain dégagé (Fantasticar uniquement)
 
 // Buffers réutilisés (pas d'allocation par appel).
 const refCost = new Int32Array(MAX_REFUNDERS)
@@ -132,11 +133,11 @@ export function bestCombo(
   // 3. Tester chaque pose de terrain candidate (free = sorts gratuits sortis de suspend ce tour).
   const free = bf.freeCasts
   const f = ctx.fantasticarCost
-  const c = bf.cloud // Untaidake dégagés : mana légendaire {C}{C}{C} pour le Fantasticar (cf. feasible)
+  const c = bf.cloud // Untaidake dégagés : {C}{C} légendaires chacun pour le Fantasticar (cf. feasible)
   // combo = true : c'est le tour du combo → Crystal Vein peut être sacrifiée pour {C}{C} (+1).
-  // On retire les Untaidake du pool générique (computeMana les compte +1) : `feasible` gère leur
-  // double emploi (générique vs légendaire) via le paramètre `clouds`.
-  const cm = (drop: LandDrop): number => computeMana(bf, drop, true) - c
+  // computeMana ne compte PAS les Untaidake (mana légendaire only) : `feasible` les applique au
+  // Fantasticar via `clouds`.
+  const cm = (drop: LandDrop): number => computeMana(bf, drop, true)
   if (feasible(k, m, cm('none'), fCast, f, free, c)) return true
   if (hand[kindCode.land]! > 0 && feasible(k, m, cm('land'), fCast, f, free, c)) return true
   if (hand[kindCode.landGrant]! > 0 && feasible(k, m, cm('landGrant'), fCast, f, free, c)) return true
@@ -163,43 +164,38 @@ export function bestCombo(
  * @param m nb d'autres sorts (othCost rempli, trié croissant)
  */
 function feasible(k: number, m: number, mana: number, fCast: boolean, fanCost: number, free: number, clouds = 0): boolean {
+  // Untaidake : chacun tape {C}{C} réservé aux sorts légendaires → couvre 2 du coût du Fantasticar
+  // (le seul sort légendaire), sans toucher au pool générique (mana). L'excédent est perdu.
+  const fCost = fCast ? 0 : Math.max(0, fanCost - LEG_PER_CLOUD * clouds)
   // `free` sorts non-créature ont déjà été lancés gratuitement ce tour (sorties de suspend).
   const need = (fCast ? 4 : 3) - free // sorts restants à lancer depuis la main
+  if (need <= 0) return mana >= fCost // les sorts gratuits (+ Fantasticar) suffisent
+
   const subsets = 1 << k
-  // Répartition des Untaidake : j tapés en {C}{C}{C} pour le Fantasticar (couvrent 3·j de son coût,
-  // mana réservé aux légendaires), les (clouds−j) restants en +1 générique (mana flexible).
-  for (let j = 0; j <= clouds; j++) {
-    const pool = mana + (clouds - j)
-    const fCost = fCast ? 0 : Math.max(0, fanCost - 3 * j)
-    if (need <= 0) {
-      if (pool >= fCost) return true // les sorts gratuits (+ Fantasticar) suffisent
-      continue
+  for (let mask = 0; mask < subsets; mask++) {
+    let bal = mana
+    let cnt = 0
+    let valid = true
+    for (let i = 0; i < k; i++) {
+      if ((mask & (1 << i)) === 0) continue
+      const cost = refCost[i]!
+      if (bal < cost) {
+        valid = false
+        break
+      }
+      bal -= cost - refRefund[i]!
+      cnt++
     }
-    for (let mask = 0; mask < subsets; mask++) {
-      let bal = pool
-      let cnt = 0
-      let valid = true
-      for (let i = 0; i < k; i++) {
-        if ((mask & (1 << i)) === 0) continue
-        const cost = refCost[i]!
-        if (bal < cost) {
-          valid = false
-          break
-        }
-        bal -= cost - refRefund[i]!
+    if (!valid || bal < fCost) continue
+    bal -= fCost // reste du Fantasticar payé en générique (les Untaidake en couvrent 2·clouds)
+    for (let s = 0; s < m && cnt < need; s++) {
+      const c = othCost[s]!
+      if (bal >= c) {
+        bal -= c
         cnt++
       }
-      if (!valid || bal < fCost) continue
-      bal -= fCost // reste du Fantasticar payé en générique (part légendaire déjà couverte par les j Untaidake)
-      for (let s = 0; s < m && cnt < need; s++) {
-        const c = othCost[s]!
-        if (bal >= c) {
-          bal -= c
-          cnt++
-        }
-      }
-      if (cnt >= need) return true
     }
+    if (cnt >= need) return true
   }
   return false
 }
@@ -242,37 +238,34 @@ export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast
   }
 
   const free = bf.freeCasts
-  const fanCost = ctx.fantasticarCost
-  const clouds = bf.cloud
+  // Untaidake dégagés : {C}{C} légendaires chacun → couvrent 2·clouds du coût du Fantasticar.
+  const fanCost = fCast ? 0 : Math.max(0, ctx.fantasticarCost - LEG_PER_CLOUD * bf.cloud)
   const need = (fCast ? 4 : 3) - free
+  const fCost = fanCost
 
   for (const drop of DROP_CANDIDATES) {
     if (drop !== 'none' && hand[DROP_KIND[drop]!]! <= 0) continue
     if (drop === 'scorched' && scorchedSacPool(bf) < 2) continue // besoin de 2 terrains dégagés à sacrifier
-    const manaBase = computeMana(bf, drop, true) - clouds // tour du combo (Crystal Vein +1) ; Untaidake gérés via j
-    for (let j = 0; j <= clouds; j++) {
-      const mana = manaBase + (clouds - j)
-      const fCost = fCast ? 0 : Math.max(0, fanCost - 3 * j)
-      if (need <= 0) {
-        if (mana >= fCost) return { drop, spellKinds: [] }
-        continue
+    const mana = computeMana(bf, drop, true) // tour du combo : Crystal Vein peut se sacrifier (+1)
+    if (need <= 0) {
+      if (mana >= fCost) return { drop, spellKinds: [] }
+      continue
+    }
+    const k = refKind.length
+    for (let mask = 0; mask < (1 << k); mask++) {
+      let bal = mana, cnt = 0, valid = true
+      const used: number[] = []
+      for (let i = 0; i < k; i++) {
+        if ((mask & (1 << i)) === 0) continue
+        if (bal < refCost2[i]!) { valid = false; break }
+        bal -= refCost2[i]! - refRefund2[i]!; cnt++; used.push(refKind[i]!)
       }
-      const k = refKind.length
-      for (let mask = 0; mask < (1 << k); mask++) {
-        let bal = mana, cnt = 0, valid = true
-        const used: number[] = []
-        for (let i = 0; i < k; i++) {
-          if ((mask & (1 << i)) === 0) continue
-          if (bal < refCost2[i]!) { valid = false; break }
-          bal -= refCost2[i]! - refRefund2[i]!; cnt++; used.push(refKind[i]!)
-        }
-        if (!valid || bal < fCost) continue
-        bal -= fCost
-        for (let s = 0; s < othKind.length && cnt < need; s++) {
-          if (bal >= othCost2[s]!) { bal -= othCost2[s]!; cnt++; used.push(othKind[s]!) }
-        }
-        if (cnt >= need) return { drop, spellKinds: used }
+      if (!valid || bal < fCost) continue
+      bal -= fCost
+      for (let s = 0; s < othKind.length && cnt < need; s++) {
+        if (bal >= othCost2[s]!) { bal -= othCost2[s]!; cnt++; used.push(othKind[s]!) }
       }
+      if (cnt >= need) return { drop, spellKinds: used }
     }
   }
   return null

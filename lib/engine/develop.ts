@@ -63,10 +63,10 @@ const AMULET = kindCode.amulet
 function chooseDrop(hand: Hand, bf: Battlefield, remaining: number): LandDrop {
   // Scorched Ruins : gros boost (+2 mana net, source à 4) dès qu'on a 2 terrains dégagés à sacrifier.
   if (hand[SCORCHED]! > 0 && scorchedSacPool(bf) >= 2) return 'scorched'
-  // Untaidake : terrain ENGAGÉ qui tape {C}{C}{C} (paie le Fantasticar). Il entre tapped → on le pose
-  // au plus tôt pour qu'il soit en ligne dès le tour suivant (un Untaidake posé T1 débloque le combo
-  // T2, comme City of Traitors + terrain). Le +1 de mana « immédiat » perdu ce tour est rarement
-  // utilisable tôt (pas de caillou à 1). Inutile au tout dernier tour (jamais dégagé).
+  // Untaidake : terrain ENGAGÉ qui tape {C}{C} pour les sorts légendaires (couvre 2 du Fantasticar,
+  // aucun mana générique). Il entre tapped → on le pose au plus tôt pour qu'il soit en ligne dès le
+  // tour suivant : posé T1 + un terrain T2, il débloque le combo T2 (comme City of Traitors + terrain).
+  // Il ne donne pas de mana « immédiat » de toute façon. Inutile au tout dernier tour (jamais dégagé).
   if (hand[CLOUD]! > 0 && remaining >= 1) return 'cloud'
   // terrains engagés simples (landT) : posés tôt si on a déjà de quoi développer les tours suivants.
   const hasLandT = hand[LANDT]! > 0

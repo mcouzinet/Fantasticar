@@ -10,79 +10,78 @@ import { mulberry32 } from '../lib/engine/prng'
 const ctx = buildComboContext(DEFAULT_SPELL_TABLE)
 const devCtx = buildDevelopContext(DEFAULT_SPELL_TABLE)
 
-describe('Untaidake, the Cloud Keeper (mana légendaire {C}{C}{C})', () => {
-  it('entre engagé : 0 mana le tour posé, +1 générique au tour suivant', () => {
+// Untaidake, the Cloud Keeper : terrain légendaire qui entre engagé puis tape {C}{C} réservé
+// aux sorts légendaires (aucun mana générique) → couvre 2 du coût du Fantasticar (le seul légendaire).
+describe('Untaidake, the Cloud Keeper ({C}{C} légendaire)', () => {
+  it('entre engagé et ne produit AUCUN mana générique (même dégagé)', () => {
     const bf = emptyBattlefield()
     applyDrop(bf, 'cloud')
     expect(computeMana(bf, 'none')).toBe(0) // engagé ce tour
     promote(bf)
-    expect(computeMana(bf, 'none')).toBe(1) // dégagé : tape {C}
+    expect(bf.cloud).toBe(1) // dégagé au tour suivant
+    expect(computeMana(bf, 'none')).toBe(0) // mais 0 mana générique (mana légendaire only)
   })
 
-  it('le mana légendaire ne paie QUE le Fantasticar (pas les rembourseurs)', () => {
-    // F=3, 1 Untaidake, 1 mana de base, un rock2u (coût 2) + 2 sorts à 0 : infaisable.
-    // Soit l'Untaidake est légendaire (paie F) → 1 mana ne lance pas le rock2u ;
-    // soit il est générique (2 mana lancent le rock2u) → il ne reste rien pour F=3.
+  it('le mana légendaire ne paie QUE le Fantasticar (ni rembourseurs ni sorts)', () => {
+    // 2 Untaidake = 4 mana légendaires (couvrent tout le Fantasticar, F=3). Mais un rock2u (coût 2)
+    // ne peut PAS être lancé avec ce mana : il faut 2 mana GÉNÉRIQUES.
     const hand = newHand()
     hand[kindCode.rock2u] = 1
     hand[kindCode.zero] = 2
-    expect(comboFeasibleForMana(ctx, hand, 1, false, 0, 1)).toBe(false)
-    // Avec 1 mana de plus, on lance le rock2u (générique) ET l'Untaidake paie F : faisable.
-    expect(comboFeasibleForMana(ctx, hand, 2, false, 0, 1)).toBe(true)
+    expect(comboFeasibleForMana(ctx, hand, 1, false, 0, 2)).toBe(false) // 1 générique < coût du rock2u
+    expect(comboFeasibleForMana(ctx, hand, 2, false, 0, 2)).toBe(true) // 2 génériques lancent le rock2u
+  })
+
+  it('un Untaidake couvre 2 du Fantasticar : il manque encore 1 mana générique', () => {
+    const spells = newHand()
+    spells[kindCode.zero] = 3
+    const bf = emptyBattlefield()
+    bf.cloud = 1
+    expect(bestCombo(ctx, spells, bf, false)).toBe(false) // 2 légendaires < 3, pas de générique
+    bf.plain = 1 // un terrain quelconque → le 3e mana
+    expect(bestCombo(ctx, spells, bf, false)).toBe(true) // Untaidake (2) + terrain (1) = Fantasticar, 3 zeros gratuits
+  })
+
+  it('deux Untaidake paient entièrement le Fantasticar (combo sans autre mana)', () => {
+    const spells = newHand()
+    spells[kindCode.zero] = 3
+    const bf = emptyBattlefield()
+    bf.cloud = 2 // 4 mana légendaires ≥ 3
+    expect(bestCombo(ctx, spells, bf, false)).toBe(true)
   })
 
   it('Untaidake est posé en priorité (engagé → en ligne le tour suivant), avant un terrain simple', () => {
     const hand = newHand()
     hand[kindCode.cloud] = 1
     hand[kindCode.land] = 1
+    hand[kindCode.zero] = 3
     const bf = emptyBattlefield()
-    develop(devCtx, hand, bf, false, 4) // T1, 4 tours restants
-    expect(bf.cloudTapped).toBe(1) // Untaidake posé ce tour
+    develop(devCtx, hand, bf, false, 4) // T1 : pose Untaidake (engagé), garde le terrain
+    expect(bf.cloudTapped).toBe(1)
     expect(hand[kindCode.cloud]).toBe(0)
-    expect(hand[kindCode.land]).toBe(1) // le terrain simple est gardé pour plus tard
-    promote(bf)
-    expect(computeMana(bf, 'none')).toBe(1) // Untaidake dégagé → tape {C}
-    const spells = newHand()
-    spells[kindCode.zero] = 3
-    expect(bestCombo(ctx, spells, bf, false)).toBe(true) // T2 : Untaidake paie le Fantasticar, 3 zeros gratuits
-  })
-
-  it('un seul Untaidake disponible paie tout le Fantasticar (combo sans autre mana)', () => {
-    const hand = newHand()
-    hand[kindCode.zero] = 3 // 3 sorts à 0 en main
-    const bf = emptyBattlefield()
-    bf.cloud = 1 // un Untaidake dégagé
-    expect(bestCombo(ctx, hand, bf, false)).toBe(true) // need 3 (zeros) + Fantasticar payé par Untaidake
+    expect(hand[kindCode.land]).toBe(1)
+    promote(bf) // T2 : Untaidake dégagé
+    // T2 : Untaidake (2 légendaires) + pose du terrain gardé (1) → Fantasticar payé, 3 zeros gratuits.
+    expect(bestCombo(ctx, hand, bf, false)).toBe(true)
   })
 
   it('sans Untaidake il faut 3 mana pour le même combo', () => {
     const hand = newHand()
     hand[kindCode.zero] = 3
     const bf0 = emptyBattlefield()
-    expect(bestCombo(ctx, hand, bf0, false)).toBe(false) // 0 mana → ne paie pas le Fantasticar
+    expect(bestCombo(ctx, hand, bf0, false)).toBe(false)
     const bf3 = emptyBattlefield()
     bf3.plain = 3
     expect(bestCombo(ctx, hand, bf3, false)).toBe(true)
   })
 
-  it('forme close == brute-force (mana légendaire) sur 20000 cas aléatoires', () => {
+  it('moteur == brute-force (mana légendaire {C}{C}) sur 20000 cas aléatoires', () => {
     const comboKinds = KINDS.filter((k) => DEFAULT_SPELL_TABLE[k].isComboSpell && !DEFAULT_SPELL_TABLE[k].suspend)
     const F = FANTASTICAR_COST
-    // Brute : chaque Untaidake est soit +1 générique, soit +3 légendaire (Fantasticar uniquement).
+    // Brute : les Untaidake n'ajoutent AUCUN mana générique ; ils couvrent 2·clouds du Fantasticar.
     function brute(spells: { cost: number; refund: number }[], mana: number, fCast: boolean, free: number, clouds: number): boolean {
       const need = (fCast ? 4 : 3) - free
-      if (fCast) {
-        // Fantasticar déjà lancé : les Untaidake ne servent que de +1 générique.
-        return solve(spells, mana + clouds, 0, need)
-      }
-      for (let j = 0; j <= clouds; j++) {
-        const legCover = Math.min(F, 3 * j)
-        const fGeneral = F - legCover // reste du Fantasticar payé en générique
-        if (solve(spells, mana + (clouds - j), fGeneral, need)) return true
-      }
-      return false
-    }
-    function solve(spells: { cost: number; refund: number }[], mana: number, fCost: number, need: number): boolean {
+      const fCost = fCast ? 0 : Math.max(0, F - 2 * clouds)
       if (need <= 0) return mana >= fCost
       const n = spells.length
       const used = new Array<boolean>(n).fill(false)

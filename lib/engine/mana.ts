@@ -33,8 +33,8 @@ export interface Battlefield {
   uPP: number
   uTower: number
   uNexus: number // Planar Nexus (tous les types)
-  // Untaidake, the Cloud Keeper : entre engagé. Une fois dégagé, tape pour {C} (compté en mana
-  // générique) OU {C}{C}{C} réservé aux légendaires → réduit le coût du Fantasticar (cf. combo.ts).
+  // Untaidake, the Cloud Keeper : entre engagé. Une fois dégagé, tape {C}{C} réservé aux sorts
+  // légendaires (aucun mana générique) → couvre 2 du coût du Fantasticar (cf. combo.ts).
   cloud: number // Untaidake dégagés (disponibles ce tour)
   cloudTapped: number // Untaidake posés ce tour (engagés → cloud au tour suivant)
 }
@@ -98,7 +98,9 @@ export function tronMana(mine: number, pp: number, tower: number, nexus: number)
  * que `combo=true` (le tour du combo), pas pendant la rampe où on la garde.
  */
 export function computeMana(bf: Battlefield, drop: LandDrop, combo = false): number {
-  let mana = bf.plain + bf.rockMana + bf.veins + bf.bank + 4 * bf.scorched + bf.cloud // vein : 1/tour ; cloud : tape {C} (générique)
+  // NB : Untaidake (bf.cloud) ne produit AUCUN mana générique — il tape {C}{C} réservé aux sorts
+  // légendaires (le Fantasticar). Sa contribution est gérée à part dans combo.ts, pas ici.
+  let mana = bf.plain + bf.rockMana + bf.veins + bf.bank + 4 * bf.scorched // vein : 1/tour (récurrent)
   if (bf.city) mana += 2
   if (drop === 'land') mana += 1
   else if (drop === 'vein') mana += 1 // Crystal Vein tape 1 ce tour

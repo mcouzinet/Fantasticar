@@ -20,7 +20,7 @@ export const KIND_META: Record<Kind, KindMeta> = {
   urzaPP: { label: 'Tron PP', full: "Urza's Power Plant (tape 2 si set complet)", color: 'var(--k-land)' },
   urzaTower: { label: 'Tron Tower', full: "Urza's Tower (tape 3 si set complet)", color: 'var(--k-land)' },
   planarNexus: { label: 'Tron tous', full: 'Planar Nexus (compte comme toutes les pièces Tron)', color: 'var(--k-land)' },
-  cloud: { label: 'Untaidake', full: 'Untaidake (engagé, {C}{C}{C} pour le Fantasticar)', color: 'var(--k-land)' },
+  cloud: { label: 'Untaidake', full: 'Untaidake (engagé, {C}{C} pour le Fantasticar)', color: 'var(--k-land)' },
   zero: { label: '0', full: 'Sort non-créature — coût 0', color: 'var(--k-zero)' },
   amulet: { label: '0 banque', full: 'Jeweled Amulet (sort à 0, banque 1 mana)', color: 'var(--k-zero)' },
   rock2u: { label: 'Caillou 2', full: 'Caillou — coût 2, prêt', color: 'var(--k-rock)' },
