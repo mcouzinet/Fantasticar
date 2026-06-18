@@ -27,7 +27,6 @@ const TOKEN: Partial<Record<Kind, string>> = {
   one: 'sort à 1', chrom: 'sort à 1', two: 'sort à 2',
   o3: 'sort cher', o4: 'sort cher', o5: 'sort cher', o6: 'sort cher', o7: 'sort cher',
   land: 'terrain', landT: 'terrain', landScry: 'terrain', landGrant: 'terrain', land0: 'terrain',
-  gemstone: 'terrain',
   amulet: 'Jeweled Amulet',
   // planarNexus + pièces Tron : jeton dynamique (terrain Tron seulement si le set est productif).
   scorched: 'Scorched Ruins',
@@ -121,10 +120,12 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
       const battlefield: string[] = [] // cartes posées/lancées (sources de mana des tours précédents)
 
       // Gemstone Caverns : sur la draw, s'il est en main d'ouverture, il démarre en jeu (+exil).
+      let gemStarted = false // ce Gemstone a-t-il démarré en jeu (≠ terrain normal) ? → nommé dans la recette
       if (!onPlay && hand[GEM]! > 0) {
         hand[GEM]!--
-        battlefield.push(handCards[GEM]!.pop() ?? 'Gemstone Caverns') // en jeu → 'terrain' dans la recette
+        battlefield.push(handCards[GEM]!.pop() ?? 'Gemstone Caverns')
         bf.plain += 1
+        gemStarted = true
         for (const c of EXILE_ORDER) { if (hand[c]! > 0) { hand[c]!--; handCards[c]!.pop(); break } }
       }
       while (hand[GEM]! > 0) { // tout Gemstone restant = terrain normal (nom transféré)
@@ -183,6 +184,9 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
                 else if (kind === 'amulet') tok = amuletIsMana ? 'Jeweled Amulet' : 'sort à 0'
                 else if (kind === 'urzaMine' || kind === 'urzaPP' || kind === 'urzaTower') tok = tronOn ? 'terrain Tron' : 'terrain'
                 else if (kind === 'planarNexus') tok = tronOn ? 'Planar Nexus' : 'terrain'
+                // Gemstone Caverns : nommé seulement s'il a démarré en jeu (ce qui débloque le T2) ;
+                // sinon ce n'est qu'un terrain normal. Singleton → un seul rôle par partie.
+                else if (kind === 'gemstone') tok = gemStarted ? 'Gemstone Caverns' : 'terrain'
                 else tok = TOKEN[kind] ?? n
                 tokens.set(tok, (tokens.get(tok) ?? 0) + 1)
               }
