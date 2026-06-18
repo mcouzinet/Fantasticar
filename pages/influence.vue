@@ -62,11 +62,11 @@ function barStyle(v: number) {
       <h1>Influence des cartes <span class="accent">sur le combo</span></h1>
       <p class="lede">
         Effet de chaque <b>catégorie de carte</b> sur la probabilité de déclencher le combo, tour par
-        tour (T2 → T5). Mesure marginale : on remplace une carte neutre par une carte de la catégorie,
-        dans la <b>liste de référence</b>, et on lit le delta — moyenne play/draw, à seed identique
-        (deltas peu bruités). C'est <b>contextuel</b> (ça dépend du reste du deck) : à lire comme le
-        <b>sens</b> et l'<b>ordre de grandeur</b> de l'effet. Toutes les cartes d'une même catégorie
-        ont le même impact mécanique.
+        tour (T2 → T5). Mesure marginale : on remplace les cartes <b>neutres</b> (les créatures) de la
+        <b>liste de référence</b> par la catégorie testée, et on lit le delta <b>moyen par carte</b>
+        ajoutée — moyenne play/draw, à seed identique (peu bruité). C'est <b>contextuel</b> (ça dépend
+        du reste du deck) : à lire comme le <b>sens</b> et l'<b>ordre de grandeur</b> de l'effet. Toutes
+        les cartes d'une même catégorie ont le même impact mécanique.
       </p>
 
       <div v-if="sim.impactsRunning.value && !rows.length" class="loading">

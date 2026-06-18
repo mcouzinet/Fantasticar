@@ -30,21 +30,34 @@ function avg4(r: SimResult): { t2: number; t3: number; t4: number; t5: number } 
  * une idée du sens et de l'ordre de grandeur de l'effet de chaque type de carte.
  */
 export function cardImpacts(config: SimConfig, onProgress?: (done: number, total: number) => void): CardImpact[] {
-  // itérations plafonnées : les deltas à seed identique sont stables bien avant 50 000.
   const cfg: SimConfig = { ...config, iterations: Math.min(config.iterations, 25000) }
   const base = avg4(runSimulation(REFERENCE_DECK, cfg))
-  const blankIdx = REFERENCE_DECK.cards.findIndex((c) => c.kind === 'creature')
+  // Cartes « neutres » de référence = les créatures (poids mort pour le combo). On les remplace
+  // TOUTES par la catégorie testée et on divise le delta par leur nombre : signal plus fort →
+  // beaucoup moins de bruit qu'un swap d'une seule carte (sinon des catégories quasi égales, p.ex.
+  // « sort à 0 » vs Jeweled Amulet à ~0,3 pt près, s'inversaient au gré du bruit). Reste la moyenne
+  // marginale par carte ajoutée — même sens et ordre de grandeur.
+  const blanks: number[] = []
+  REFERENCE_DECK.cards.forEach((c, i) => { if (c.kind === 'creature') blanks.push(i) })
+  const nBlank = Math.max(1, blanks.length)
 
-  const kinds = KINDS.filter((k) => k !== 'creature') // la créature est la carte « neutre » de référence
+  const kinds = KINDS.filter((k) => k !== 'creature')
   const out: CardImpact[] = []
   let done = 0
   for (const kind of kinds) {
+    const blankSet = new Set(blanks)
     const cards: Card[] = REFERENCE_DECK.cards.map((c, i) =>
-      i === blankIdx ? { name: `+${kind}`, kind, qty: 1 } : c,
+      blankSet.has(i) ? { name: `+${kind}${i}`, kind, qty: 1 } : c,
     )
     const a = avg4(runSimulation({ cards }, cfg))
-    out.push({ kind, t2: a.t2 - base.t2, t3: a.t3 - base.t3, t4: a.t4 - base.t4, t5: a.t5 - base.t5 })
+    out.push({
+      kind,
+      t2: (a.t2 - base.t2) / nBlank,
+      t3: (a.t3 - base.t3) / nBlank,
+      t4: (a.t4 - base.t4) / nBlank,
+      t5: (a.t5 - base.t5) / nBlank,
+    })
     onProgress?.(++done, kinds.length)
   }
-  return out.sort((x, y) => y.t3 - x.t3)
+  return out.sort((x, y) => (y.t2 + y.t3 + y.t4) - (x.t2 + x.t3 + x.t4))
 }
