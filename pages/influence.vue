@@ -22,18 +22,22 @@ const cardsByKind = computed(() => {
   return m
 })
 
+// Effet cumulé T2+T3+T4 : capte l'apport sur les tours qui comptent (T5 quasi saturé est ignoré).
 const rows = computed(() =>
-  (sim.impacts.value ?? []).map((i) => ({
-    kind: i.kind as Kind,
-    label: KIND_META[i.kind].full,
-    cards: cardsByKind.value[i.kind] ?? [],
-    t2: i.t2,
-    t3: i.t3,
-    t4: i.t4,
-    t5: i.t5,
-  })),
+  (sim.impacts.value ?? [])
+    .map((i) => ({
+      kind: i.kind as Kind,
+      label: KIND_META[i.kind].full,
+      cards: cardsByKind.value[i.kind] ?? [],
+      t2: i.t2,
+      t3: i.t3,
+      t4: i.t4,
+      t5: i.t5,
+      sum: i.t2 + i.t3 + i.t4,
+    }))
+    .sort((a, b) => b.sum - a.sum),
 )
-const maxAbs = computed(() => rows.value.reduce((m, r) => Math.max(m, Math.abs(r.t3)), 0) || 1)
+const maxAbs = computed(() => rows.value.reduce((m, r) => Math.max(m, Math.abs(r.sum)), 0) || 1)
 
 function cls(d: number): string {
   if (d > 0.0008) return 'pos'
@@ -44,9 +48,9 @@ function fmt(d: number): string {
   const v = d * 100
   return v > 0.05 ? `+${v.toFixed(1)}` : v.toFixed(1)
 }
-function barStyle(t3: number) {
-  const w = (Math.abs(t3) / maxAbs.value) * 50
-  return t3 >= 0 ? { left: '50%', width: `${w}%` } : { right: '50%', width: `${w}%` }
+function barStyle(v: number) {
+  const w = (Math.abs(v) / maxAbs.value) * 50
+  return v >= 0 ? { left: '50%', width: `${w}%` } : { right: '50%', width: `${w}%` }
 }
 </script>
 
@@ -74,10 +78,11 @@ function barStyle(t3: number) {
         <div class="thead">
           <span class="h-cat">Catégorie</span>
           <span class="h-num">T2</span>
-          <span class="h-num h-hot">T3</span>
+          <span class="h-num">T3</span>
           <span class="h-num">T4</span>
           <span class="h-num">T5</span>
-          <span class="h-bar">effet T3 (points)</span>
+          <span class="h-num h-hot">Σ T2-4</span>
+          <span class="h-bar">effet cumulé T2+T3+T4 (points)</span>
         </div>
         <ul class="list">
           <li v-for="r in rows" :key="r.kind">
@@ -87,12 +92,13 @@ function barStyle(t3: number) {
                 }}{{ r.cards.length > 5 ? ` · +${r.cards.length - 5}` : '' }}</span>
             </span>
             <span class="num" :class="cls(r.t2)">{{ fmt(r.t2) }}</span>
-            <span class="num hot" :class="cls(r.t3)">{{ fmt(r.t3) }}</span>
+            <span class="num" :class="cls(r.t3)">{{ fmt(r.t3) }}</span>
             <span class="num" :class="cls(r.t4)">{{ fmt(r.t4) }}</span>
             <span class="num" :class="cls(r.t5)">{{ fmt(r.t5) }}</span>
+            <span class="num hot" :class="cls(r.sum)">{{ fmt(r.sum) }}</span>
             <span class="dbar">
               <span class="dbar-axis" />
-              <span class="dbar-fill" :class="r.t3 >= 0 ? 'pos' : 'neg'" :style="barStyle(r.t3)" />
+              <span class="dbar-fill" :class="r.sum >= 0 ? 'pos' : 'neg'" :style="barStyle(r.sum)" />
             </span>
           </li>
         </ul>
@@ -100,10 +106,11 @@ function barStyle(t3: number) {
 
       <p class="note faint">
         Valeurs en points de pourcentage (ex. <b>+1,2</b> = +1,2 % de combos). <span class="pos">Vert</span> =
-        aide, <span class="neg">rouge</span> = pénalise, ~0 = négligeable (ou dans le bruit). Trié par
-        effet sur le <b>T3</b> (la cible du deck). Les « sorts à 0 » sont la base du combo : on en a
-        déjà beaucoup, donc l'impact marginal d'un de plus est faible mais positif. À l'inverse,
-        Sol Talisman pénalise un peu le T3 (dilution) mais paie au T4 (suspend).
+        aide, <span class="neg">rouge</span> = pénalise, ~0 = négligeable (ou dans le bruit). La colonne
+        <b>Σ T2-4</b> (et la barre) additionne l'effet sur T2&nbsp;+&nbsp;T3&nbsp;+&nbsp;T4 — le tri se fait dessus
+        (T5 quasi saturé est ignoré). Les « sorts à 0 » sont la base du combo : on en a déjà beaucoup,
+        donc l'impact marginal d'un de plus est faible mais positif. À l'inverse, Sol Talisman pénalise
+        un peu le T3 (dilution) mais paie au T4 (suspend).
       </p>
     </div>
   </div>
@@ -166,9 +173,9 @@ h1 .accent {
 .thead,
 .list li {
   display: grid;
-  grid-template-columns: minmax(240px, 2fr) 56px 56px 56px 56px minmax(200px, 1.4fr);
+  grid-template-columns: minmax(220px, 2fr) 50px 50px 50px 50px 58px minmax(170px, 1.2fr);
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 .thead {
   padding: 10px 0;
@@ -268,15 +275,19 @@ h1 .accent {
   font-weight: 600;
 }
 @media (max-width: 720px) {
-  .thead .h-bar {
+  /* On masque la barre et la colonne T5 ; on garde T2/T3/T4 + le cumul Σ. */
+  .thead .h-bar,
+  .dbar {
+    display: none;
+  }
+  .thead > :nth-child(5),
+  .list li > :nth-child(5) {
     display: none;
   }
   .thead,
   .list li {
-    grid-template-columns: minmax(140px, 2fr) 44px 44px 44px 44px;
-  }
-  .dbar {
-    display: none;
+    grid-template-columns: minmax(130px, 2fr) 42px 42px 42px 50px;
+    gap: 8px;
   }
 }
 </style>
