@@ -32,6 +32,8 @@ export const CARD_CATALOG: Record<string, Kind> = {
   Wastes: 'land',
   "Adventurer's Inn": 'land',
   'Fomori Vault': 'land',
+  'Tectonic Edge': 'land', // entre dégagé, tape {C} (la capacité de sac est sans effet en goldfish)
+  'The Great Mound': 'land', // tape {C} ; jetons Vibranium/pioche trop lents pour le combo précoce
 
   // — Terrains spéciaux —
   'Maze of Ith': 'land0', // ne tape pour aucun mana
@@ -87,6 +89,9 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Goblin Firebomb': 'one',
   'Null Elemental Blast': 'one',
   Skateboard: 'one',
+  'Bear Trap': 'one', // {1} ; la capacité ({3},T,sac) ne sert pas le combo
+  'Lunatic Pandora': 'one', // {1} ; surveil coûte {2},T (pas gratuit) → simple sort à 1
+  'Pithing Needle': 'one', // {1} artefact non-créature
 
   // — Sorts à 2 —
   'Levitating Statue': 'two',
