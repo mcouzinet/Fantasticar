@@ -54,13 +54,24 @@ function bottomCards(hand: Hand, n: number): void {
   }
 }
 
+/**
+ * Nombre de terrains « pour démarrer » : City of Traitors tape pour 2 dès le T1 (lancer un caillou
+ * → partir T2), elle vaut donc 2 dans le critère de garde. Crystal Vein (ne tape 2 qu'en se
+ * sacrifiant) et Untaidake (entre engagé, mana légendaire only) restent à 1. Le plafond anti-flood,
+ * lui, reste sur le nombre réel de cartes-terrain.
+ */
+function startLands(hand: Hand): number {
+  return landsInHand(hand) + hand[CITY]!
+}
+
 /** Critère de garde London selon la taille cible (§3.6). */
 function keepLondon(hand: Hand, targetSize: number): boolean {
-  const lands = landsInHand(hand)
+  const lands = landsInHand(hand) // cartes-terrain (plafond anti-flood)
+  const start = startLands(hand) // capacité de démarrage (City vaut 2)
   const zeros = zerosInHand(hand)
-  if (targetSize >= 7) return lands >= 2 && lands <= 5 && zeros >= 2
-  if (targetSize === 6) return lands >= 2 && zeros >= 1
-  return lands >= 1 // targetSize 5
+  if (targetSize >= 7) return start >= 2 && lands <= 5 && zeros >= 2
+  if (targetSize === 6) return start >= 2 && zeros >= 1
+  return start >= 1 // targetSize 5
 }
 
 const MOXFIELD_CAP = 15
@@ -91,7 +102,7 @@ export function openingHand(
       shuffle(deckBuf, rng, ids)
       dealInto(deckBuf, 7, outHand)
       const lands = landsInHand(outHand)
-      if (lands >= 2 && lands <= 5 && zerosInHand(outHand) >= 2) break
+      if (startLands(outHand) >= 2 && lands <= 5 && zerosInHand(outHand) >= 2) break
     }
     return 7
   }
