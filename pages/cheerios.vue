@@ -68,11 +68,9 @@ interface Pseudo {
 }
 const PSEUDO_GROUPS: { title: string; items: Pseudo[] }[] = [
   {
-    title: 'Monolithes — le mana investi revient le tour même',
+    title: 'Monolithe — le mana investi revient le tour même',
     items: [
       { name: 'Basalt Monolith', note: '{3} → tape {C}{C}{C} le tour même · net 0' },
-      { name: 'Grim Monolith', note: '{2} → tape {C}{C}{C} le tour même · net +1' },
-      { name: 'Mana Vault', note: '{1} → tape {C}{C}{C} le tour même · net +2' },
     ],
   },
   {
@@ -80,7 +78,6 @@ const PSEUDO_GROUPS: { title: string; items: Pseudo[] }[] = [
     items: [
       { name: 'Scale of Chiss-Goria', note: '{3}, affinité aux artefacts' },
       { name: 'Tooth of Chiss-Goria', note: '{3}, affinité aux artefacts' },
-      { name: 'Cranial Plating', note: '{2}, affinité aux artefacts (équipement)' },
     ],
   },
 ]
