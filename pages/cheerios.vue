@@ -61,6 +61,34 @@ const SCORE_LABEL: Record<number, string> = {
 // Tri par pertinence décroissante en conservant l'ordre fourni au sein d'un tier.
 const sorted = CHEERIOS.map((c, i) => ({ ...c, i })).sort((a, b) => b.score - a.score || a.i - b.i)
 
+// Pseudo-cheerios : pas {0}, mais ≈ gratuits pour le combo (mana rendu le tour même, ou affinité).
+interface Pseudo {
+  name: string
+  note: string
+}
+const PSEUDO_GROUPS: { title: string; items: Pseudo[] }[] = [
+  {
+    title: 'Monolithes — le mana investi revient le tour même',
+    items: [
+      { name: 'Basalt Monolith', note: '{3} → tape {C}{C}{C} le tour même · net 0' },
+      { name: 'Grim Monolith', note: '{2} → tape {C}{C}{C} le tour même · net +1' },
+      { name: 'Mana Vault', note: '{1} → tape {C}{C}{C} le tour même · net +2' },
+    ],
+  },
+  {
+    title: 'Affinité aux artefacts — ≈ {0} avec assez d’artefacts en jeu',
+    items: [
+      { name: 'Scale of Chiss-Goria', note: '{3}, affinité aux artefacts' },
+      { name: 'Tooth of Chiss-Goria', note: '{3}, affinité aux artefacts' },
+      { name: 'Cranial Plating', note: '{2}, affinité aux artefacts (équipement)' },
+    ],
+  },
+]
+const ALL_NAMES = [
+  ...CHEERIOS.map((c) => c.name),
+  ...PSEUDO_GROUPS.flatMap((g) => g.items.map((p) => p.name)),
+]
+
 // Images : on résout les 31 cartes en UNE seule requête « cards/collection » (méthode
 // recommandée par Scryfall). Elle renvoie des URLs du CDN, NON rate-limitées — contrairement
 // à 31 appels « named » en parallèle qui se faisaient jeter (429 → repli céréales).
@@ -72,7 +100,7 @@ onMounted(async () => {
     const res = await fetch('https://api.scryfall.com/cards/collection', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifiers: CHEERIOS.map((c) => ({ name: c.name })) }),
+      body: JSON.stringify({ identifiers: ALL_NAMES.map((name) => ({ name })) }),
     })
     const data = await res.json()
     for (const card of data?.data ?? []) {
@@ -83,7 +111,7 @@ onMounted(async () => {
     /* hors-ligne / Scryfall indispo : on tombera sur le motif céréales */
   }
   // Tout ce qui manque → motif céréales (repli thématique).
-  for (const c of CHEERIOS) if (!map[c.name]) map[c.name] = FALLBACK
+  for (const name of ALL_NAMES) if (!map[name]) map[name] = FALLBACK
   imgByName.value = map
 })
 function imgUrl(name: string) {
@@ -173,6 +201,43 @@ const previewStyle = computed(() => {
         </li>
       </ul>
 
+      <h2 class="sub">Les <span class="accent">pseudo-cheerios</span></h2>
+      <p class="lede">
+        Pas <code>{0}</code>, mais <b>≈ gratuits</b> pour le combo : soit le mana investi <b>revient le
+        tour même</b> (monolithes), soit l'<b>affinité aux artefacts</b> les rend quasi gratuits dans un
+        deck plein d'artefacts. Ils comptent eux aussi comme un sort non-créature du tour.
+      </p>
+
+      <template v-for="g in PSEUDO_GROUPS" :key="g.title">
+        <h3 class="grp">{{ g.title }}</h3>
+        <ul class="list">
+          <li
+            v-for="p in g.items"
+            :key="p.name"
+            class="prow"
+            @mouseenter="showPreview(p.name, $event)"
+            @mousemove="movePreview"
+            @mouseleave="hidePreview"
+          >
+            <img
+              v-if="imgByName[p.name]"
+              class="thumb"
+              :class="{ 'is-fallback': imgByName[p.name] === FALLBACK }"
+              :src="imgUrl(p.name)"
+              :alt="p.name"
+              loading="lazy"
+              referrerpolicy="no-referrer"
+              @error="onImgError"
+            />
+            <span v-else class="thumb thumb-ph" aria-hidden="true" />
+            <span class="pinfo">
+              <a class="name" :href="scryfallUrl(p.name)" target="_blank" rel="noopener noreferrer">{{ p.name }}</a>
+              <span class="pnote">{{ p.note }}</span>
+            </span>
+          </li>
+        </ul>
+      </template>
+
       <img
         v-if="preview"
         class="hover-preview"
@@ -240,6 +305,26 @@ code {
   font-size: 0.9em;
   color: var(--accent);
 }
+.sub {
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 38px 0 8px;
+  padding-top: 26px;
+  border-top: 1px solid var(--border);
+}
+.sub .accent {
+  color: var(--accent);
+}
+.grp {
+  font-family: var(--font-display);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  margin: 18px 0 8px;
+}
 
 .list {
   list-style: none;
@@ -274,6 +359,33 @@ code {
 }
 .row.tier-1 {
   border-left-color: var(--bad);
+}
+/* Lignes pseudo-cheerios : vignette + nom + note (pas de note /5). */
+.prow {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--k-rock);
+  border-radius: 10px;
+  padding: 6px 14px 6px 11px;
+  transition: border-color 0.12s, background 0.12s;
+}
+.prow:hover {
+  background: #161c28;
+  border-color: #3a4654;
+}
+.pinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pnote {
+  font-size: 12px;
+  color: var(--text-dim);
 }
 .thumb {
   width: 44px;
