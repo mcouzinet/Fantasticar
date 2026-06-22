@@ -86,12 +86,12 @@ describe('Decklist de référence courante (nouvelle liste)', () => {
     const s = deckStats(REFERENCE_DECK)
     expect(s.total).toBe(99)
     expect(s.byGroup.lands).toBe(39)
-    expect(s.byGroup.zeros).toBe(25)
-    expect(s.byGroup.rocks).toBe(10)
+    expect(s.byGroup.zeros).toBe(33)
+    expect(s.byGroup.rocks + s.byGroup.rocksTapped).toBe(8)
     expect(s.byGroup.ones).toBe(10)
-    expect(s.byGroup.twos).toBe(5)
-    expect(s.byGroup.creatures).toBe(3)
-    expect(s.byGroup.others).toBe(7)
+    expect(s.byGroup.twos).toBe(4)
+    expect(s.byGroup.creatures).toBe(1)
+    expect(s.byGroup.others).toBe(4)
   })
 
   it('probabilités cohérentes (monotonie, hiérarchie, pioche)', () => {

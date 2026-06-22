@@ -116,4 +116,26 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Skittering Cicada': 'creature',
   'Steel Overseer': 'creature',
   'Thought-Knot Seer': 'creature',
+
+  // — Cartes autrefois dans la liste de référence (gardées reconnues à l'import) —
+  'Darksteel Citadel': 'land',
+  Fountainport: 'land',
+  "Mishra's Factory": 'land',
+  "Mishra's Foundry": 'land',
+  Mutavault: 'land',
+  'Snow-Covered Wastes': 'land',
+  Vesuva: 'landT', // entre engagé (copie d'un terrain)
+  'The Mightstone and Weakstone': 'mightstone', // {5} → tape {C}{C} (net 3)
+  'Sol Talisman': 'sol', // Suspend 3 → caillou à 2 (se résout ~T4)
+  'Ghost Vacuum': 'one',
+  'Stone of Erech': 'one',
+  'Chromatic Sphere': 'chrom', // {1} ; activation pioche = {1},T,sac (rend 1) → sort à 1 net
+  'Chromatic Star': 'chrom',
+  'Disruptor Flute': 'two',
+  'Patchwork Automaton': 'creature',
+  'Hope of Ghirapur': 'creature',
+  Nettlecyst: 'o3',
+  'Karn, Scion of Urza': 'o4',
+  'Forsaken Monument': 'o5', // sort à 5 « nu » (doublement de mana ignoré)
+  'Ugin, Eye of the Storms': 'o7',
 }
