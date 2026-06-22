@@ -41,7 +41,18 @@ export interface GameDeps {
   maxTurn: number
 }
 
-function resetBattlefield(bf: Battlefield): void {
+/** Gemstone Caverns : free-start sur la draw (démarre en jeu + exil), puis le reste = terrain normal. */
+export function gemstoneOpening(hand: Hand, bf: Battlefield, onPlay: boolean): void {
+  if (!onPlay && hand[GEM]! > 0) {
+    hand[GEM]!-- // ce Gemstone part sur le champ de bataille
+    bf.plain += 1 // en jeu dès le départ (dégagé, tape pour 1)
+    exileWorst(hand) // exil d'une carte de la main
+  }
+  hand[LAND]! += hand[GEM]! // tout Gemstone restant = terrain normal
+  hand[GEM]! = 0
+}
+
+export function resetBattlefield(bf: Battlefield): void {
   bf.plain = 0
   bf.tapped = 0
   bf.city = false
@@ -71,17 +82,7 @@ export function playGame(deps: GameDeps, onPlay: boolean): number {
   const { deckBuf, rng, hand, bf, comboCtx, devCtx, mode, maxTurn } = deps
   let pointer = openingHand(deckBuf, rng, mode, hand)
   resetBattlefield(bf)
-
-  // Gemstone Caverns : sur la draw, s'il est en main d'ouverture, on peut le démarrer en jeu (avec
-  // un marqueur chance → tape pour 1) en exilant une carte. On gagne ainsi ~un tour de mana.
-  // Sur le play, ou pioché plus tard, c'est un terrain normal.
-  if (!onPlay && hand[GEM]! > 0) {
-    hand[GEM]!-- // ce Gemstone part sur le champ de bataille
-    bf.plain += 1 // en jeu dès le départ (dégagé, tape pour 1)
-    exileWorst(hand) // exil d'une carte de la main
-  }
-  hand[LAND]! += hand[GEM]! // tout Gemstone restant = terrain normal
-  hand[GEM]! = 0
+  gemstoneOpening(hand, bf, onPlay) // free-start de Gemstone Caverns sur la draw
 
   let fCast = false
 
