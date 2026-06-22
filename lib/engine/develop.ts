@@ -122,7 +122,7 @@ const ROCKS = [
   kindCode.basalt, kindCode.mightstone, kindCode.sol,
 ]
 const MANA_LANDS = [LAND, LANDT, VEIN, CITY, LANDGRANT, LANDSCRY, CLOUD, kindCode.gemstone]
-const CHEAP_SPELLS = [kindCode.zero, kindCode.one, kindCode.chrom, kindCode.two]
+const CHEAP_SPELLS = [kindCode.zero, kindCode.bauble, kindCode.one, kindCode.chrom, kindCode.two]
 
 /**
  * Décision scry/surveil 1 sur la carte du dessus (kind), selon l'état de la main.

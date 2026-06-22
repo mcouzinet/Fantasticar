@@ -17,11 +17,11 @@ const rows = computed(() => {
 
     <template v-if="data && data.conditioned > 0">
       <p class="intro faint">
-        On garde les parties qui <b>combotent au plus tard à T3</b>
-        (<b>{{ pct(data.condRate) }}</b> des parties, 1ᵉʳ combo ≈ T{{ data.firstAvgTurn.toFixed(1) }}),
-        puis on continue à jouer. La Fantasticar revient en zone de commandement et coûte
-        <b>+2</b> (taxe). On mesure <b>combien de tours après</b> on peut la
-        <b>relancer + 3 sorts non-créature</b>.
+        On garde les parties qui <b>combotent exactement à T3</b>
+        (<b>{{ pct(data.condRate) }}</b> des parties), puis on continue à jouer. La Fantasticar revient
+        en zone de commandement et coûte <b>+2</b> (taxe). On mesure <b>combien de tours après</b> on
+        peut la <b>relancer + 3 sorts non-créature</b>. Les <b>baubles</b> lancés piochent (ils se
+        remplacent), ce qui accélère le reload.
       </p>
 
       <div class="big-stat">
@@ -40,7 +40,8 @@ const rows = computed(() => {
 
       <p class="foot faint">
         Cumulatif : « ≤ +N tours » = recast dans les N tours qui suivent le combo. Parmi les parties
-        combotant ≤ T3. Modèle v1 : un seul recast mesuré, taxe commandant +2 par lancement.
+        combotant exactement à T3. Modèle v1 : un seul recast mesuré, taxe commandant +2 par lancement,
+        pioche des baubles prise en compte.
       </p>
     </template>
 

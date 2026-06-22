@@ -20,7 +20,7 @@ export interface GroupDef {
 /** Regroupement métier pour l'affichage (spec §4.1). */
 export const GROUPS: GroupDef[] = [
   { id: 'lands', label: 'Terrains', kinds: ['land', 'landT', 'city', 'vein', 'land0', 'landGrant', 'landScry', 'scorched', 'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus', 'cloud', 'gemstone'] },
-  { id: 'zeros', label: 'Sorts à 0', kinds: ['zero', 'amulet'] },
+  { id: 'zeros', label: 'Sorts à 0', kinds: ['zero', 'amulet', 'bauble'] },
   { id: 'rocks', label: 'Cailloux', kinds: ['rock2u', 'rock3', 'basalt', 'mightstone', 'dynamo', 'sol'] },
   { id: 'rocksTapped', label: 'Cailloux engagés', kinds: ['rock2t'] },
   { id: 'ones', label: 'Sorts à 1', kinds: ['one', 'chrom'] },

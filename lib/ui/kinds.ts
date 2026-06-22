@@ -24,6 +24,7 @@ export const KIND_META: Record<Kind, KindMeta> = {
   gemstone: { label: 'Gemstone', full: 'Gemstone Caverns (démarre en jeu sur la draw)', color: 'var(--k-land)' },
   zero: { label: '0', full: 'Sort non-créature — coût 0', color: 'var(--k-zero)' },
   amulet: { label: '0 banque', full: 'Jeweled Amulet (sort à 0, banque 1 mana)', color: 'var(--k-zero)' },
+  bauble: { label: '0 pioche', full: 'Bauble (sort à 0 qui pioche : Mishra\'s/Urza\'s/Lodestone)', color: 'var(--k-zero)' },
   rock2u: { label: 'Caillou 2', full: 'Caillou — coût 2, prêt', color: 'var(--k-rock)' },
   rock2t: { label: 'Caillou 2⟲', full: 'Caillou — coût 2, engagé', color: 'var(--k-rock)' },
   rock3: { label: 'Caillou 3', full: 'Caillou — coût 3', color: 'var(--k-rock)' },

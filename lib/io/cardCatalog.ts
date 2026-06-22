@@ -75,6 +75,10 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Kite Shield': 'zero',
   'Mox Jasper': 'zero',
   Spellbook: 'zero',
+  // Baubles {0} : sort à 0 qui pioche (cantrip) — leur pioche compte pour le recast (cf. recast.ts).
+  'Lodestone Bauble': 'bauble',
+  "Mishra's Bauble": 'bauble',
+  "Urza's Bauble": 'bauble',
   'Scale of Chiss-Goria': 'zero',
   'Tooth of Chiss-Goria': 'zero',
 

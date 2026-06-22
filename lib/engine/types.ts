@@ -10,7 +10,7 @@ export type Kind =
   | 'urzaMine' | 'urzaPP' | 'urzaTower' | 'planarNexus' // Tron : Mine/PP tapent 2, Tower 3 (set complet) ; Nexus = tous les types
   | 'cloud' // Untaidake : terrain engagé qui tape {C}{C} pour les sorts légendaires (couvre 2 du Fantasticar)
   | 'gemstone' // Gemstone Caverns : terrain normal, mais sur la draw en main d'ouverture il démarre en jeu (gagne un tour)
-  | 'zero' | 'amulet' | 'rock2u' | 'rock2t' | 'rock3'
+  | 'zero' | 'amulet' | 'bauble' | 'rock2u' | 'rock2t' | 'rock3'
   | 'basalt' | 'mightstone' | 'dynamo' | 'sol' // cailloux à profil mana particulier
   | 'one' | 'chrom' | 'two'
   | 'o3' | 'o4' | 'o5' | 'o6' | 'o7'
@@ -22,7 +22,7 @@ export const KINDS: readonly Kind[] = [
   'land0', 'landGrant', 'landScry', 'scorched',
   'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus',
   'cloud', 'gemstone',
-  'zero', 'amulet', 'rock2u', 'rock2t', 'rock3',
+  'zero', 'amulet', 'bauble', 'rock2u', 'rock2t', 'rock3',
   'basalt', 'mightstone', 'dynamo', 'sol',
   'one', 'chrom', 'two',
   'o3', 'o4', 'o5', 'o6', 'o7',

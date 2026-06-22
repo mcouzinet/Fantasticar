@@ -284,9 +284,9 @@ export function commitCombo(
   bf: Battlefield,
   table: SpellTable,
   fanCostBase: number,
-): boolean {
+): ComboLine | null {
   const line = traceCombo(ctx, hand, bf, false, fanCostBase)
-  if (!line) return false
+  if (!line) return null
   if (line.drop !== 'none') {
     const dk = DROP_KIND[line.drop]
     if (dk !== undefined && hand[dk]! > 0) hand[dk]!--
@@ -297,5 +297,5 @@ export function commitCombo(
     const p = table[KINDS[code]!]
     if (p.producesMana) bf.pendingRockMana += p.tapsFor ?? 1 // le caillou reste → produit dès le tour suivant
   }
-  return true
+  return line
 }

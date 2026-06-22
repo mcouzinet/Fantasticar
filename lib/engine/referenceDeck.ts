@@ -51,12 +51,13 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
     "Cathar's Shield", 'Chalice of the Void', 'Chimeric Mass', 'Claws of Gix',
     'Clown Car', 'Dark Sphere', 'Darksteel Relic', "Delif's Cone",
     'Engineered Explosives', 'Everflowing Chalice', 'Fountain of Youth', "Gustha's Scepter",
-    'Herbal Poultice', 'Kite Shield', 'Lodestone Bauble', "Mishra's Bauble",
+    'Herbal Poultice', 'Kite Shield',
     'Mox Jasper', 'Orochi Hatchery', 'Paradise Mantle', 'Scale of Chiss-Goria',
     'Sigil of Distinction', 'Spellbook', 'Spidersilk Net', 'Tooth of Chiss-Goria',
-    "Tormod's Crypt", "Urza's Bauble", 'Welding Jar', 'Zuran Orb',
+    "Tormod's Crypt", 'Welding Jar', 'Zuran Orb',
   ],
   amulet: ['Jeweled Amulet'], // sort à 0 qui banque 1 mana (activateur de combo précoce)
+  bauble: ['Lodestone Bauble', "Mishra's Bauble", "Urza's Bauble"], // sort à 0 qui pioche (cantrip)
 
   // — CAILLOUX (8) —
   rock2u: [

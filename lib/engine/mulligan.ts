@@ -51,6 +51,7 @@ function bottomCards(hand: Hand, n: number): void {
   }
   if (n > 0) {
     while (n > 0 && hand[Z]! > 0) { hand[Z]!--; n-- }
+    while (n > 0 && hand[kindCode.bauble]! > 0) { hand[kindCode.bauble]!--; n-- } // baubles = sorts à 0
   }
 }
 

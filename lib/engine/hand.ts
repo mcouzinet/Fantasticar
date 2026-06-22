@@ -24,5 +24,5 @@ export function landsInHand(hand: Hand): number {
 }
 
 export function zerosInHand(hand: Hand): number {
-  return hand[kindCode.zero]!
+  return hand[kindCode.zero]! + hand[kindCode.bauble]! // baubles = sorts à 0 (cantrip)
 }

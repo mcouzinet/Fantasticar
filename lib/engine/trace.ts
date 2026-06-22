@@ -23,7 +23,7 @@ export interface T2RecipesResult {
 // Jeton normalisé par carte pour la signature de recette. `city` est traité par NOM
 // (City of Traitors vs Crystal Vein, distincts pour le joueur même si même profil).
 const TOKEN: Partial<Record<Kind, string>> = {
-  zero: 'sort à 0',
+  zero: 'sort à 0', bauble: 'sort à 0',
   one: 'sort à 1', chrom: 'sort à 1', two: 'sort à 2',
   o3: 'sort cher', o4: 'sort cher', o5: 'sort cher', o6: 'sort cher', o7: 'sort cher',
   land: 'terrain', landT: 'terrain', landScry: 'terrain', landGrant: 'terrain', land0: 'terrain',
