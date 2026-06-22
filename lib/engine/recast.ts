@@ -26,15 +26,16 @@ export interface RecastResult {
   conditioned: number // parties ayant combo ≤ T3 (population de base)
   condRate: number // conditioned / games
   firstAvgTurn: number // tour moyen du 1er combo (parmi conditionnées)
-  recastByTurn: { turn: number; cum: number }[] // P(recast ≤ turn) parmi conditionnées, turns 4..max
-  recastEver: number // P(recast au moins une fois ≤ max) parmi conditionnées
-  recastAvgTurn: number // tour moyen du recast (parmi celles qui recastent)
-  maxTurn: number
+  recastByAfter: { after: number; cum: number }[] // P(recast dans ≤ +after tours) parmi conditionnées
+  recastEver: number // P(recast dans ≤ +MAX_AFTER tours) parmi conditionnées
+  recastAvgAfter: number // nb moyen de tours après le combo pour le recast (parmi celles qui recastent)
+  maxAfter: number
 }
 
 const GEM = kindCode.gemstone
 const LAND = kindCode.land
-const RECAST_MAX_TURN = 8 // on prolonge au-delà de T5 pour voir le recast
+const MAX_AFTER = 5 // on mesure le recast jusqu'à +5 tours après le combo
+const RECAST_MAX_TURN = 3 + MAX_AFTER // 1er combo ≤ T3 → fenêtre d'observation identique pour tous (≤ +5)
 
 interface RecastDeps {
   deckBuf: Int8Array
@@ -108,9 +109,9 @@ export function recastSim(deck: Deck, config: SimConfig): RecastResult {
   let games = 0
   let conditioned = 0
   let firstSum = 0
-  let recastSum = 0
+  let afterSum = 0
   let recastCount = 0
-  const cum = new Int32Array(RECAST_MAX_TURN + 1) // cum[t] = nb de recasts au tour t exactement
+  const cum = new Int32Array(MAX_AFTER + 1) // cum[d] = nb de recasts à exactement +d tours après le combo
 
   const runAxis = (onPlay: boolean): void => {
     for (let i = 0; i < config.iterations; i++) {
@@ -119,22 +120,23 @@ export function recastSim(deck: Deck, config: SimConfig): RecastResult {
       if (first < 2 || first > 3) continue // population : 1er combo ≤ T3
       conditioned++
       firstSum += first
-      if (recast > 0) {
+      const d = recast - first // nb de tours après le combo
+      if (recast > 0 && d >= 1 && d <= MAX_AFTER) {
         recastCount++
-        recastSum += recast
-        cum[recast]!++
+        afterSum += d
+        cum[d]!++
       }
     }
   }
   runAxis(true)
   runAxis(false)
 
-  // Cumulatif P(recast ≤ turn) parmi les parties conditionnées.
-  const recastByTurn: { turn: number; cum: number }[] = []
+  // Cumulatif P(recast dans ≤ +after tours) parmi les parties conditionnées.
+  const recastByAfter: { after: number; cum: number }[] = []
   let acc = 0
-  for (let t = 4; t <= RECAST_MAX_TURN; t++) {
-    acc += cum[t]!
-    recastByTurn.push({ turn: t, cum: conditioned ? acc / conditioned : 0 })
+  for (let d = 1; d <= MAX_AFTER; d++) {
+    acc += cum[d]!
+    recastByAfter.push({ after: d, cum: conditioned ? acc / conditioned : 0 })
   }
 
   return {
@@ -142,9 +144,9 @@ export function recastSim(deck: Deck, config: SimConfig): RecastResult {
     conditioned,
     condRate: games ? conditioned / games : 0,
     firstAvgTurn: conditioned ? firstSum / conditioned : 0,
-    recastByTurn,
+    recastByAfter,
     recastEver: conditioned ? recastCount / conditioned : 0,
-    recastAvgTurn: recastCount ? recastSum / recastCount : 0,
-    maxTurn: RECAST_MAX_TURN,
+    recastAvgAfter: recastCount ? afterSum / recastCount : 0,
+    maxAfter: MAX_AFTER,
   }
 }

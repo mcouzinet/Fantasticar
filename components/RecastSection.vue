@@ -6,8 +6,8 @@ const props = defineProps<{ data: RecastResult | null }>()
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`
 const rows = computed(() => {
   if (!props.data || !props.data.conditioned) return []
-  const max = props.data.recastByTurn.reduce((m, r) => Math.max(m, r.cum), 0) || 1
-  return props.data.recastByTurn.map((r) => ({ turn: r.turn, cum: r.cum, w: (r.cum / max) * 100 }))
+  const max = props.data.recastByAfter.reduce((m, r) => Math.max(m, r.cum), 0) || 1
+  return props.data.recastByAfter.map((r) => ({ after: r.after, cum: r.cum, w: (r.cum / max) * 100 }))
 })
 </script>
 
@@ -20,26 +20,27 @@ const rows = computed(() => {
         On garde les parties qui <b>combotent au plus tard à T3</b>
         (<b>{{ pct(data.condRate) }}</b> des parties, 1ᵉʳ combo ≈ T{{ data.firstAvgTurn.toFixed(1) }}),
         puis on continue à jouer. La Fantasticar revient en zone de commandement et coûte
-        <b>+2</b> (taxe). On mesure quand on peut la <b>relancer + 3 sorts non-créature</b>.
+        <b>+2</b> (taxe). On mesure <b>combien de tours après</b> on peut la
+        <b>relancer + 3 sorts non-créature</b>.
       </p>
 
       <div class="big-stat">
         <span class="bn">{{ pct(data.recastEver) }}</span>
-        <span class="bl">repartent au moins une fois (≤ T{{ data.maxTurn }})<template v-if="data.recastAvgTurn">,
-          recast ≈ <b>T{{ data.recastAvgTurn.toFixed(1) }}</b></template></span>
+        <span class="bl">repartent dans les {{ data.maxAfter }} tours qui suivent<template v-if="data.recastAvgAfter">,
+          en moyenne <b>+{{ data.recastAvgAfter.toFixed(1) }} tours</b> après le combo</template></span>
       </div>
 
       <ul class="bars">
-        <li v-for="r in rows" :key="r.turn">
-          <span class="nm">recast ≤ T{{ r.turn }}</span>
+        <li v-for="r in rows" :key="r.after">
+          <span class="nm">≤ +{{ r.after }} tour{{ r.after > 1 ? 's' : '' }}</span>
           <span class="track"><span class="fill" :style="{ width: `${r.w}%` }" /></span>
           <span class="pct">{{ pct(r.cum) }}</span>
         </li>
       </ul>
 
       <p class="foot faint">
-        Cumulatif parmi les parties combotant ≤ T3. Modèle v1 : un seul recast mesuré, partie
-        prolongée jusqu'à T{{ data.maxTurn }}, taxe commandant +2 par lancement.
+        Cumulatif : « ≤ +N tours » = recast dans les N tours qui suivent le combo. Parmi les parties
+        combotant ≤ T3. Modèle v1 : un seul recast mesuré, taxe commandant +2 par lancement.
       </p>
     </template>
 
