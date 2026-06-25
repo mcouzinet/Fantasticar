@@ -1,7 +1,6 @@
 import type { Deck, SimConfig, SimResult } from '~/lib/engine/types'
 import type { T2RecipesResult } from '~/lib/engine/trace'
 import type { CardImpact } from '~/lib/engine/impacts'
-import type { RecastResult } from '~/lib/engine/recast'
 import type { WorkerOut } from '~/lib/sim.worker'
 
 // Singleton worker (hors état réactif : non sérialisable).
@@ -18,7 +17,6 @@ export function useSim() {
   const baselineResult = useState<SimResult | null>('sim:baseline', () => null)
   const draftResult = useState<SimResult | null>('sim:draft', () => null)
   const t2 = useState<T2RecipesResult | null>('sim:t2', () => null)
-  const recast = useState<RecastResult | null>('sim:recast', () => null)
   const error = useState<string | null>('sim:error', () => null)
   // Influence des cartes (calculée à la demande, mise en cache)
   const impacts = useState<CardImpact[] | null>('sim:impacts', () => null)
@@ -74,7 +72,6 @@ export function useSim() {
         baselineResult.value = m.baseline
         draftResult.value = m.draft
         t2.value = m.t2
-        recast.value = m.recast
         progress.value = 1
         finish()
       } else if (m.kind === 'error') {
@@ -129,7 +126,7 @@ export function useSim() {
   }
 
   return {
-    isRunning, progress, baselineResult, draftResult, t2, recast, error, lastConfig, run,
+    isRunning, progress, baselineResult, draftResult, t2, error, lastConfig, run,
     impacts, impactsRunning, impactsProgress, runImpacts,
   }
 }

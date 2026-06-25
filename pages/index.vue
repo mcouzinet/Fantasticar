@@ -140,7 +140,6 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
         </div>
 
         <T2Combos v-if="primary" :data="sim.t2.value" />
-        <RecastSection v-if="primary" :data="sim.recast.value" />
       </section>
     </main>
 
