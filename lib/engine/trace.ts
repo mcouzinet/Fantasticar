@@ -69,6 +69,7 @@ const DROP_KIND: Partial<Record<LandDrop, number>> = {
   landT: kindCode.landT, vein: kindCode.vein, city: kindCode.city, land0: kindCode.land0,
   scorched: kindCode.scorched,
   urzaMine: kindCode.urzaMine, urzaPP: kindCode.urzaPP, urzaTower: kindCode.urzaTower, planarNexus: kindCode.planarNexus,
+  cloud: kindCode.cloud, cloudpost: kindCode.cloudpost, locus: kindCode.locus,
 }
 
 /**
@@ -99,7 +100,7 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
   const idBuf = new Int16Array(total)
   const before = new Int16Array(KIND_COUNT)
 
-  const popName = (handCards: string[][], kc: number): string => handCards[kc]!.pop() ?? '?'
+  const popName = (handCards: string[][], kc: number): string => handCards[kc]?.pop() ?? '?'
 
   const runAxis = (onPlay: boolean, seed: number): void => {
     const rng = mulberry32(seed >>> 0)
