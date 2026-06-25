@@ -27,6 +27,7 @@ const TOKEN: Partial<Record<Kind, string>> = {
   one: 'sort à 1', chrom: 'sort à 1', two: 'sort à 2',
   o3: 'sort cher', o4: 'sort cher', o5: 'sort cher', o6: 'sort cher', o7: 'sort cher',
   land: 'terrain', landT: 'terrain', landScry: 'terrain', landGrant: 'terrain', land0: 'terrain',
+  locus: 'terrain', cloudpost: 'Cloudpost',
   amulet: 'Jeweled Amulet',
   // planarNexus + pièces Tron : jeton dynamique (terrain Tron seulement si le set est productif).
   scorched: 'Scorched Ruins',

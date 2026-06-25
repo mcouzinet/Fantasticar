@@ -10,6 +10,8 @@ export type Kind =
   | 'urzaMine' | 'urzaPP' | 'urzaTower' | 'planarNexus' // Tron : Mine/PP tapent 2, Tower 3 (set complet) ; Nexus = tous les types
   | 'cloud' // Untaidake : terrain engagé qui tape {C}{C} pour les sorts légendaires (couvre 2 du Fantasticar)
   | 'gemstone' // Gemstone Caverns : terrain normal, mais sur la draw en main d'ouverture il démarre en jeu (gagne un tour)
+  | 'cloudpost' // Cloudpost : entre engagé, tape {C} par Locus en jeu (Cloudpost/Glimmerpost/Trenchpost/Planar Nexus)
+  | 'locus' // Glimmerpost / Trenchpost : terrain dégagé qui tape 1, mais compte comme Locus (booste Cloudpost)
   | 'zero' | 'amulet' | 'bauble' | 'rock2u' | 'rock2t' | 'rock3'
   | 'basalt' | 'mightstone' | 'dynamo' | 'sol' // cailloux à profil mana particulier
   | 'one' | 'chrom' | 'two'
@@ -21,7 +23,7 @@ export const KINDS: readonly Kind[] = [
   'land', 'landT', 'city', 'vein',
   'land0', 'landGrant', 'landScry', 'scorched',
   'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus',
-  'cloud', 'gemstone',
+  'cloud', 'gemstone', 'cloudpost', 'locus',
   'zero', 'amulet', 'bauble', 'rock2u', 'rock2t', 'rock3',
   'basalt', 'mightstone', 'dynamo', 'sol',
   'one', 'chrom', 'two',

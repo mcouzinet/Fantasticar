@@ -4,7 +4,7 @@
 
 export type LandDrop =
   | 'none' | 'land' | 'landT' | 'vein' | 'city' | 'land0' | 'landGrant' | 'landScry' | 'scorched'
-  | 'urzaMine' | 'urzaPP' | 'urzaTower' | 'planarNexus' | 'cloud'
+  | 'urzaMine' | 'urzaPP' | 'urzaTower' | 'planarNexus' | 'cloud' | 'cloudpost' | 'locus'
 
 /** Une carte en exil suspendu : se résout quand `turnsLeft` atteint 0. */
 export interface SuspendTimer {
@@ -37,6 +37,11 @@ export interface Battlefield {
   // légendaires (aucun mana générique) → couvre 2 du coût du Fantasticar (cf. combo.ts).
   cloud: number // Untaidake dégagés (disponibles ce tour)
   cloudTapped: number // Untaidake posés ce tour (engagés → cloud au tour suivant)
+  // Locus : Cloudpost (engagé à l'arrivée) tape {C} par Locus en jeu. Glimmerpost/Trenchpost (`locus`)
+  // tapent 1 mais comptent comme Locus ; Planar Nexus (uNexus) compte aussi comme Locus.
+  cloudpost: number // Cloudpost dégagés (tapent chacun pour le nb de Locus)
+  cloudpostTapped: number // Cloudpost posés ce tour (engagés → cloudpost au tour suivant ; comptent déjà comme Locus)
+  locus: number // Glimmerpost/Trenchpost en jeu (tapent 1, comptent comme Locus)
 }
 
 export function emptyBattlefield(): Battlefield {
@@ -61,6 +66,9 @@ export function emptyBattlefield(): Battlefield {
     uNexus: 0,
     cloud: 0,
     cloudTapped: 0,
+    cloudpost: 0,
+    cloudpostTapped: 0,
+    locus: 0,
   }
 }
 
@@ -115,6 +123,16 @@ export function computeMana(bf: Battlefield, drop: LandDrop, combo = false): num
     const tower = bf.uTower + (drop === 'urzaTower' ? 1 : 0)
     const nexus = bf.uNexus + (drop === 'planarNexus' ? 1 : 0)
     mana += tronMana(mine, pp, tower, nexus)
+  }
+  // Locus : chaque Cloudpost DÉGAGÉ tape {C} par Locus en jeu. Locus = Cloudpost (engagés inclus,
+  // ils comptent même sans taper) + Glimmerpost/Trenchpost + Planar Nexus. Le terrain posé ce tour
+  // s'ajoute au compteur (Cloudpost engagé compte mais ne tape pas ; locus tape 1 et compte).
+  {
+    const nexus = bf.uNexus + (drop === 'planarNexus' ? 1 : 0)
+    let locusCount = bf.cloudpost + bf.cloudpostTapped + bf.locus + nexus
+    if (drop === 'cloudpost' || drop === 'locus') locusCount += 1
+    mana += bf.cloudpost * locusCount // Cloudpost dégagés (le posé ce tour entre engagé)
+    mana += bf.locus + (drop === 'locus' ? 1 : 0) // Glimmerpost/Trenchpost tapent 1
   }
   // Terrains sans mana (Maze of Ith) : produisent 1 chacun SI un donneur de type est en jeu
   // (Yavimaya/Urborg les rend Forêt/Marais), y compris celui qu'on poserait ce tour-ci.
@@ -180,6 +198,8 @@ export function applyDrop(bf: Battlefield, drop: LandDrop): void {
     case 'urzaTower': bf.uTower += 1; bf.city = false; break
     case 'planarNexus': bf.uNexus += 1; bf.city = false; break
     case 'cloud': bf.cloudTapped += 1; bf.city = false; break // Untaidake entre engagé
+    case 'cloudpost': bf.cloudpostTapped += 1; bf.city = false; break // Cloudpost entre engagé (déjà un Locus)
+    case 'locus': bf.locus += 1; bf.city = false; break // Glimmerpost/Trenchpost : dégagé, tape 1, Locus
     case 'none':
       break
   }
@@ -195,6 +215,8 @@ export function promote(bf: Battlefield): void {
   bf.tapped = 0
   bf.cloud += bf.cloudTapped // Untaidake posés au tour précédent se dégagent
   bf.cloudTapped = 0
+  bf.cloudpost += bf.cloudpostTapped // Cloudpost posés au tour précédent se dégagent
+  bf.cloudpostTapped = 0
   bf.rockMana += bf.pendingRockMana
   bf.pendingRockMana = 0
   // mana banqué (Jeweled Amulet) : dispo ce tour-ci, one-shot (perdu s'il n'est pas rechargé).

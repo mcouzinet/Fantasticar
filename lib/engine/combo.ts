@@ -153,6 +153,8 @@ export function bestCombo(
   if (hand[kindCode.urzaTower]! > 0 && feasible(k, m, cm('urzaTower'), fCast, f, free, c)) return true
   if (hand[kindCode.planarNexus]! > 0 && feasible(k, m, cm('planarNexus'), fCast, f, free, c)) return true
   if (hand[kindCode.cloud]! > 0 && feasible(k, m, cm('cloud'), fCast, f, free, c)) return true
+  if (hand[kindCode.cloudpost]! > 0 && feasible(k, m, cm('cloudpost'), fCast, f, free, c)) return true
+  if (hand[kindCode.locus]! > 0 && feasible(k, m, cm('locus'), fCast, f, free, c)) return true
   return false
 }
 
@@ -210,14 +212,14 @@ export interface ComboLine {
 
 const DROP_CANDIDATES: LandDrop[] = [
   'none', 'land', 'landGrant', 'landScry', 'landT', 'vein', 'city', 'land0', 'scorched',
-  'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus', 'cloud',
+  'urzaMine', 'urzaPP', 'urzaTower', 'planarNexus', 'cloud', 'cloudpost', 'locus',
 ]
 const DROP_KIND: Partial<Record<LandDrop, number>> = {
   land: kindCode.land, landGrant: kindCode.landGrant, landScry: kindCode.landScry,
   landT: kindCode.landT, vein: kindCode.vein, city: kindCode.city, land0: kindCode.land0,
   scorched: kindCode.scorched,
   urzaMine: kindCode.urzaMine, urzaPP: kindCode.urzaPP, urzaTower: kindCode.urzaTower, planarNexus: kindCode.planarNexus,
-  cloud: kindCode.cloud,
+  cloud: kindCode.cloud, cloudpost: kindCode.cloudpost, locus: kindCode.locus,
 }
 
 /**

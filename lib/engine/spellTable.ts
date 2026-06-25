@@ -39,6 +39,10 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   // Gemstone Caverns : terrain normal (converti en `land` par le moteur). Particularité gérée dans
   // game.ts/trace.ts : sur la draw, s'il est en main d'ouverture, il démarre en jeu (+exil d'une carte).
   gemstone: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  // Cloudpost : terrain Locus engagé, tape {C} par Locus en jeu (cf. mana.ts). Glimmerpost/Trenchpost
+  // (`locus`) tapent 1 mais comptent comme Locus → boostent Cloudpost.
+  cloudpost: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
+  locus: { cost: 0, refund: 0, isComboSpell: false, producesMana: false, tappedRock: false },
 
   // — Sorts non-créature : sorts de combo —
   zero: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },

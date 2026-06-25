@@ -22,6 +22,8 @@ export const KIND_META: Record<Kind, KindMeta> = {
   planarNexus: { label: 'Tron tous', full: 'Planar Nexus (compte comme toutes les pièces Tron)', color: 'var(--k-land)' },
   cloud: { label: 'Untaidake', full: 'Untaidake (engagé, {C}{C} pour le Fantasticar)', color: 'var(--k-land)' },
   gemstone: { label: 'Gemstone', full: 'Gemstone Caverns (démarre en jeu sur la draw)', color: 'var(--k-land)' },
+  cloudpost: { label: 'Cloudpost', full: 'Cloudpost (engagé, tape {C} par Locus en jeu)', color: 'var(--k-land)' },
+  locus: { label: 'Locus', full: 'Glimmerpost / Trenchpost (tape 1, compte comme Locus)', color: 'var(--k-land)' },
   zero: { label: '0', full: 'Sort non-créature — coût 0', color: 'var(--k-zero)' },
   amulet: { label: '0 banque', full: 'Jeweled Amulet (sort à 0, banque 1 mana)', color: 'var(--k-zero)' },
   bauble: { label: '0 pioche', full: 'Bauble (sort à 0 qui pioche : Mishra\'s/Urza\'s/Lodestone)', color: 'var(--k-zero)' },

@@ -73,6 +73,9 @@ export function resetBattlefield(bf: Battlefield): void {
   bf.uNexus = 0
   bf.cloud = 0
   bf.cloudTapped = 0
+  bf.cloudpost = 0
+  bf.cloudpostTapped = 0
+  bf.locus = 0
 }
 
 /**

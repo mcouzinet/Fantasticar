@@ -11,7 +11,8 @@ import type { Kind } from '../engine/types'
  *  - Eldrazi Temple : le {C}{C} est réservé aux Eldrazi → modélisé à 1 (conservateur).
  *  - Mox Jasper : mana seulement si l'on contrôle un Dragon → pas de mana fiable → zero.
  *  - Scale / Tooth of Chiss-Goria : affinité aux artefacts → ~gratuits en deck artefacts → zero.
- *  - Lands Locus (Cloudpost/Glimmerpost/Trenchpost) modélisés à 1 (pas de bonus Locus).
+ *  - Lands Locus modélisés : Cloudpost (`cloudpost`) tape {C} par Locus en jeu ; Glimmerpost/Trenchpost
+ *    (`locus`) tapent 1 mais comptent comme Locus ; Planar Nexus est aussi un Locus (cf. mana.ts).
  */
 export const CARD_CATALOG: Record<string, Kind> = {
   // — Terrains prêts (tapent {C}, entrent dégagés) —
@@ -19,7 +20,6 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Buried Ruin': 'land',
   'Deserted Temple': 'land',
   'Eldrazi Temple': 'land',
-  Glimmerpost: 'land',
   'Horizon of Progress': 'land',
   'Hostile Desert': 'land',
   'Lazotep Quarry': 'land',
@@ -28,7 +28,6 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Scavenger Grounds': 'land',
   'The Gold Saucer': 'land',
   'Treasure Vault': 'land',
-  Trenchpost: 'land',
   Wastes: 'land',
   "Adventurer's Inn": 'land',
   'Fomori Vault': 'land',
@@ -40,8 +39,13 @@ export const CARD_CATALOG: Record<string, Kind> = {
   'Yavimaya, Cradle of Growth': 'landGrant', // chaque terrain devient Forêt → active les Maze
   'Urborg, Tomb of Yawgmoth': 'landGrant', // chaque terrain devient Marais → active les Maze
 
+  // — Terrains Locus — Cloudpost tape {C} par Locus en jeu (entre engagé) ; Glimmerpost/Trenchpost
+  // tapent 1 mais comptent comme Locus (booste Cloudpost). Planar Nexus est aussi un Locus.
+  Cloudpost: 'cloudpost',
+  Glimmerpost: 'locus',
+  Trenchpost: 'locus',
+
   // — Terrains engagés (enters tapped) —
-  Cloudpost: 'landT',
   'Guildless Commons': 'landT',
   'Ruins of Oran-Rief': 'landT',
 

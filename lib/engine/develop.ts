@@ -57,6 +57,8 @@ const UPP = kindCode.urzaPP
 const UTOWER = kindCode.urzaTower
 const UNEXUS = kindCode.planarNexus
 const CLOUD = kindCode.cloud
+const CLOUDPOST = kindCode.cloudpost
+const LOCUS = kindCode.locus
 const AMULET = kindCode.amulet
 
 /** Choix de la pose de terrain (spec §3.5.1). */
@@ -68,24 +70,29 @@ function chooseDrop(hand: Hand, bf: Battlefield, remaining: number): LandDrop {
   // tour suivant : posé T1 + un terrain T2, il débloque le combo T2 (comme City of Traitors + terrain).
   // Il ne donne pas de mana « immédiat » de toute façon. Inutile au tout dernier tour (jamais dégagé).
   if (hand[CLOUD]! > 0 && remaining >= 1) return 'cloud'
+  // Cloudpost : terrain Locus ENGAGÉ (tape par Locus). On le pose tôt pour démarrer/agrandir le
+  // moteur Locus, comme Untaidake (inutile au tout dernier tour, jamais dégagé).
+  if (hand[CLOUDPOST]! > 0 && remaining >= 1) return 'cloudpost'
   // terrains engagés simples (landT) : posés tôt si on a déjà de quoi développer les tours suivants.
   const hasLandT = hand[LANDT]! > 0
-  // terrains dégagés produisant du mana, gardés en réserve (tous sauf landT/cloud/land0)
+  // terrains dégagés produisant du mana, gardés en réserve (tous sauf landT/cloud/cloudpost/land0)
   const immediate =
-    hand[LAND]! + hand[VEIN]! + hand[CITY]! + hand[LANDGRANT]! + hand[LANDSCRY]! +
+    hand[LAND]! + hand[LOCUS]! + hand[VEIN]! + hand[CITY]! + hand[LANDGRANT]! + hand[LANDSCRY]! +
     hand[SCORCHED]! + hand[UMINE]! + hand[UPP]! + hand[UTOWER]! + hand[UNEXUS]!
   if (hasLandT && immediate >= remaining) return 'landT'
   if (hand[LANDSCRY]! > 0) return 'landScry' // priorité : pose "gratuite" qui filtre la pioche
   if (hand[LANDGRANT]! > 0) return 'landGrant' // tape pour 1 + active les Maze
-  // Pièces Tron jouées avant les terrains génériques (construit le set ; Nexus = tous les types).
+  // Pièces Tron jouées avant les terrains génériques (construit le set ; Nexus = tous les types + Locus).
   if (hand[UNEXUS]! > 0) return 'planarNexus'
   if (hand[UTOWER]! > 0) return 'urzaTower'
   if (hand[UMINE]! > 0) return 'urzaMine'
   if (hand[UPP]! > 0) return 'urzaPP'
+  if (hand[LOCUS]! > 0) return 'locus' // Glimmerpost/Trenchpost : tape 1 comme un terrain + Locus (booste Cloudpost)
   if (hand[LAND]! > 0) return 'land'
   if (hand[VEIN]! > 0) return 'vein'
   if (hand[CITY]! > 0) return 'city' // dégagée, tape pour 2 → avant un terrain engagé (0 mana ce tour)
   if (hand[CLOUD]! > 0) return 'cloud' // Untaidake (engagé) avant un landT nu : il rampe + remise Fantasticar
+  if (hand[CLOUDPOST]! > 0) return 'cloudpost' // Cloudpost (engagé) — dernier recours, même au tout dernier tour
   if (hand[LANDT]! > 0) return 'landT'
   if (hand[LAND0]! > 0) return 'land0' // Maze : dernier recours (0 mana sauf donneur)
   return 'none'
@@ -106,6 +113,8 @@ function removeDrop(hand: Hand, drop: LandDrop): void {
     case 'urzaTower': hand[UTOWER]!--; break
     case 'planarNexus': hand[UNEXUS]!--; break
     case 'cloud': hand[CLOUD]!--; break
+    case 'cloudpost': hand[CLOUDPOST]!--; break
+    case 'locus': hand[LOCUS]!--; break
     case 'none': break
   }
 }
@@ -121,7 +130,7 @@ const ROCKS = [
   kindCode.rock2u, kindCode.rock2t, kindCode.rock3,
   kindCode.basalt, kindCode.mightstone, kindCode.sol,
 ]
-const MANA_LANDS = [LAND, LANDT, VEIN, CITY, LANDGRANT, LANDSCRY, CLOUD, kindCode.gemstone]
+const MANA_LANDS = [LAND, LANDT, VEIN, CITY, LANDGRANT, LANDSCRY, CLOUD, CLOUDPOST, LOCUS, kindCode.gemstone]
 const CHEAP_SPELLS = [kindCode.zero, kindCode.bauble, kindCode.one, kindCode.chrom, kindCode.two]
 
 /**

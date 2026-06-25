@@ -37,6 +37,8 @@ const NAMES_BY_KIND: Record<Kind, string[]> = {
   planarNexus: ['Planar Nexus'],
   cloud: ['Untaidake, the Cloud Keeper'], // tape {C}{C} légendaire → paie le Fantasticar
   gemstone: ['Gemstone Caverns'], // terrain normal, mais démarre en jeu sur la draw (gagne un tour)
+  cloudpost: [], // Cloudpost (Locus : tape {C} par Locus) — candidat catalogue, absent de la liste
+  locus: [], // Glimmerpost / Trenchpost (Locus, tapent 1) — candidat catalogue, absent de la liste
   land0: [], // terrain sans mana (Maze of Ith) — aucun dans cette liste
   landGrant: [], // donneur de type (Yavimaya/Urborg) — aucun dans cette liste
   // terrains dégagés qui scry/surveil 1 à l'arrivée (filtrent la prochaine pioche)
