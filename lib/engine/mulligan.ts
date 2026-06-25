@@ -49,6 +49,16 @@ function bottomCards(hand: Hand, n: number): void {
       while (n > 0 && hand[code]! > 0) { hand[code]!--; n-- }
     }
   }
+  // 4. Catch-all : retire les catégories non couvertes ci-dessus (City, terrains landScry/Tron/
+  //    gemstone/cloud/cloudpost/locus/scorched, amulet, basalt…) pour GARANTIR le retrait d'exactement
+  //    n cartes (invariant London : une main mulliganée-à-N fait N cartes). On épargne les sorts à 0.
+  if (n > 0) {
+    for (let code = 0; n > 0 && code < hand.length; code++) {
+      if (code === Z || code === kindCode.bauble) continue
+      while (n > 0 && hand[code]! > 0) { hand[code]!--; n-- }
+    }
+  }
+  // 5. En tout dernier recours : sorts à 0 (zéros puis baubles), gardés au maximum.
   if (n > 0) {
     while (n > 0 && hand[Z]! > 0) { hand[Z]!--; n-- }
     while (n > 0 && hand[kindCode.bauble]! > 0) { hand[kindCode.bauble]!--; n-- } // baubles = sorts à 0

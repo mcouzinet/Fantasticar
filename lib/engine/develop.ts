@@ -16,6 +16,9 @@ export interface DevelopContext {
   suspendN: number[]
   suspendTaps: number[]
   suspendCombo: boolean[]
+  // Sorts de combo lançables depuis la main (isComboSpell && !suspend) : sert au garde « surplus »
+  // du pré-cast (ne jamais transformer en rampe un caillou nécessaire comme sort du combo).
+  comboSpellKinds: number[]
 }
 
 export function buildDevelopContext(table: SpellTable): DevelopContext {
@@ -31,6 +34,11 @@ export function buildDevelopContext(table: SpellTable): DevelopContext {
     rocks.push({ code: kindCode[kind], cost: p.cost, net: p.cost - p.refund, taps: p.tapsFor ?? 1 })
   }
   rocks.sort((a, b) => a.net - b.net || a.cost - b.cost) // rock2u, rock2t, rock3, mightstone
+  const comboSpellKinds: number[] = []
+  for (const kind of KINDS as readonly Kind[]) {
+    const p = table[kind]
+    if (p.isComboSpell && !p.suspend) comboSpellKinds.push(kindCode[kind])
+  }
   return {
     rockKinds: rocks.map((r) => r.code),
     rockCost: rocks.map((r) => r.cost),
@@ -41,6 +49,7 @@ export function buildDevelopContext(table: SpellTable): DevelopContext {
     suspendN: susp.map((s) => s.n),
     suspendTaps: susp.map((s) => s.taps),
     suspendCombo: susp.map((s) => s.combo),
+    comboSpellKinds,
   }
 }
 
@@ -176,27 +185,36 @@ export function develop(
   // commandement et se lance le tour du combo, en même temps que les 3 autres sorts non-créature
   // (need = 3). Le poser seul un tour à l'avance (need = 4) serait strictement pire.
 
-  // 2. Pré-cast des cailloux abordables, du moins cher (net) au plus cher.
+  // Sorts de combo encore en main et cible `need` (sorts non-créature à lancer le tour du combo).
+  // Un caillou pré-lancé devient rampe pérenne mais ne compte PLUS parmi les sorts du combo (lancés
+  // un tour avant). On ne pré-lance donc que les cailloux EXCÉDENTAIRES : tant qu'il reste > need
+  // sorts de combo en main, en retirer un (le caillou) en laisse ≥ need (cf. DH-01 de l'audit).
+  const need = (fCast ? 4 : 3) - bf.freeCasts
+  let comboInHand = 0
+  for (const k of ctx.comboSpellKinds) comboInHand += hand[k]!
+
+  // 2. Pré-cast des cailloux EXCÉDENTAIRES, du moins cher (net) au plus cher.
   for (let i = 0; i < ctx.rockKinds.length; i++) {
     const code = ctx.rockKinds[i]!
     const cost = ctx.rockCost[i]!
     const net = ctx.rockNet[i]!
     const taps = ctx.rockTaps[i]!
-    while (hand[code]! > 0 && pool >= cost) {
+    while (hand[code]! > 0 && pool >= cost && comboInHand > need) {
       hand[code]!--
       pool -= net
       bf.pendingRockMana += taps // produit à partir du tour suivant
+      comboInHand-- // un caillou est un sort de combo : le pré-lancer en retire un de la main
     }
   }
 
   // 3a. Jeweled Amulet : banque le mana en rab (paie {1} maintenant → +1 mana au tour suivant).
-  //     On ne charge QUE si on a déjà ≥ 3 autres sorts bon marché en main : sacrifier l'Amulet
-  //     comme source de mana ne coûte alors aucune pièce de combo (need = 3), c'est tout bénéf.
-  //     Sinon on le garde comme sort à 0 (4e pièce). Évite de plomber le T3.
+  //     On ne charge QUE si on garde ≥ `need` AUTRES sorts bon marché en main : sacrifier l'Amulet
+  //     comme source de mana ne coûte alors aucune pièce de combo, c'est tout bénéf. Sinon on le
+  //     garde comme sort à 0. `need` tient compte des sorts gratuits (suspend) acquis ce tour (DH-02).
   if (hand[AMULET]! > 0 && pool >= 1) {
     let cheap = 0
     for (const k of CHEAP_SPELLS) cheap += hand[k]!
-    while (hand[AMULET]! > 0 && pool >= 1 && cheap >= 3) {
+    while (hand[AMULET]! > 0 && pool >= 1 && cheap >= need) {
       hand[AMULET]!--
       pool -= 1
       bf.pendingBank += 1

@@ -60,8 +60,8 @@ const EXILE_ORDER: number[] = [
   kindCode.rock2t, kindCode.rock2u, kindCode.basalt,
   kindCode.landScry, kindCode.landGrant, kindCode.land,
   kindCode.urzaMine, kindCode.urzaPP, kindCode.urzaTower, kindCode.planarNexus,
-  kindCode.scorched, kindCode.vein, kindCode.city, kindCode.cloud,
-  kindCode.zero, kindCode.amulet,
+  kindCode.scorched, kindCode.vein, kindCode.city, kindCode.cloud, kindCode.cloudpost, kindCode.locus,
+  kindCode.zero, kindCode.bauble, kindCode.amulet,
 ]
 
 const DROP_KIND: Partial<Record<LandDrop, number>> = {
@@ -128,7 +128,9 @@ export function collectT2Recipes(deck: Deck, config: SimConfig, table: SpellTabl
         battlefield.push(handCards[GEM]!.pop() ?? 'Gemstone Caverns')
         bf.plain += 1
         gemStarted = true
-        for (const c of EXILE_ORDER) { if (hand[c]! > 0) { hand[c]!--; handCards[c]!.pop(); break } }
+        let exiled = false
+        for (const c of EXILE_ORDER) { if (hand[c]! > 0) { hand[c]!--; handCards[c]!.pop(); exiled = true; break } }
+        if (!exiled) for (let c = 0; c < KIND_COUNT; c++) { if (hand[c]! > 0) { hand[c]!--; handCards[c]!.pop(); break } }
       }
       while (hand[GEM]! > 0) { // tout Gemstone restant = terrain normal (nom transféré)
         hand[GEM]!--; hand[LAND]!++

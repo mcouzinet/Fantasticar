@@ -21,11 +21,17 @@ const EXILE_ORDER: number[] = [
   kindCode.rock2t, kindCode.rock2u, kindCode.basalt,
   kindCode.landScry, kindCode.landGrant, kindCode.land,
   kindCode.urzaMine, kindCode.urzaPP, kindCode.urzaTower, kindCode.planarNexus,
-  kindCode.scorched, kindCode.vein, kindCode.city, kindCode.cloud,
-  kindCode.zero, kindCode.amulet,
+  kindCode.scorched, kindCode.vein, kindCode.city, kindCode.cloud, kindCode.cloudpost, kindCode.locus,
+  kindCode.zero, kindCode.bauble, kindCode.amulet,
 ]
 function exileWorst(hand: Hand): void {
   for (const c of EXILE_ORDER) {
+    if (hand[c]! > 0) { hand[c]!--; return }
+  }
+  // Fallback : l'exil de Gemstone est OBLIGATOIRE. Si aucune catégorie listée n'est présente
+  // (main exclusivement composée de catégories non listées), on retire la première carte trouvée
+  // → garantit le retrait d'exactement une carte (pas de no-op qui sur-compterait).
+  for (let c = 0; c < hand.length; c++) {
     if (hand[c]! > 0) { hand[c]!--; return }
   }
 }
