@@ -37,6 +37,7 @@ const rows = computed(() =>
     }))
     .sort((a, b) => b.sum - a.sum),
 )
+const maxAbs = computed(() => rows.value.reduce((m, r) => Math.max(m, Math.abs(r.sum)), 0) || 1)
 
 function cls(d: number): string {
   if (d > 0.0008) return 'pos'
@@ -46,6 +47,10 @@ function cls(d: number): string {
 function fmt(d: number): string {
   const v = d * 100
   return v > 0.05 ? `+${v.toFixed(1)}` : v.toFixed(1)
+}
+function barStyle(v: number) {
+  const w = (Math.abs(v) / maxAbs.value) * 50
+  return v >= 0 ? { left: '50%', width: `${w}%` } : { right: '50%', width: `${w}%` }
 }
 </script>
 
@@ -77,6 +82,7 @@ function fmt(d: number): string {
           <span class="h-num">T4</span>
           <span class="h-num">T5</span>
           <span class="h-num h-hot">Σ T2-4</span>
+          <span class="h-bar">effet cumulé T2+T3+T4 (points)</span>
         </div>
         <ul class="list">
           <li v-for="r in rows" :key="r.kind">
@@ -90,6 +96,10 @@ function fmt(d: number): string {
             <span class="num" :class="cls(r.t4)">{{ fmt(r.t4) }}</span>
             <span class="num" :class="cls(r.t5)">{{ fmt(r.t5) }}</span>
             <span class="num hot" :class="cls(r.sum)">{{ fmt(r.sum) }}</span>
+            <span class="dbar">
+              <span class="dbar-axis" />
+              <span class="dbar-fill" :class="r.sum >= 0 ? 'pos' : 'neg'" :style="barStyle(r.sum)" />
+            </span>
           </li>
         </ul>
       </div>
@@ -97,7 +107,7 @@ function fmt(d: number): string {
       <p class="note faint">
         Valeurs en points de pourcentage (ex. <b>+1,2</b> = +1,2 % de combos). <span class="pos">Vert</span> =
         aide, <span class="neg">rouge</span> = pénalise, ~0 = négligeable (ou dans le bruit). La colonne
-        <b>Σ T2-4</b> additionne l'effet sur T2&nbsp;+&nbsp;T3&nbsp;+&nbsp;T4 — le tri se fait dessus
+        <b>Σ T2-4</b> (et la barre) additionne l'effet sur T2&nbsp;+&nbsp;T3&nbsp;+&nbsp;T4 — le tri se fait dessus
         (T5 quasi saturé est ignoré). Les « sorts à 0 » sont la base du combo : on en a déjà beaucoup,
         donc l'impact marginal d'un de plus est faible mais positif. À l'inverse, Sol Talisman pénalise
         un peu le T3 (dilution) mais paie au T4 (suspend).
@@ -163,7 +173,7 @@ h1 .accent {
 .thead,
 .list li {
   display: grid;
-  grid-template-columns: minmax(220px, 2fr) 50px 50px 50px 50px 58px;
+  grid-template-columns: minmax(220px, 2fr) 50px 50px 50px 50px 58px minmax(170px, 1.2fr);
   align-items: center;
   gap: 10px;
 }
@@ -224,6 +234,34 @@ h1 .accent {
 .neu {
   color: var(--text-faint);
 }
+/* barre divergente : axe au centre, remplissage à droite (vert +) ou gauche (rouge −) */
+.dbar {
+  position: relative;
+  height: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.dbar-axis {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+.dbar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.dbar-fill.pos {
+  background: var(--good);
+}
+.dbar-fill.neg {
+  background: var(--bad);
+}
 .note {
   font-size: 12px;
   line-height: 1.6;
@@ -237,7 +275,11 @@ h1 .accent {
   font-weight: 600;
 }
 @media (max-width: 720px) {
-  /* On masque la colonne T5 ; on garde T2/T3/T4 + le cumul Σ. */
+  /* On masque la barre et la colonne T5 ; on garde T2/T3/T4 + le cumul Σ. */
+  .thead .h-bar,
+  .dbar {
+    display: none;
+  }
   .thead > :nth-child(5),
   .list li > :nth-child(5) {
     display: none;

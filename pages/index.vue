@@ -125,9 +125,6 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
             <div class="result-table">
               <ResultsTable :primary="primary" :compare="compare" />
             </div>
-            <div class="chart">
-              <ProbBars :on-play="primary.onPlay" :on-draw="primary.onDraw" />
-            </div>
             <p class="combo-flavor faint">
               🛸 Au 4ᵉ sort non-créature du tour, on sacrifie The Fantasticar → <b>4 jetons 4/4</b>
               volants et hâtifs. Décollage visé&nbsp;: <b class="accent">T3</b>.
@@ -217,10 +214,6 @@ const compare = computed(() => (sim.draftResult.value ? sim.baselineResult.value
 }
 .result-table {
   margin-top: 18px;
-  max-width: 880px;
-}
-.chart {
-  margin-top: 22px;
   max-width: 880px;
 }
 .combo-flavor {
