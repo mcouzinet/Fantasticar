@@ -70,8 +70,9 @@ function chooseDrop(hand: Hand, bf: Battlefield, remaining: number): LandDrop {
   // tour suivant : posé T1 + un terrain T2, il débloque le combo T2 (comme City of Traitors + terrain).
   // Il ne donne pas de mana « immédiat » de toute façon. Inutile au tout dernier tour (jamais dégagé).
   if (hand[CLOUD]! > 0 && remaining >= 1) return 'cloud'
-  // Cloudpost : terrain Locus ENGAGÉ (tape par Locus). On le pose tôt pour démarrer/agrandir le
-  // moteur Locus, comme Untaidake (inutile au tout dernier tour, jamais dégagé).
+  // Cloudpost : terrain Locus ENGAGÉ. Comme tout terrain engagé, on le pose tôt pour qu'il soit
+  // EN LIGNE (s'il est posé le tour du combo il est engagé → 0 mana). Bonus : il scale avec les
+  // autres Locus. Inutile au tout dernier tour (jamais dégagé).
   if (hand[CLOUDPOST]! > 0 && remaining >= 1) return 'cloudpost'
   // terrains engagés simples (landT) : posés tôt si on a déjà de quoi développer les tours suivants.
   const hasLandT = hand[LANDT]! > 0
