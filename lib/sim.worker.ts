@@ -1,8 +1,9 @@
 /// <reference lib="webworker" />
-import { runSimulation, collectT2Recipes, cardImpacts } from './engine'
+import { runSimulation, collectT2Recipes, cardImpacts, recastSim } from './engine'
 import type { Deck, SimConfig, SimResult } from './engine/types'
 import type { T2RecipesResult } from './engine/trace'
 import type { CardImpact } from './engine/impacts'
+import type { RecastResult } from './engine/recast'
 
 export interface CompareRequest {
   kind: 'compare'
@@ -22,7 +23,7 @@ export type WorkerIn = CompareRequest | ImpactsRequest
 
 export type WorkerOut =
   | { kind: 'progress'; reqId: number; done: number; total: number }
-  | { kind: 'done'; reqId: number; baseline: SimResult; draft: SimResult | null; t2: T2RecipesResult }
+  | { kind: 'done'; reqId: number; baseline: SimResult; draft: SimResult | null; t2: T2RecipesResult; recast: RecastResult }
   | { kind: 'impacts-done'; reqId: number; impacts: CardImpact[] }
   | { kind: 'error'; reqId: number; message: string }
 
@@ -62,7 +63,10 @@ ctx.onmessage = (e: MessageEvent<WorkerIn>) => {
     // Itérations plafonnées (la fréquence T2 est stable bien avant 50 000) pour rester fluide.
     const t2 = collectT2Recipes(draft ?? baseline, { ...config, iterations: Math.min(config.iterations, 30000) })
 
-    ctx.postMessage({ kind: 'done', reqId, baseline: baselineResult, draft: draftResult, t2 } satisfies WorkerOut)
+    // Probas de « repartir » (recast de la Fantasticar) après un combo ≤ T3, sur le deck affiché.
+    const recast = recastSim(draft ?? baseline, { ...config, iterations: Math.min(config.iterations, 30000) })
+
+    ctx.postMessage({ kind: 'done', reqId, baseline: baselineResult, draft: draftResult, t2, recast } satisfies WorkerOut)
   } catch (err) {
     ctx.postMessage({ kind: 'error', reqId, message: err instanceof Error ? err.message : String(err) } satisfies WorkerOut)
   }

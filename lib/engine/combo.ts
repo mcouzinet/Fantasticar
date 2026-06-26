@@ -2,7 +2,7 @@ import type { Kind, SpellTable } from './types'
 import { KINDS, kindCode } from './types'
 import { FANTASTICAR_COST } from './spellTable'
 import type { Hand } from './hand'
-import { computeMana, scorchedSacPool, type Battlefield, type LandDrop } from './mana'
+import { applyDrop, computeMana, scorchedSacPool, type Battlefield, type LandDrop } from './mana'
 
 /**
  * Contexte de combo précalculé à partir de la SpellTable : on sépare les sorts de
@@ -106,6 +106,7 @@ export function bestCombo(
   hand: Hand,
   bf: Battlefield,
   fCast: boolean,
+  fanCost: number = ctx.fantasticarCost, // surcoût « taxe commandant » pour les recasts (cf. recast.ts)
 ): boolean {
   // 1. Rembourseurs présents en main (cap 6), déjà triés par coût croissant.
   let k = 0
@@ -132,7 +133,7 @@ export function bestCombo(
 
   // 3. Tester chaque pose de terrain candidate (free = sorts gratuits sortis de suspend ce tour).
   const free = bf.freeCasts
-  const f = ctx.fantasticarCost
+  const f = fanCost
   const c = bf.cloud // Untaidake dégagés : {C}{C} légendaires chacun pour le Fantasticar (cf. feasible)
   // combo = true : c'est le tour du combo → Crystal Vein peut être sacrifiée pour {C}{C} (+1).
   // computeMana ne compte PAS les Untaidake (mana légendaire only) : `feasible` les applique au
@@ -225,7 +226,7 @@ const DROP_KIND: Partial<Record<LandDrop, number>> = {
  * Comme `bestCombo`, mais renvoie la PREMIÈRE ligne faisable (pose de terrain + sorts lancés),
  * ou `null`. Sert uniquement à reconstituer les recettes (lent, hors chemin de simulation).
  */
-export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast: boolean): ComboLine | null {
+export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast: boolean, fanCostBase: number = ctx.fantasticarCost): ComboLine | null {
   const refKind: number[] = [], refCost2: number[] = [], refRefund2: number[] = []
   for (let i = 0; i < ctx.refunderKinds.length && refKind.length < MAX_REFUNDERS; i++) {
     let n = hand[ctx.refunderKinds[i]!]!
@@ -241,7 +242,7 @@ export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast
 
   const free = bf.freeCasts
   // Untaidake dégagés : {C}{C} légendaires chacun → couvrent 2·clouds du coût du Fantasticar.
-  const fanCost = fCast ? 0 : Math.max(0, ctx.fantasticarCost - LEG_PER_CLOUD * bf.cloud)
+  const fanCost = fCast ? 0 : Math.max(0, fanCostBase - LEG_PER_CLOUD * bf.cloud)
   const need = (fCast ? 4 : 3) - free
   const fCost = fanCost
 
@@ -273,3 +274,30 @@ export function traceCombo(ctx: ComboContext, hand: Hand, bf: Battlefield, fCast
   return null
 }
 
+/**
+ * Exécute un combo (pour CONTINUER la partie, cf. recast.ts) : trouve une ligne faisable au coût
+ * `fanCostBase` (taxe commandant incluse) et l'APPLIQUE — pose le terrain, retire de la main les
+ * sorts lancés ; les cailloux lancés restent en jeu (produisent dès le tour suivant). Le Fantasticar
+ * retourne en zone de commandement (pas d'effet sur le board ici). Renvoie true si le combo a passé.
+ */
+export function commitCombo(
+  ctx: ComboContext,
+  hand: Hand,
+  bf: Battlefield,
+  table: SpellTable,
+  fanCostBase: number,
+): ComboLine | null {
+  const line = traceCombo(ctx, hand, bf, false, fanCostBase)
+  if (!line) return null
+  if (line.drop !== 'none') {
+    const dk = DROP_KIND[line.drop]
+    if (dk !== undefined && hand[dk]! > 0) hand[dk]!--
+    applyDrop(bf, line.drop)
+  }
+  for (const code of line.spellKinds) {
+    if (hand[code]! > 0) hand[code]!--
+    const p = table[KINDS[code]!]
+    if (p.producesMana) bf.pendingRockMana += p.tapsFor ?? 1 // le caillou reste → produit dès le tour suivant
+  }
+  return line
+}

@@ -48,8 +48,8 @@ export const DEFAULT_SPELL_TABLE: SpellTable = {
   zero: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
   // Jeweled Amulet : sort à 0, mais peut banquer 1 mana d'un tour sur l'autre (cf. mana/develop).
   amulet: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
-  // Baubles ({0} : Mishra's/Urza's/Lodestone) : sort à 0 qui pioche (cantrip). Modélisé comme `zero`
-  // pour le combo ; leur pioche est ignorée (conservateur), comme les autres baubles.
+  // Baubles ({0} : Mishra's/Urza's/Lodestone) : sort à 0 qui PIOCHE une carte (cantrip). Identique
+  // à `zero` pour le combo ; la pioche (différée) n'est simulée que dans le recast (cf. recast.ts).
   bauble: { cost: 0, refund: 0, isComboSpell: true, producesMana: false, tappedRock: false },
   rock2u: { cost: 2, refund: 1, isComboSpell: true, producesMana: true, tappedRock: false, tapsFor: 1 },
   rock2t: { cost: 2, refund: 0, isComboSpell: true, producesMana: true, tappedRock: true, tapsFor: 1 },
